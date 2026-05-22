@@ -126,7 +126,7 @@ const BRAND = {
 - フロントエンド：HTML + Tailwind CSS(CDN) + バニラJS
 - バックエンド：Netlify Functions（`netlify/functions/*.mjs`）
 - データ保存：Netlify Blobs（サーバー稼働時）／ localStorage（フォールバック時）
-- AI：Anthropic Claude API（`claude-sonnet-4-5`）／ モック自動切替
+- AI：Anthropic Claude API（`claude-sonnet-4-6`）／ モック自動切替
 
 ---
 

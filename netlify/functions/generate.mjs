@@ -138,7 +138,7 @@ export default async (req) => {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5",
+        model: "claude-sonnet-4-6",
         max_tokens: 1500,
         temperature: 0.5,
         system: SYSTEM_PROMPT,
@@ -172,7 +172,7 @@ export default async (req) => {
         "ドラフトを作成しました。右側のプレビューでご確認ください。",
       tokensUsed:
         (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0),
-      model: "claude-sonnet-4-5",
+      model: "claude-sonnet-4-6",
       mode: "live",
     });
   } catch (err) {

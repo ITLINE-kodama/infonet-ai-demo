@@ -243,7 +243,7 @@
       });
 
       const meta = result.mode === "live"
-        ? `claude-sonnet-4-5 ／ ${result.tokensUsed} トークン`
+        ? `claude-sonnet-4-6 ／ ${result.tokensUsed} トークン`
         : `${result.model}`;
       addAiMsg(`${escapeHtml(result.chatMessage)}
         <span class="block mt-1.5 text-[11px] text-[#9CA3AF]">右側のプレビューに反映しました（${escapeHtml(meta)}）</span>`);
