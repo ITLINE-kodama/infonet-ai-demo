@@ -1,0 +1,18 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# /api/* へのリクエストを Netlify Functions に転送
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# きれいな記事URL（/news/seed-001 など）でも詳細ページを表示
+[[redirects]]
+  from = "/news/*"
+  to = "/news.html"
+  status = 200

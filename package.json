@@ -1,0 +1,9 @@
+{
+  "name": "infonet-ai-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "法人用AIデモ（インフォネット様向け）｜AIでらくらく更新",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}

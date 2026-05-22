@@ -1,0 +1,21 @@
+# 依存・ビルド成果物
+node_modules/
+.netlify/
+
+# 環境変数（APIキー等。GitHubには絶対に上げない）
+.env
+.env.local
+.env.*.local
+
+# ローカルツール
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 作業資料（アプリ本体ではないためリポジトリに含めない）
+Claudchatから/
+ITLINE法人用AI資料.pptx
+image/
+Claud.md

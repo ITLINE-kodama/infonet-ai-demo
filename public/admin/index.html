@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ログイン｜AIでらくらく更新 管理画面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/styles.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#1E2761] min-h-screen flex items-center justify-center p-4">
+
+<div class="w-full max-w-[400px]">
+  <!-- ロゴ（ご依頼②：admin.js の BRAND と合わせて表示） -->
+  <div class="text-center mb-7">
+    <div id="brand-logo" class="text-white font-bold text-2xl tracking-wide">INFONET</div>
+    <p id="brand-sub" class="mt-1 text-sm text-white/55">AIでらくらく更新 ／ 管理画面</p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-xl p-7">
+    <h1 class="text-lg font-semibold text-[#111827]">管理画面にログイン</h1>
+    <p class="mt-1 text-sm text-[#6B7280]">担当者アカウントでログインしてください。</p>
+
+    <form id="login-form" class="mt-6 space-y-4">
+      <div>
+        <label class="block text-[13px] font-medium text-[#374151] mb-1">メールアドレス</label>
+        <input id="email" type="text" autocomplete="username"
+          class="w-full border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm focus:border-[#1E2761] outline-none"
+          placeholder="demo@infonet.co.jp" value="demo@infonet.co.jp" />
+      </div>
+      <div>
+        <label class="block text-[13px] font-medium text-[#374151] mb-1">パスワード</label>
+        <input id="password" type="password" autocomplete="current-password"
+          class="w-full border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm focus:border-[#1E2761] outline-none"
+          placeholder="••••••••" value="demo1234" />
+      </div>
+      <p id="error" class="hidden text-[13px] text-[#EF4444]"></p>
+      <button type="submit"
+        class="w-full py-2.5 rounded-lg bg-[#1E2761] text-white text-sm font-semibold hover:opacity-90 transition">
+        ログイン
+      </button>
+    </form>
+
+    <div class="mt-5 pt-4 border-t border-[#E5E7EB]">
+      <p class="text-[12px] text-[#6B7280] leading-relaxed">
+        ※ 本デモではメール・パスワードは任意の文字列でログインできます。
+        初期値のまま「ログイン」を押してお進みください。
+      </p>
+    </div>
+  </div>
+
+  <p class="mt-5 text-center text-xs text-white/45">
+    <a href="/" class="hover:text-white/80">← 公開サイトへ戻る</a>
+  </p>
+</div>
+
+<script src="/assets/store.js"></script>
+<script src="/assets/admin.js"></script>
+<script>
+  // ロゴ差し替え設定を反映
+  if (BRAND.logoImage) {
+    document.getElementById("brand-logo").innerHTML =
+      `<img src="${BRAND.logoImage}" alt="${BRAND.name}" class="h-9 mx-auto" />`;
+  } else {
+    document.getElementById("brand-logo").textContent = BRAND.name;
+  }
+  document.getElementById("brand-sub").textContent = BRAND.productName + " ／ 管理画面";
+
+  // すでにログイン済みならダッシュボードへ
+  if (getUser()) location.href = "/admin/dashboard.html";
+
+  document.getElementById("login-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const err = document.getElementById("error");
+    if (!email || !password) {
+      err.textContent = "メールアドレスとパスワードを入力してください。";
+      err.classList.remove("hidden");
+      return;
+    }
+    setUser({ id: "demo-user-01", email: email, name: "インフォネット担当者" });
+    location.href = "/admin/dashboard.html";
+  });
+  lucide.createIcons();
+</script>
+</body>
+</html>

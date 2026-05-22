@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>株式会社インフォネット｜企業のWeb戦略を、技術と発想で支える。</title>
+<meta name="description" content="株式会社インフォネットは、Webサイト制作・システム開発・DXコンサルティング・運用支援を通じて企業のWeb戦略を支援します。" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/styles.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: { colors: {
+    ink: '#0F3D7E', sky: '#00B8D9', mist: '#F5F7FA', line: '#E5E7EB'
+  } } } };
+</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-white text-[#1A1A1A]">
+
+<!-- ===== ヘッダー ===== -->
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-line">
+  <div class="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-md bg-ink flex items-center justify-center text-white font-bold">i</span>
+      <span class="text-xl font-bold tracking-wide text-ink">INFONET</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+      <a href="#about" class="hover:text-ink">会社概要</a>
+      <a href="#services" class="hover:text-ink">サービス</a>
+      <a href="#news" class="hover:text-ink">お知らせ</a>
+      <a href="#contact" class="hover:text-ink">お問い合わせ</a>
+    </nav>
+    <a href="#contact" class="hidden md:inline-flex items-center px-4 py-2 rounded-lg bg-ink text-white text-sm font-semibold hover:opacity-90">
+      ご相談はこちら
+    </a>
+    <button id="menu-btn" class="md:hidden text-ink" aria-label="メニュー">
+      <i data-lucide="menu" class="w-6 h-6"></i>
+    </button>
+  </div>
+  <div id="mobile-menu" class="hidden md:hidden border-t border-line bg-white">
+    <div class="px-6 py-3 flex flex-col gap-1 text-sm font-medium">
+      <a href="#about" class="py-2">会社概要</a>
+      <a href="#services" class="py-2">サービス</a>
+      <a href="#news" class="py-2">お知らせ</a>
+      <a href="#contact" class="py-2">お問い合わせ</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===== ヒーロー ===== -->
+<section class="relative overflow-hidden bg-gradient-to-br from-[#0F3D7E] via-[#13468f] to-[#0a2c5c] text-white">
+  <div class="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-sky/20 blur-3xl"></div>
+  <div class="absolute right-32 bottom-0 w-72 h-72 rounded-full bg-white/5 blur-2xl"></div>
+  <div class="relative max-w-[1200px] mx-auto px-6 py-24 md:py-32">
+    <p class="text-sky font-semibold tracking-wide">INFONET Inc.</p>
+    <h1 class="mt-4 text-3xl md:text-5xl font-bold leading-tight">
+      企業のWeb戦略を、<br />技術と発想で支える。
+    </h1>
+    <p class="mt-6 max-w-xl text-white/80 leading-relaxed">
+      Webサイト制作からシステム開発、DXコンサルティングまで。
+      私たちは、お客様のビジネスを次のステージへ導くパートナーです。
+    </p>
+    <div class="mt-9 flex flex-wrap gap-4">
+      <a href="#services" class="px-6 py-3 rounded-lg bg-sky text-white font-semibold hover:opacity-90 transition">
+        サービスを見る
+      </a>
+      <a href="#contact" class="px-6 py-3 rounded-lg bg-white/10 border border-white/30 text-white font-semibold hover:bg-white/20 transition">
+        お問い合わせ
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 会社概要 ===== -->
+<section id="about" class="py-20 md:py-24">
+  <div class="max-w-[1200px] mx-auto px-6">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div>
+        <p class="text-sky font-semibold">ABOUT US</p>
+        <h2 class="mt-2 text-2xl md:text-3xl font-bold">会社概要</h2>
+        <p class="mt-5 text-[#666] leading-relaxed">
+          株式会社インフォネットは、2005年の創業以来、企業のWeb戦略・DX推進を一貫して支援してまいりました。
+          確かな技術力と、お客様に寄り添う発想力で、課題解決に取り組みます。
+        </p>
+      </div>
+      <div class="bg-mist rounded-xl p-7 border border-line">
+        <dl class="divide-y divide-line text-sm">
+          <div class="flex py-3"><dt class="w-28 font-semibold text-ink shrink-0">社名</dt><dd>株式会社インフォネット（INFONET Inc.）</dd></div>
+          <div class="flex py-3"><dt class="w-28 font-semibold text-ink shrink-0">創業</dt><dd>2005年4月</dd></div>
+          <div class="flex py-3"><dt class="w-28 font-semibold text-ink shrink-0">所在地</dt><dd>東京都千代田区丸の内1-1-1 インフォネットビル</dd></div>
+          <div class="flex py-3"><dt class="w-28 font-semibold text-ink shrink-0">事業内容</dt><dd>Webサイト制作／システム開発／DXコンサルティング／運用支援</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== サービス ===== -->
+<section id="services" class="py-20 md:py-24 bg-mist">
+  <div class="max-w-[1200px] mx-auto px-6">
+    <div class="text-center">
+      <p class="text-sky font-semibold">SERVICES</p>
+      <h2 class="mt-2 text-2xl md:text-3xl font-bold">サービス</h2>
+      <p class="mt-3 text-[#666]">企業のWebに関わる課題を、ワンストップで解決します。</p>
+    </div>
+    <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-white rounded-xl p-6 border border-line transition hover:-translate-y-1 hover:shadow-md">
+        <div class="w-12 h-12 rounded-lg bg-ink/10 flex items-center justify-center text-ink"><i data-lucide="layout-template" class="w-6 h-6"></i></div>
+        <h3 class="mt-4 font-semibold">Webサイト制作</h3>
+        <p class="mt-2 text-sm text-[#666] leading-relaxed">コーポレートサイトからLPまで、戦略設計から実装まで一貫対応します。</p>
+      </div>
+      <div class="bg-white rounded-xl p-6 border border-line transition hover:-translate-y-1 hover:shadow-md">
+        <div class="w-12 h-12 rounded-lg bg-ink/10 flex items-center justify-center text-ink"><i data-lucide="code-2" class="w-6 h-6"></i></div>
+        <h3 class="mt-4 font-semibold">システム開発</h3>
+        <p class="mt-2 text-sm text-[#666] leading-relaxed">業務システム・Webアプリケーションを、要件定義から運用まで支援します。</p>
+      </div>
+      <div class="bg-white rounded-xl p-6 border border-line transition hover:-translate-y-1 hover:shadow-md">
+        <div class="w-12 h-12 rounded-lg bg-ink/10 flex items-center justify-center text-ink"><i data-lucide="trending-up" class="w-6 h-6"></i></div>
+        <h3 class="mt-4 font-semibold">DXコンサルティング</h3>
+        <p class="mt-2 text-sm text-[#666] leading-relaxed">業務のデジタル化・AI活用まで、現場目線で伴走します。</p>
+      </div>
+      <div class="bg-white rounded-xl p-6 border border-line transition hover:-translate-y-1 hover:shadow-md">
+        <div class="w-12 h-12 rounded-lg bg-ink/10 flex items-center justify-center text-ink"><i data-lucide="life-buoy" class="w-6 h-6"></i></div>
+        <h3 class="mt-4 font-semibold">運用支援</h3>
+        <p class="mt-2 text-sm text-[#666] leading-relaxed">公開後のサイト更新・保守・改善まで、継続的にサポートします。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 実績・強み ===== -->
+<section class="py-20 md:py-24">
+  <div class="max-w-[1200px] mx-auto px-6">
+    <div class="text-center">
+      <p class="text-sky font-semibold">OUR STRENGTH</p>
+      <h2 class="mt-2 text-2xl md:text-3xl font-bold">選ばれる理由</h2>
+    </div>
+    <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+      <div>
+        <div class="mx-auto w-14 h-14 rounded-full bg-sky/10 flex items-center justify-center text-sky"><i data-lucide="award" class="w-7 h-7"></i></div>
+        <h3 class="mt-4 font-semibold">制作実績 1,200件超</h3>
+        <p class="mt-1 text-sm text-[#666]">幅広い業種での豊富な実績。</p>
+      </div>
+      <div>
+        <div class="mx-auto w-14 h-14 rounded-full bg-sky/10 flex items-center justify-center text-sky"><i data-lucide="users" class="w-7 h-7"></i></div>
+        <h3 class="mt-4 font-semibold">専任チーム体制</h3>
+        <p class="mt-1 text-sm text-[#666]">企画から運用まで一気通貫。</p>
+      </div>
+      <div>
+        <div class="mx-auto w-14 h-14 rounded-full bg-sky/10 flex items-center justify-center text-sky"><i data-lucide="shield-check" class="w-7 h-7"></i></div>
+        <h3 class="mt-4 font-semibold">安心のセキュリティ</h3>
+        <p class="mt-1 text-sm text-[#666]">堅牢な運用基盤で支えます。</p>
+      </div>
+      <div>
+        <div class="mx-auto w-14 h-14 rounded-full bg-sky/10 flex items-center justify-center text-sky"><i data-lucide="zap" class="w-7 h-7"></i></div>
+        <h3 class="mt-4 font-semibold">スピード対応</h3>
+        <p class="mt-1 text-sm text-[#666]">最短即日での更新対応も可能。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== お知らせ ===== -->
+<section id="news" class="py-20 md:py-24 bg-mist">
+  <div class="max-w-[1200px] mx-auto px-6">
+    <div class="flex items-end justify-between flex-wrap gap-3">
+      <div>
+        <p class="text-sky font-semibold">NEWS</p>
+        <h2 class="mt-2 text-2xl md:text-3xl font-bold">お知らせ</h2>
+      </div>
+      <a href="#news" class="text-sm font-medium text-ink hover:underline">お知らせ一覧へ →</a>
+    </div>
+    <div id="news-list" class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <p class="text-[#666] col-span-full text-center py-8">お知らせを読み込んでいます…</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== お問い合わせ ===== -->
+<section id="contact" class="py-20 md:py-24">
+  <div class="max-w-[760px] mx-auto px-6">
+    <div class="text-center">
+      <p class="text-sky font-semibold">CONTACT</p>
+      <h2 class="mt-2 text-2xl md:text-3xl font-bold">お問い合わせ</h2>
+      <p class="mt-3 text-[#666]">Webサイト・システムに関するご相談はお気軽にどうぞ。</p>
+    </div>
+    <form class="mt-10 bg-white border border-line rounded-xl p-7 space-y-5" onsubmit="event.preventDefault(); alert('※ デモのためお問い合わせは送信されません');">
+      <div>
+        <label class="block text-sm font-medium mb-1">会社名</label>
+        <input type="text" class="w-full border border-line rounded-lg px-3.5 py-2.5 text-sm" placeholder="株式会社○○" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">メールアドレス</label>
+        <input type="email" class="w-full border border-line rounded-lg px-3.5 py-2.5 text-sm" placeholder="example@company.co.jp" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">お問い合わせ内容</label>
+        <textarea rows="4" class="w-full border border-line rounded-lg px-3.5 py-2.5 text-sm" placeholder="ご相談内容をご記入ください"></textarea>
+      </div>
+      <button type="submit" class="w-full py-3 rounded-lg bg-ink text-white font-semibold hover:opacity-90">送信する</button>
+    </form>
+  </div>
+</section>
+
+<!-- ===== フッター ===== -->
+<footer class="bg-[#0a2c5c] text-white/80">
+  <div class="max-w-[1200px] mx-auto px-6 py-12">
+    <div class="flex flex-wrap justify-between gap-8">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-md bg-white/15 flex items-center justify-center text-white font-bold">i</span>
+          <span class="text-lg font-bold text-white">INFONET</span>
+        </div>
+        <p class="mt-3 text-sm">東京都千代田区丸の内1-1-1<br />インフォネットビル</p>
+      </div>
+      <div class="text-sm">
+        <p class="font-semibold text-white">サービス</p>
+        <ul class="mt-3 space-y-2">
+          <li>Webサイト制作</li>
+          <li>システム開発</li>
+          <li>DXコンサルティング</li>
+          <li>運用支援</li>
+        </ul>
+      </div>
+      <div class="text-sm">
+        <p class="font-semibold text-white">会社情報</p>
+        <ul class="mt-3 space-y-2">
+          <li><a href="#about" class="hover:text-white">会社概要</a></li>
+          <li><a href="#news" class="hover:text-white">お知らせ</a></li>
+          <li><a href="#contact" class="hover:text-white">お問い合わせ</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-10 pt-6 border-t border-white/10 flex flex-wrap justify-between gap-3 text-xs text-white/55">
+      <p>© <span id="year">2026</span> INFONET Inc. ｜ 本サイトは ITLINE による法人AIデモ環境です。</p>
+      <a href="/admin/" class="hover:text-white">管理画面</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/store.js"></script>
+<script src="/assets/site.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
