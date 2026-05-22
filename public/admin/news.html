@@ -48,6 +48,18 @@
         <div id="chat" class="flex-1 overflow-y-auto thin-scroll px-5 py-5 space-y-4"></div>
 
         <div class="px-4 py-3 border-t border-[#E5E7EB]">
+          <div class="flex items-center gap-2 mb-2">
+            <label class="flex items-center gap-1.5 text-[12px] text-[#374151] cursor-pointer select-none shrink-0">
+              <input type="checkbox" id="img-toggle" checked class="w-3.5 h-3.5 accent-[#1E2761]" />
+              サムネイル画像も生成
+            </label>
+            <input type="text" id="img-instruction" placeholder="画像の指示（任意）例：青空とオフィスビルの写真"
+              class="flex-1 min-w-0 border border-[#E5E7EB] rounded-lg px-2.5 py-1 text-[12px] focus:border-[#1E2761] outline-none" />
+            <button id="gen-img-btn" type="button"
+              class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1E2761] hover:bg-[#F9FAFB] disabled:opacity-40">
+              <i data-lucide="image" class="w-3.5 h-3.5"></i> 画像を生成
+            </button>
+          </div>
           <div class="flex items-end gap-2">
             <button id="mic-btn" title="音声入力"
               class="w-10 h-10 shrink-0 rounded-lg border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:bg-[#F9FAFB]">
@@ -211,10 +223,15 @@
   });
 
   /* ---- AIサムネイル画像生成（Gemini）---- */
-  async function generateThumbnail(topic) {
+  let imgBusy = false;
+  async function generateThumbnail(topic, instruction) {
+    if (imgBusy) return;
+    imgBusy = true;
+    const genBtn = document.getElementById("gen-img-btn");
+    genBtn.disabled = true;
     const note = addAiMsg(`<span class="text-[#6B7280]"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span> サムネイル画像をAIで生成しています…（10〜20秒ほどかかります）</span>`);
     try {
-      const url = await window.Store.generateImage(topic);
+      const url = await window.Store.generateImage(topic, instruction);
       note.remove();
       if (url) {
         generatedImage = url;
@@ -227,6 +244,9 @@
       }
     } catch {
       note.remove();
+    } finally {
+      imgBusy = false;
+      genBtn.disabled = false;
     }
   }
 
@@ -289,8 +309,11 @@
         userPrompt: text, aiOutput: result.body, tokensUsed: result.tokensUsed,
       });
 
-      // 続けてサムネイル画像をAI生成（テキストは先に表示済み）
-      generateThumbnail(result.title || text);
+      // チェックがONなら、続けてサムネイル画像もAI生成（テキストは先に表示済み）
+      if (document.getElementById("img-toggle").checked) {
+        const instr = document.getElementById("img-instruction").value.trim();
+        generateThumbnail(result.title || text, instr);
+      }
     } catch {
       typing.remove();
       addAiMsg(`<span class="text-[#EF4444]">申し訳ありません、AIアシスタントとの通信に失敗しました。もう一度お試しください。</span>`);
@@ -318,6 +341,17 @@
   document.getElementById("preview-site-btn").addEventListener("click", () => {
     window.open(location.origin + "/?t=" + Date.now() + "#news",
       "infonet_public_preview", "width=1200,height=860");
+  });
+
+  // サムネイル画像を手動で生成／再生成（指示欄の内容を反映）
+  document.getElementById("gen-img-btn").addEventListener("click", () => {
+    const topic = titleEl.value.trim();
+    const instr = document.getElementById("img-instruction").value.trim();
+    if (!topic && !instr) {
+      toast("先にお知らせ原稿を生成するか、画像の指示を入力してください", "error");
+      return;
+    }
+    generateThumbnail(topic || instr, instr);
   });
 
   /* ---- 保存・公開・破棄 ---- */

@@ -32,18 +32,23 @@ export default async (req) => {
     return json({ fallback: true });
   }
   const topic = String(payload.topic || payload.title || "お知らせ").slice(0, 300);
+  const instruction = String(payload.instruction || "").slice(0, 300);
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || isExpired()) {
     return json({ fallback: true, reason: isExpired() ? "expired" : "no-key" });
   }
 
+  // 画像の指示があれば最優先で反映、なければ標準スタイル
+  const styleLine = instruction
+    ? `■ 画像のご指示（最優先で忠実に反映してください）：${instruction}`
+    : `スタイル：高品質で洗練されたビジネス写真調、清潔感のある明るい雰囲気、` +
+      `ディープネイビー〜ブルーを基調とした落ち着いた配色、プロフェッショナルで上品。`;
   const prompt =
     `日本企業のコーポレートサイトの「お知らせ」に掲載するサムネイル画像を生成してください。` +
     `記事テーマ：「${topic}」。` +
-    `スタイル：高品質で洗練されたビジネス写真調、清潔感のある明るい雰囲気、` +
-    `ディープネイビー〜ブルーを基調とした落ち着いた配色、プロフェッショナルで上品。横長16:9。` +
-    `画像内に文字・ロゴ・透かしは一切入れないでください。`;
+    styleLine +
+    `横長16:9。画像内に文字・ロゴ・透かしは一切入れないでください。`;
 
   try {
     const res = await fetch(

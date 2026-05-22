@@ -257,11 +257,11 @@
 
     // お知らせ内容に合うサムネイル画像をAI生成。
     // 失敗・未対応時は null を返す（呼び出し側は固定ライブラリ画像を使う）
-    async generateImage(topic) {
+    async generateImage(topic, instruction) {
       try {
         const r = await fetch(`${API}/image`, {
           method: "POST", headers: H,
-          body: JSON.stringify({ topic: topic || "" }),
+          body: JSON.stringify({ topic: topic || "", instruction: instruction || "" }),
         });
         if (!r.ok) return null;
         const d = await r.json();
