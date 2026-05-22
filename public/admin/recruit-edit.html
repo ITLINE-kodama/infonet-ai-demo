@@ -138,33 +138,41 @@
       </section>
     </div>
 
-    <!-- ===== AIにおまかせ更新 ===== -->
+    <!-- ===== AIにおまかせ更新（チャット） ===== -->
     <div id="ai-panel" class="hidden mt-6">
-      <section class="bg-white border border-[#E5E7EB] rounded-xl p-6">
-        <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="wand-2" class="w-4 h-4 text-[#1E2761]"></i> AIにおまかせ更新</h2>
-        <p class="text-[12px] text-[#6B7280] mt-1.5 leading-relaxed">
-          指示文を入力すると、AIが採用ページの内容を指示どおりに更新します。社員インタビューの追加、文章の書き換えなどができます。
-        </p>
-        <label class="block text-[13px] font-medium text-[#374151] mb-1 mt-4">AIへの指示</label>
-        <textarea id="ai-instruction" rows="4" placeholder="例：社員インタビューに、入社5年目のエンジニア（男性）を1人追加して。技術への挑戦とやりがいについて前向きに書いて。"
-          class="w-full border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed focus:border-[#1E2761] outline-none thin-scroll"></textarea>
-        <label class="flex items-center gap-1.5 text-[13px] text-[#374151] cursor-pointer select-none mt-3">
-          <input type="checkbox" id="ai-mv-toggle" class="w-3.5 h-3.5 accent-[#1E2761]" />
-          メインビジュアルの背景画像もAIで生成する
-        </label>
-        <input id="ai-mv-instruction" type="text" placeholder="背景画像の指示（任意・例：活気のあるオフィス）"
-          class="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-[12px] focus:border-[#1E2761] outline-none mt-2" />
-        <button id="ai-run"
-          class="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#1E2761] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed">
-          <i data-lucide="sparkles" class="w-4 h-4"></i> AIで採用ページを更新
-        </button>
-        <div id="ai-status" class="hidden mt-3 flex items-start gap-2.5 rounded-lg bg-[#EEF2FF] border border-[#C7D2FE] px-3.5 py-3 text-[13px] text-[#1E2761]">
-          <i data-lucide="loader-2" class="w-4 h-4 mt-0.5 shrink-0 animate-spin"></i>
-          <span>AIが採用ページの内容を確認して更新しています。<br>完了まで <strong>20〜30秒ほど</strong> かかる場合があります。このままお待ちください。</span>
+      <section class="bg-white border border-[#E5E7EB] rounded-xl flex flex-col" style="height: 70vh; min-height: 520px;">
+        <div class="px-5 py-3.5 border-b border-[#E5E7EB] flex items-center gap-3">
+          <span class="w-9 h-9 rounded-full bg-[#1E2761] flex items-center justify-center text-white">
+            <i data-lucide="wand-2" class="w-5 h-5"></i>
+          </span>
+          <div>
+            <p class="text-sm font-semibold">らくらくAI</p>
+            <p class="text-[12px] text-[#6B7280]">採用ページ 編集アシスタント</p>
+          </div>
         </div>
-        <p class="mt-3 text-[12px] text-[#9CA3AF] leading-relaxed">
-          ※ 更新後は「項目で編集」タブで内容を確認・微調整できます。意図と違う場合は、右上の「初期状態に戻す」で元に戻せます。
-        </p>
+
+        <div id="ai-chat" class="flex-1 overflow-y-auto thin-scroll px-5 py-5 space-y-4"></div>
+
+        <div class="px-4 py-3 border-t border-[#E5E7EB]">
+          <div class="flex items-center gap-2 mb-2">
+            <label class="flex items-center gap-1.5 text-[12px] text-[#374151] cursor-pointer select-none shrink-0">
+              <input type="checkbox" id="ai-mv-toggle" class="w-3.5 h-3.5 accent-[#1E2761]" />
+              背景画像も生成
+            </label>
+            <input id="ai-mv-instruction" type="text" placeholder="背景画像の指示（任意・例：活気のあるオフィス）"
+              class="flex-1 min-w-0 border border-[#E5E7EB] rounded-lg px-2.5 py-1 text-[12px] focus:border-[#1E2761] outline-none" />
+          </div>
+          <div class="flex items-end gap-2">
+            <textarea id="ai-instruction" rows="1" placeholder="例：採用メッセージをもっと簡潔に。募集職種の枠を横に大きく。"
+              class="flex-1 resize-none border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed focus:border-[#1E2761] outline-none thin-scroll"
+              style="max-height: 120px;"></textarea>
+            <button id="ai-run"
+              class="w-10 h-10 shrink-0 rounded-lg bg-[#1E2761] flex items-center justify-center text-white hover:opacity-90 disabled:opacity-40">
+              <i data-lucide="send" class="w-5 h-5"></i>
+            </button>
+          </div>
+          <p class="mt-1.5 text-[11px] text-[#9CA3AF]">Enterで送信／Shift+Enterで改行　｜　変更は自動で保存されます</p>
+        </div>
       </section>
     </div>
   </main>
@@ -185,6 +193,7 @@
     $("tab-ai").className = "px-4 py-1.5 rounded-md text-sm font-medium " + (!fields ? "bg-[#1E2761] text-white" : "text-[#6B7280]");
     $("editor").classList.toggle("hidden", !fields);
     $("ai-panel").classList.toggle("hidden", fields);
+    if (!fields) aiInitChat();
   }
   $("tab-fields").addEventListener("click", () => switchMode("fields"));
   $("tab-ai").addEventListener("click", () => switchMode("ai"));
@@ -412,27 +421,73 @@
     }
   });
 
-  /* ---- AIにおまかせ更新 ---- */
-  const AI_RUN_LABEL = '<i data-lucide="sparkles" class="w-4 h-4"></i> AIで採用ページを更新';
-  function setAiRunning(running) {
-    const btn = $("ai-run");
-    btn.disabled = running;
-    btn.innerHTML = running
-      ? '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> AIが更新中…'
-      : AI_RUN_LABEL;
-    $("ai-status").classList.toggle("hidden", !running);
-    if (window.lucide) lucide.createIcons();
+  /* ---- AIにおまかせ更新（チャット形式）---- */
+  const aiChat = $("ai-chat");
+  const aiInput = $("ai-instruction");
+  let aiBusy = false;
+  let aiChatInited = false;
+
+  function openRecruitPreview() {
+    window.open(location.origin + "/recruit.html?t=" + Date.now(), "infonet_recruit_preview", "width=1200,height=860");
   }
 
-  $("ai-run").addEventListener("click", async () => {
-    const instruction = $("ai-instruction").value.trim();
-    if (!instruction) { toast("AIへの指示を入力してください", "error"); return; }
-    setAiRunning(true);
+  function aiAddUser(text) {
+    const el = document.createElement("div");
+    el.className = "fade-in flex justify-end";
+    el.innerHTML = `<div class="max-w-[80%] bg-[#1E2761] text-white text-sm rounded-2xl rounded-br-sm px-4 py-2.5 leading-relaxed whitespace-pre-wrap">${escapeHtml(text)}</div>`;
+    aiChat.appendChild(el);
+    aiChat.scrollTop = aiChat.scrollHeight;
+  }
+  function aiAddBot(html) {
+    const el = document.createElement("div");
+    el.className = "fade-in flex gap-2.5";
+    el.innerHTML = `
+      <span class="w-8 h-8 shrink-0 rounded-full bg-[#1E2761] flex items-center justify-center text-white">
+        <i data-lucide="wand-2" class="w-4 h-4"></i>
+      </span>
+      <div class="max-w-[85%] bg-[#F3F4F6] text-[#111827] text-sm rounded-2xl rounded-bl-sm px-4 py-2.5 leading-relaxed">${html}</div>`;
+    aiChat.appendChild(el);
+    if (window.lucide) lucide.createIcons();
+    aiChat.scrollTop = aiChat.scrollHeight;
+    return el;
+  }
+  function aiAddTyping() {
+    const el = aiAddBot(`<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>`);
+    el.dataset.typing = "1";
+    return el;
+  }
+  function aiInitChat() {
+    if (aiChatInited) return;
+    aiChatInited = true;
+    aiAddBot(`こんにちは、採用ページ編集アシスタントです。<br>
+      変更したい内容を話しかけてください。文章の書き換え、社員インタビューの追加、背景の配色、募集職種カードのデザインなどに対応します。
+      <span class="block mt-2 text-[12px] text-[#6B7280]">例：「採用メッセージをもっと簡潔に」「募集職種の枠を横に大きく、縁をおしゃれに」「福利厚生の背景を緑に」</span>`);
+  }
+
+  // チャット内のリンク（プレビュー）
+  aiChat.addEventListener("click", (e) => {
+    const a = e.target.closest('[data-act="preview"]');
+    if (a) { e.preventDefault(); openRecruitPreview(); }
+  });
+
+  async function aiRun() {
+    if (aiBusy) return;
+    const instruction = aiInput.value.trim();
+    if (!instruction) return;
+    aiBusy = true;
+    $("ai-run").disabled = true;
+    aiInput.value = "";
+    aiInput.style.height = "auto";
+    aiAddUser(instruction);
+    const typing = aiAddTyping();
     try {
       const res = await apiRecruitAI(instruction, data);
       if (!res || !res.recruit) {
+        typing.remove();
         const reason = (res && res.error) ? res.error : "AIから有効な応答が得られませんでした";
-        toast("AI更新に失敗しました：" + reason, "error");
+        aiAddBot(`<span class="text-[#EF4444]">更新できませんでした。</span>
+          <span class="block mt-1 text-[11px] text-[#9CA3AF]">理由：${escapeHtml(reason)}</span>
+          <span class="block mt-1 text-[11px] text-[#9CA3AF]">少し時間をおいて、もう一度お試しください。</span>`);
         return;
       }
       const updated = res.recruit;
@@ -442,21 +497,37 @@
         if (imgUrl) updated.mvImage = imgUrl;
       }
       await apiSaveRecruit(updated);
-      await apiLog({ userName: user.name, action: "edit", targetTitle: "採用ページ：AIで一括更新", userPrompt: instruction });
+      await apiLog({ userName: user.name, action: "edit", targetTitle: "採用ページ：AIで更新", userPrompt: instruction });
       data = updated;
       if (!Array.isArray(data.interviews)) data.interviews = [];
       if (!Array.isArray(data.stats)) data.stats = [];
       if (!Array.isArray(data.benefits)) data.benefits = [];
       fillEditor();
-      $("ai-instruction").value = "";
-      switchMode("fields");
-      toast("AIが採用ページを更新しました。「採用ページを別画面で表示」で仕上がりをご確認ください。", "success");
+      typing.remove();
+      const msg = (res.chatMessage || "採用ページを更新しました。").trim();
+      aiAddBot(`${escapeHtml(msg)}
+        <span class="block mt-2 text-[12px]">
+          <a href="#" data-act="preview" class="text-[#1E2761] font-medium hover:underline">→ 採用ページを別画面で確認する</a>
+        </span>`);
     } catch (err) {
+      typing.remove();
       const reason = (err && err.message) ? err.message : "通信エラーが発生しました";
-      toast("AI更新に失敗しました：" + reason, "error");
+      aiAddBot(`<span class="text-[#EF4444]">更新に失敗しました。</span>
+        <span class="block mt-1 text-[11px] text-[#9CA3AF]">理由：${escapeHtml(reason)}</span>`);
     } finally {
-      setAiRunning(false);
+      aiBusy = false;
+      $("ai-run").disabled = false;
+      aiInput.focus();
     }
+  }
+
+  $("ai-run").addEventListener("click", aiRun);
+  aiInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); aiRun(); }
+  });
+  aiInput.addEventListener("input", () => {
+    aiInput.style.height = "auto";
+    aiInput.style.height = Math.min(aiInput.scrollHeight, 120) + "px";
   });
 
   /* ---- 初期状態に戻す ---- */

@@ -15,7 +15,8 @@ const SYSTEM_PROMPT = `あなたは企業の採用ページの内容を編集す
   "stats": [ { "label": "項目名", "value": "数値" } ],
   "benefits": [ { "title": "制度名", "desc": "説明" } ],
   "sectionThemes": { "message": "テーマ名", "positions": "テーマ名", "interview": "テーマ名", "benefits": "テーマ名", "flow": "テーマ名", "blog": "テーマ名" },
-  "positionsStyle": "募集職種カードのレイアウト名"
+  "positionsStyle": "募集職種カードのレイアウト名",
+  "chatMessage": "担当者への報告メッセージ"
 }
 
 【sectionThemes ─ セクションの配色（背景デザイン）】
@@ -45,6 +46,8 @@ sectionThemes のキーと対応セクション：
 - 変更しないキーは出力に一切含めない（例：メッセージだけを直す指示なら、出力は {"message": "..."} のみ）
 - 配列（interviews / stats / benefits）を変更する場合のみ、その配列を「全要素そろえて」出力する（変更しない要素も省略せず含める）
 - これは応答速度のために重要なルールです。必ず守ること
+- ただし "chatMessage" は毎回必ず含めること。これは保存データではなく、担当者に「何をどう変更したか」を伝える短い日本語の報告文です（1〜2文・敬体・親しみやすく）
+- 指示が採用ページの編集と無関係、または対応できない内容のときは、データのキーは一切変更せず "chatMessage" だけで丁寧に説明する
 
 【編集ルール】
 - 社員インタビューを追加する場合、id は "iv-" + 適当な英数字、image は "recruit" とする
@@ -131,6 +134,13 @@ export default async (req) => {
       throw new Error("AI応答のフォーマットが不正です");
     }
 
+    // chatMessage は担当者への報告用。保存データには含めない
+    const chatMessage =
+      typeof parsed.chatMessage === "string" && parsed.chatMessage.trim()
+        ? parsed.chatMessage.trim()
+        : "採用ページを更新しました。";
+    delete parsed.chatMessage;
+
     // AIは「変更したキーだけ」を返すため、現在の内容にマージして全体を組み立てる
     const recruit = { ...current, ...parsed };
     // sectionThemes は一部のキーだけ返ることがあるため、現在値と深くマージする
@@ -143,6 +153,7 @@ export default async (req) => {
 
     return json({
       recruit,
+      chatMessage,
       tokensUsed: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0),
       model: "claude-sonnet-4-6",
     });
