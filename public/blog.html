@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ブログ｜株式会社インフォネット</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/styles.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: { colors: {
+    ink: '#0F3D7E', sky: '#00B8D9', mist: '#F5F7FA', line: '#E5E7EB'
+  } } } };
+</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-white text-[#1A1A1A]">
+
+<!-- ===== ヘッダー ===== -->
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-line">
+  <div class="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2">
+      <img src="/assets/infonet-logo.png" alt="株式会社インフォネット" class="h-7 w-auto" />
+      <span class="text-[10px] font-bold text-[#92400E] bg-[#FEF3C7] border border-[#FCD34D] rounded px-1.5 py-0.5 leading-none">DEMO</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+      <a href="/#about" class="hover:text-ink">会社概要</a>
+      <a href="/#services" class="hover:text-ink">サービス</a>
+      <a href="/#news" class="hover:text-ink">お知らせ</a>
+      <a href="/recruit.html" class="text-ink font-semibold">採用情報</a>
+      <a href="/#contact" class="hover:text-ink">お問い合わせ</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== パンくず ===== -->
+<div class="bg-mist border-b border-line">
+  <div class="max-w-[820px] mx-auto px-6 py-3 text-sm text-[#666]">
+    <a href="/" class="hover:text-ink">ホーム</a>
+    <span class="mx-2">/</span>
+    <a href="/recruit.html" class="hover:text-ink">採用情報</a>
+    <span class="mx-2">/</span>
+    <a href="/recruit.html#blog" class="hover:text-ink">ブログ</a>
+  </div>
+</div>
+
+<!-- ===== ブログ本文 ===== -->
+<main class="max-w-[820px] mx-auto px-6 py-12 md:py-16">
+  <a href="/recruit.html#blog" class="inline-flex items-center gap-1 text-sm font-medium text-ink hover:underline">
+    <i data-lucide="arrow-left" class="w-4 h-4"></i> ブログ一覧へ戻る
+  </a>
+  <article id="blog-detail" class="mt-6">
+    <p class="text-[#666] py-12 text-center">記事を読み込んでいます…</p>
+  </article>
+</main>
+
+<!-- ===== フッター ===== -->
+<footer class="bg-[#0a2c5c] text-white/55 mt-10">
+  <div class="max-w-[1200px] mx-auto px-6 py-8 flex flex-wrap justify-between gap-3 text-xs">
+    <p>© <span id="year">2026</span> INFONET Inc. ｜ 本サイトは ITLINE による法人AIデモ環境です。</p>
+    <a href="/admin/" class="hover:text-white">管理画面</a>
+  </div>
+</footer>
+
+<script src="/assets/store.js"></script>
+<script src="/assets/site.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

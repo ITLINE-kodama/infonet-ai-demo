@@ -54,6 +54,11 @@ function apiGetRecruit() { return window.Store.getRecruit(); }
 function apiSaveRecruit(patch) { return window.Store.saveRecruit(patch); }
 function apiRecruitAI(instruction, current) { return window.Store.recruitAI(instruction, current); }
 function apiResetRecruit() { return window.Store.resetRecruit(); }
+function apiListBlog(status) { return window.Store.listBlog(status); }
+function apiGetBlog(id) { return window.Store.getBlog(id); }
+function apiCreateBlog(data) { return window.Store.createBlog(data); }
+function apiUpdateBlog(id, data) { return window.Store.updateBlog(id, data); }
+function apiDeleteBlog(id) { return window.Store.deleteBlog(id); }
 function apiListLogs() { return window.Store.listLogs(); }
 async function apiLog(data) {
   try { await window.Store.addLog(data); } catch { /* ログ失敗はデモ進行を止めない */ }
@@ -136,12 +141,17 @@ function confirmModal({ title, message, okText = "実行する", cancelText = "�
 /* ---------- サイドバー & 画面初期化 ---------- */
 const NAV_ITEMS = [
   { key: "dashboard", label: "ダッシュボード", href: "/admin/dashboard.html", icon: "layout-dashboard" },
+  { group: "お知らせ" },
   { key: "news", label: "ニュース更新", href: "/admin/news.html", icon: "sparkles" },
   { key: "drafts", label: "下書き一覧", href: "/admin/drafts.html", icon: "file-text" },
   { key: "published", label: "公開済み", href: "/admin/published.html", icon: "globe" },
-  { key: "recruit-edit", label: "採用ページ編集", href: "/admin/recruit-edit.html", icon: "file-pen", badge: "NEW" },
+  { group: "採用サイト" },
+  { key: "recruit-edit", label: "採用ページ編集", href: "/admin/recruit-edit.html", icon: "file-pen" },
   { key: "jobs", label: "求人作成", href: "/admin/jobs.html", icon: "briefcase" },
   { key: "jobs-list", label: "求人一覧", href: "/admin/jobs-list.html", icon: "users" },
+  { key: "blog", label: "ブログ作成", href: "/admin/blog.html", icon: "pen-line", badge: "NEW" },
+  { key: "blog-list", label: "ブログ一覧", href: "/admin/blog-list.html", icon: "newspaper" },
+  { group: "その他" },
   { key: "logs", label: "ログ・履歴", href: "/admin/logs.html", icon: "scroll-text" },
 ];
 
@@ -169,8 +179,11 @@ function initAdmin(activeKey) {
         <a href="/" class="flex items-center gap-2">${logoMarkup()}</a>
         <p class="mt-1 text-[11px] text-white/55">${escapeHtml(BRAND.productName)}</p>
       </div>
-      <nav class="flex-1 px-3 py-4 space-y-1">
+      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         ${NAV_ITEMS.map((it) => {
+          if (it.group) {
+            return `<p class="px-3 pt-4 pb-1 text-[10px] font-semibold tracking-wider text-white/35 uppercase">${escapeHtml(it.group)}</p>`;
+          }
           const active = it.key === activeKey;
           return `
           <a href="${it.href}" class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition

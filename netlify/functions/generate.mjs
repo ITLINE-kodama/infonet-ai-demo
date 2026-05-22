@@ -97,6 +97,30 @@ const RECRUIT_SYSTEM_PROMPT = `あなたは「らくらくAI」という、企�
 【避けるべき表現】
 - カジュアルすぎる口語、過度な誇張、不確実な情報の断定`;
 
+const BLOG_SYSTEM_PROMPT = `あなたは「らくらくAI」という、企業の採用ブログの記事作成を支援するAIアシスタントです。
+
+【役割】
+- 担当者の指示を受け取り、採用ブログに掲載する記事のドラフトを作成する
+- 読み手（求職者・社外の方）に向けた、親しみやすく前向きで誠実なトーンで書く
+
+【出力ルール】
+- 必ず以下のJSON形式のみで応答する。JSON以外のテキスト（前置き・後書き）は出力しない
+- JSONの最初の文字は「{」、最後の文字は「}」
+{
+  "title": "（記事タイトル。35文字以内推奨）",
+  "body": "（記事本文。300〜700文字程度。段落を改行で分ける）",
+  "category": "（People／News／Culture／Event から記事内容に最も合うものを1つ）",
+  "tags": ["（記事に関連するタグを2〜4個。短い単語で）"],
+  "imageKey": "（maintenance／recruit／relocation／seminar／general から内容に最も合うもの）",
+  "chatMessage": "（チャット欄に表示する一言メッセージ）"
+}
+
+【会社情報（参考）】
+- 会社名：株式会社インフォネット（Webサイト制作・システム開発・DXコンサルティング、東京都港区新橋）
+
+【避けるべき表現】
+- カジュアルすぎる口語、過度な誇張、不確実な情報の断定`;
+
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
     status,
@@ -175,6 +199,19 @@ function buildRecruitMock(message) {
   };
 }
 
+// --- ブログ記事モードのモック応答 -----------------------------------
+function buildBlogMock(message) {
+  const m = String(message || "");
+  return {
+    imageKey: "general",
+    category: "News",
+    tags: ["お知らせ", "インフォネット"],
+    title: "ブログ記事",
+    body: (m ? m + "\n\n" : "") +
+      "詳しい内容につきましては、改めてご紹介いたします。\n\n※この文章はデモ用のサンプル応答です。",
+  };
+}
+
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "POSTのみ対応しています" }, 405);
 
@@ -189,13 +226,15 @@ export default async (req) => {
     ? payload.conversationHistory
     : [];
 
-  // mode="job"（求人）/ "recruit"（採用ページ文章）/ それ以外はお知らせ
+  // mode="job"（求人）/ "recruit"（採用ページ文章）/ "blog"（ブログ）/ それ以外はお知らせ
   const mode = payload.mode;
   const systemPrompt = mode === "job" ? JOB_SYSTEM_PROMPT
     : mode === "recruit" ? RECRUIT_SYSTEM_PROMPT
+    : mode === "blog" ? BLOG_SYSTEM_PROMPT
     : SYSTEM_PROMPT;
   const mockFn = mode === "job" ? buildJobMock
     : mode === "recruit" ? buildRecruitMock
+    : mode === "blog" ? buildBlogMock
     : buildMock;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -208,6 +247,8 @@ export default async (req) => {
       title: mock.title,
       body: mock.body,
       imageKey: mock.imageKey,
+      category: mock.category,
+      tags: mock.tags,
       chatMessage: expired
         ? "本デモのAI生成期間は終了しました。サンプル原稿を表示しています。"
         : "ドラフトを作成しました。本文とサムネイル画像を右側のプレビューでご確認ください。（デモモード）",
@@ -257,6 +298,8 @@ export default async (req) => {
       title: parsed.title,
       body: parsed.body,
       imageKey: IMAGE_KEYS.includes(parsed.imageKey) ? parsed.imageKey : "general",
+      category: parsed.category,
+      tags: Array.isArray(parsed.tags) ? parsed.tags : [],
       chatMessage:
         parsed.chatMessage ||
         "ドラフトを作成しました。右側のプレビューでご確認ください。",
@@ -272,6 +315,8 @@ export default async (req) => {
       title: mock.title,
       body: mock.body,
       imageKey: mock.imageKey,
+      category: mock.category,
+      tags: mock.tags,
       chatMessage:
         "AIとの通信が混み合っているため、サンプル原稿を表示しています。内容はそのままご利用いただけます。",
       tokensUsed: 0,

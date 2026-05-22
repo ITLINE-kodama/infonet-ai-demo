@@ -278,6 +278,114 @@ async function renderRecruitPage() {
   if (window.lucide) lucide.createIcons();
 }
 
+/* ---------- ブログのカテゴリーラベル ---------- */
+function blogCategoryLabel(cat) {
+  const m = window.BLOG_CATEGORY_LABELS || {};
+  return m[cat] || cat || "";
+}
+
+/* ---------- 採用ページ：ブログ一覧の描画 ---------- */
+async function renderBlogList() {
+  const host = document.getElementById("rc-blog-list");
+  if (!host) return;
+  try {
+    const list = await window.Store.listBlog("published");
+    const items = (Array.isArray(list) ? list : []).slice(0, 6);
+    if (items.length === 0) {
+      host.innerHTML = `<p class="text-[#666] col-span-full text-center py-8">ブログ記事は準備中です。</p>`;
+      return;
+    }
+    host.innerHTML = items
+      .map(
+        (n) => `
+      <a href="/blog.html?id=${encodeURIComponent(n.id)}"
+         class="group block bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden transition hover:-translate-y-1 hover:shadow-md">
+        <div class="relative">
+          <img src="${window.newsImageUrl(n.image)}" alt="" class="w-full h-44 object-cover" />
+          <span class="absolute top-3 left-3 text-[11px] font-semibold text-white bg-[#00B8D9] rounded px-2 py-0.5">
+            ${escapeHtmlSite(blogCategoryLabel(n.category))}
+          </span>
+        </div>
+        <div class="p-6">
+          <span class="text-[12px] text-[#9CA3AF]">${formatDateSite(n.publishedAt || n.createdAt)}</span>
+          <h3 class="mt-1.5 text-base font-bold text-[#1A1A1A] leading-snug group-hover:text-[#0F3D7E]">
+            ${escapeHtmlSite(n.title)}
+          </h3>
+          <p class="mt-2 text-sm text-[#666] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 70))}</p>
+          ${
+            Array.isArray(n.tags) && n.tags.length
+              ? `<div class="mt-3 flex flex-wrap gap-1.5">${n.tags
+                  .map((t) => `<span class="text-[11px] text-[#6B7280] bg-[#F5F7FA] rounded px-2 py-0.5">#${escapeHtmlSite(t)}</span>`)
+                  .join("")}</div>`
+              : ""
+          }
+        </div>
+      </a>`
+      )
+      .join("");
+    if (window.lucide) lucide.createIcons();
+  } catch {
+    host.innerHTML = `<p class="text-[#666] col-span-full text-center py-8">ブログを読み込めませんでした。</p>`;
+  }
+}
+
+/* ---------- ブログ詳細ページの描画 ---------- */
+async function renderBlogDetail() {
+  const host = document.getElementById("blog-detail");
+  if (!host) return;
+  const params = new URLSearchParams(location.search);
+  let id = params.get("id");
+  if (!id) {
+    const m = location.pathname.match(/\/blog\/([^/]+)/);
+    if (m) id = m[1];
+  }
+  if (!id) {
+    host.innerHTML = `<p class="text-[#666]">記事が指定されていません。</p>`;
+    return;
+  }
+  try {
+    const n = await window.Store.getBlog(id);
+    if (!n || n.status !== "published") {
+      host.innerHTML = `<p class="text-[#666] py-12 text-center">この記事は公開されていないか、削除されました。</p>`;
+      return;
+    }
+    document.title = `${n.title}｜ブログ｜株式会社インフォネット`;
+    host.innerHTML = `
+      <div class="flex items-center gap-3">
+        <span class="inline-block text-sm font-semibold text-white bg-[#00B8D9] rounded px-3 py-1">
+          ${escapeHtmlSite(blogCategoryLabel(n.category))}
+        </span>
+        <span class="text-sm text-[#9CA3AF]">${formatDateSite(n.publishedAt || n.createdAt)}</span>
+      </div>
+      <h1 class="mt-5 text-3xl font-bold text-[#1A1A1A] leading-tight">${escapeHtmlSite(n.title)}</h1>
+      <div class="mt-4 pb-6 border-b border-[#E5E7EB] text-sm text-[#666]">
+        ブログ ／ 株式会社インフォネット
+      </div>
+      <img src="${window.newsImageUrl(n.image)}" alt="" class="w-full rounded-xl mt-8 border border-[#E5E7EB]" />
+      <div class="article-body mt-8 text-[15px] text-[#1A1A1A]">${escapeHtmlSite(n.body)}</div>
+      ${
+        Array.isArray(n.tags) && n.tags.length
+          ? `<div class="mt-8 flex flex-wrap gap-2">${n.tags
+              .map((t) => `<span class="text-[13px] text-[#0F3D7E] bg-[#F5F7FA] border border-[#E5E7EB] rounded-full px-3 py-1">#${escapeHtmlSite(t)}</span>`)
+              .join("")}</div>`
+          : ""
+      }
+      <div class="mt-10 pt-6 border-t border-[#E5E7EB] flex items-center justify-between gap-3 flex-wrap">
+        <a href="/recruit.html#blog" class="inline-flex items-center gap-1 text-sm font-medium text-[#0F3D7E] hover:underline">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> ブログ一覧へ戻る
+        </a>
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-[#666]">この記事を共有：</span>
+          <button class="w-9 h-9 rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#666] hover:bg-[#F5F7FA]" onclick="alert('※ デモのため共有機能は無効です')"><i data-lucide="share-2" class="w-4 h-4"></i></button>
+          <button class="w-9 h-9 rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#666] hover:bg-[#F5F7FA]" onclick="alert('※ デモのため共有機能は無効です')"><i data-lucide="link" class="w-4 h-4"></i></button>
+        </div>
+      </div>`;
+    if (window.lucide) lucide.createIcons();
+  } catch {
+    host.innerHTML = `<p class="text-[#666] py-12 text-center">記事を読み込めませんでした。</p>`;
+  }
+}
+
 /* ---------- モバイルメニュー ---------- */
 function initMobileMenu() {
   const btn = document.getElementById("menu-btn");
@@ -294,6 +402,8 @@ document.addEventListener("DOMContentLoaded", () => {
   renderJobsList();
   renderJobDetail();
   renderRecruitPage();
+  renderBlogList();
+  renderBlogDetail();
   initMobileMenu();
   const y = document.getElementById("year");
   if (y) y.textContent = new Date().getFullYear();

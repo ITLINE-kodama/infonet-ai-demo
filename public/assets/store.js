@@ -14,6 +14,8 @@
   const LOGS_KEY = "infonet_demo_logs";
   const JOBS_KEY = "infonet_demo_jobs";
   const RECRUIT_KEY = "infonet_demo_recruit";
+  const BLOG_KEY = "infonet_demo_blog";
+  const BLOG_CATEGORIES = ["People", "News", "Culture", "Event"];
 
   /* ---- AI生成サムネイル画像ライブラリ ---- */
   const IMAGE_KEYS = ["maintenance", "recruit", "relocation", "seminar", "general"];
@@ -31,10 +33,17 @@
     }
     return "/assets/news/" + (IMAGE_KEYS.includes(key) ? key : "general") + ".webp";
   }
-  // image の値を正規化（AI生成画像のデータURL or ライブラリキー）
+  // image の値を正規化（AI生成画像のデータURL or ライブラリキー or サイト内パス）
   function normalizeImage(v) {
-    if (typeof v === "string" && v.startsWith("data:image/")) return v;
+    if (typeof v === "string" && (v.startsWith("data:image/") || v.startsWith("/"))) return v;
     return IMAGE_KEYS.includes(v) ? v : "general";
+  }
+  function normalizeCategory(v) {
+    return BLOG_CATEGORIES.includes(v) ? v : "News";
+  }
+  function normalizeTags(v) {
+    if (!Array.isArray(v)) return [];
+    return v.map((t) => String(t).trim()).filter(Boolean).slice(0, 6);
   }
 
   /* ---- 初期お知らせ（news.mjs のシードと同一）---- */
@@ -91,6 +100,25 @@
       status: "published", authorId: "demo-user-01", authorName: "インフォネット担当者",
       createdAt: "2026-05-01T00:00:00.000Z", updatedAt: "2026-05-01T00:00:00.000Z", publishedAt: "2026-05-01T00:00:00.000Z",
     },
+  ];
+
+  /* ---- 初期ブログ記事（blog.mjs のシードと同一）---- */
+  const BLOG_SEED = [
+    { id: "blog-seed-001", category: "People", tags: ["新卒", "成長", "インタビュー"], image: "/assets/news/iv-3.webp",
+      title: "未経験からの1年。新卒社員が見つけた「面白さ」",
+      body: "2025年に新卒で入社した社員に、この1年を振り返ってもらいました。\n\n入社当初はWebの知識もほとんどなく、不安ばかりだったといいます。それでも、先輩がつきっきりでサポートしてくれる環境のなかで、少しずつできることが増えていきました。\n\n「最初は言われたことをこなすだけでした。でも今は、自分から提案できるようになってきた。お客様に喜んでもらえたときの達成感は、ほかでは味わえません」\n\n答えのない仕事だからこそ、面白い。そう語る表情が印象的でした。",
+      status: "published", authorId: "demo-user-01", authorName: "インフォネット担当者",
+      createdAt: "2026-05-20T01:00:00.000Z", updatedAt: "2026-05-20T01:00:00.000Z", publishedAt: "2026-05-20T01:00:00.000Z" },
+    { id: "blog-seed-002", category: "News", tags: ["イベント", "社内", "チーム"], image: "/assets/news/seminar.webp",
+      title: "全社ミーティング「ALL HANDS 2026」を開催しました",
+      body: "先日、全社員が一堂に会する全社ミーティング「ALL HANDS 2026」を開催しました。\n\n半期の振り返りと今後の方針の共有に加え、部署を越えたグループワークを実施。普段は接点の少ないメンバー同士が、これからの会社について語り合いました。\n\n会の後半では、半期のMVP表彰も。日々の努力が会社全体で称えられる、温かい時間となりました。\n\nこうした機会を通じて、私たちは「みんなで働く」ことの価値を大切にしています。",
+      status: "published", authorId: "demo-user-01", authorName: "インフォネット担当者",
+      createdAt: "2026-05-11T02:00:00.000Z", updatedAt: "2026-05-11T02:00:00.000Z", publishedAt: "2026-05-11T02:00:00.000Z" },
+    { id: "blog-seed-003", category: "Culture", tags: ["働き方", "カルチャー", "リモート"], image: "/assets/recruit-hero.webp",
+      title: "リモートと出社のいいとこ取り。インフォネットの働き方",
+      body: "インフォネットでは、職種やプロジェクトに応じて、リモートワークと出社を柔軟に組み合わせています。\n\n集中して作業したい日は自宅で、チームで議論したい日はオフィスで。一人ひとりが、その日の仕事に合わせて働く場所を選んでいます。\n\nオフィスにはコミュニケーションを生む共有スペースを用意。出社した日には、自然と会話が生まれます。\n\n働きやすさと、チームのつながり。その両方を大切にした働き方を、これからも追求していきます。",
+      status: "published", authorId: "demo-user-01", authorName: "インフォネット担当者",
+      createdAt: "2026-05-02T00:00:00.000Z", updatedAt: "2026-05-02T00:00:00.000Z", publishedAt: "2026-05-02T00:00:00.000Z" },
   ];
 
   /* ---- 採用ページのセクション内容（recruit.mjs の初期値と同一）---- */
@@ -158,6 +186,14 @@
     }
   }
   function lsSetRecruit(obj) { try { localStorage.setItem(RECRUIT_KEY, JSON.stringify(obj)); } catch {} }
+  function lsGetBlog() {
+    try {
+      const raw = localStorage.getItem(BLOG_KEY);
+      if (raw == null) { localStorage.setItem(BLOG_KEY, JSON.stringify(BLOG_SEED)); return BLOG_SEED.map((n) => ({ ...n })); }
+      return JSON.parse(raw);
+    } catch { return BLOG_SEED.map((n) => ({ ...n })); }
+  }
+  function lsSetBlog(list) { try { localStorage.setItem(BLOG_KEY, JSON.stringify(list)); } catch {} }
 
   function sortRecency(list) {
     return [...list].sort((a, b) => {
@@ -193,6 +229,11 @@
     const m = String(message || "");
     return { imageKey: "recruit", title: "募集職種",
       body: "下記のとおり人材を募集いたします。\n\n■ 仕事内容\n" + (m ? m + "\n\n" : "Webサイト制作・運用に関わる業務をお任せします。\n\n") + "■ 応募資格\n※詳細は面談時にご案内いたします。\n\n■ 雇用形態\n正社員\n\n■ 勤務地\n東京都港区新橋\n\n※この文章はデモ用のサンプル応答です。" };
+  }
+  function buildBlogMock(message) {
+    const m = String(message || "");
+    return { imageKey: "general", category: "News", tags: ["お知らせ", "インフォネット"], title: "ブログ記事",
+      body: (m ? m + "\n\n" : "") + "詳しい内容につきましては、改めてご紹介いたします。\n\n※この文章はデモ用のサンプル応答です。" };
   }
 
   /* ---- fetch ラッパ（失敗時は throw してフォールバックへ）---- */
@@ -361,6 +402,84 @@
       }
     },
 
+    /* ---- ブログ ---- */
+    async listBlog(status) {
+      try {
+        const url = status ? `${API}/blog?status=${status}` : `${API}/blog`;
+        const data = await tryFetch(url);
+        this.mode = "api";
+        return data;
+      } catch {
+        this.mode = "local";
+        let list = lsGetBlog();
+        if (status) list = list.filter((n) => n.status === status);
+        return sortRecency(list);
+      }
+    },
+    async getBlog(id) {
+      try {
+        return await tryFetch(`${API}/blog?id=${encodeURIComponent(id)}`);
+      } catch {
+        return lsGetBlog().find((n) => n.id === id) || null;
+      }
+    },
+    async createBlog(data) {
+      try {
+        return await tryFetch(`${API}/blog`, { method: "POST", headers: H, body: JSON.stringify(data) });
+      } catch {
+        const list = lsGetBlog();
+        const now = new Date().toISOString();
+        const pub = data.status === "published";
+        const item = {
+          id: "b-" + Date.now().toString(36),
+          title: (data.title || "無題の記事").trim(),
+          body: data.body || "",
+          image: normalizeImage(data.image),
+          category: normalizeCategory(data.category),
+          tags: normalizeTags(data.tags),
+          status: pub ? "published" : "draft",
+          authorId: "demo-user-01",
+          authorName: data.authorName || "インフォネット担当者",
+          createdAt: now, updatedAt: now, publishedAt: pub ? now : undefined,
+        };
+        list.push(item);
+        lsSetBlog(list);
+        return item;
+      }
+    },
+    async updateBlog(id, data) {
+      try {
+        return await tryFetch(`${API}/blog?id=${encodeURIComponent(id)}`, { method: "PUT", headers: H, body: JSON.stringify(data) });
+      } catch {
+        const list = lsGetBlog();
+        const i = list.findIndex((n) => n.id === id);
+        if (i < 0) throw new Error("記事が見つかりません");
+        const now = new Date().toISOString();
+        const prev = list[i];
+        const next = { ...prev, updatedAt: now };
+        if ("title" in data) next.title = (data.title || "無題の記事").trim();
+        if ("body" in data) next.body = data.body;
+        if ("image" in data) next.image = normalizeImage(data.image);
+        if ("category" in data) next.category = normalizeCategory(data.category);
+        if ("tags" in data) next.tags = normalizeTags(data.tags);
+        if (data.status && data.status !== prev.status) {
+          next.status = data.status;
+          if (data.status === "published") next.publishedAt = now;
+        }
+        list[i] = next;
+        lsSetBlog(list);
+        return next;
+      }
+    },
+    async deleteBlog(id) {
+      try {
+        return await tryFetch(`${API}/blog?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      } catch {
+        lsSetBlog(lsGetBlog().filter((n) => n.id !== id));
+        return { ok: true };
+      }
+    },
+
     /* ---- 採用ページのセクション内容 ---- */
     async getRecruit() {
       try {
@@ -436,11 +555,13 @@
       try {
         await fetch(`${API}/news?reset=1`, { method: "DELETE" });
         await fetch(`${API}/jobs?reset=1`, { method: "DELETE" });
+        await fetch(`${API}/blog?reset=1`, { method: "DELETE" });
         await fetch(`${API}/recruit?reset=1`, { method: "DELETE" });
         await fetch(`${API}/logs?reset=1`, { method: "DELETE" });
       } catch {}
       lsSetNews(SEED.map((n) => ({ ...n })));
       lsSetJobs(JOB_SEED.map((n) => ({ ...n })));
+      lsSetBlog(BLOG_SEED.map((n) => ({ ...n })));
       lsSetRecruit({ ...RECRUIT_DEFAULT });
       lsSetLogs([]);
     },
@@ -452,9 +573,9 @@
           body: JSON.stringify({ userMessage, conversationHistory: conversationHistory || [], mode: mode || "news" }),
         });
       } catch {
-        const m = (mode === "job" ? buildJobMock : buildMock)(userMessage);
+        const m = (mode === "job" ? buildJobMock : mode === "blog" ? buildBlogMock : buildMock)(userMessage);
         return {
-          title: m.title, body: m.body, imageKey: m.imageKey,
+          title: m.title, body: m.body, imageKey: m.imageKey, category: m.category, tags: m.tags,
           chatMessage: "ドラフトを作成しました。本文とサムネイル画像を右側のプレビューでご確認ください。（オフラインデモ）",
           tokensUsed: 0, model: "デモモック（ローカル）", mode: "local-mock",
         };
@@ -482,4 +603,11 @@
   window.NEWS_IMAGE_KEYS = IMAGE_KEYS;
   window.NEWS_IMAGE_LABELS = IMAGE_LABELS;
   window.newsImageUrl = imageUrl;
+  window.BLOG_CATEGORIES = BLOG_CATEGORIES;
+  window.BLOG_CATEGORY_LABELS = {
+    People: "社員・人",
+    News: "ニュース",
+    Culture: "カルチャー",
+    Event: "イベント",
+  };
 })();

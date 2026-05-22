@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ブログ作成｜AIでらくらく更新</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/styles.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#F9FAFB] text-[#111827]">
+
+<div class="flex">
+  <aside id="sidebar"></aside>
+
+  <main class="flex-1 min-w-0 p-6 lg:p-8 max-w-[1400px]">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h1 id="page-title" class="text-2xl font-bold">ブログ作成</h1>
+        <p class="mt-1 text-sm text-[#6B7280]">AIアシスタント「らくらくAI」に話しかけるだけで、採用ブログの記事を作成できます。</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="mode-badge" class="hidden text-[12px] font-semibold px-2.5 py-1 rounded-full bg-[#FEF3C7] text-[#92400E]"></span>
+        <button id="preview-site-btn"
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#E5E7EB] bg-white text-sm font-medium text-[#374151] hover:bg-[#F9FAFB]">
+          <i data-lucide="external-link" class="w-4 h-4"></i> 採用ページを別画面で表示
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-6 grid lg:grid-cols-5 gap-6" style="min-height: 620px;">
+
+      <!-- ===== 左：チャット ===== -->
+      <section class="lg:col-span-3 bg-white border border-[#E5E7EB] rounded-xl flex flex-col" style="height: 78vh; min-height: 560px;">
+        <div class="px-5 py-3.5 border-b border-[#E5E7EB] flex items-center gap-3">
+          <span class="w-9 h-9 rounded-full bg-[#1E2761] flex items-center justify-center text-white">
+            <i data-lucide="bot" class="w-5 h-5"></i>
+          </span>
+          <div>
+            <p class="text-sm font-semibold">らくらくAI</p>
+            <p class="text-[12px] text-[#6B7280]">採用ブログ アシスタント</p>
+          </div>
+        </div>
+
+        <div id="chat" class="flex-1 overflow-y-auto thin-scroll px-5 py-5 space-y-4"></div>
+
+        <div class="px-4 py-3 border-t border-[#E5E7EB]">
+          <div class="flex items-center gap-2 mb-2">
+            <label class="flex items-center gap-1.5 text-[12px] text-[#374151] cursor-pointer select-none shrink-0">
+              <input type="checkbox" id="img-toggle" checked class="w-3.5 h-3.5 accent-[#1E2761]" />
+              アイキャッチ画像も生成
+            </label>
+            <input type="text" id="img-instruction" placeholder="画像の指示（任意）例：明るいオフィスで談笑する社員"
+              class="flex-1 min-w-0 border border-[#E5E7EB] rounded-lg px-2.5 py-1 text-[12px] focus:border-[#1E2761] outline-none" />
+            <button id="gen-img-btn" type="button"
+              class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1E2761] hover:bg-[#F9FAFB] disabled:opacity-40">
+              <i data-lucide="image" class="w-3.5 h-3.5"></i> 画像を生成
+            </button>
+          </div>
+          <div class="flex items-end gap-2">
+            <button id="mic-btn" title="音声入力"
+              class="w-10 h-10 shrink-0 rounded-lg border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:bg-[#F9FAFB]">
+              <i data-lucide="mic" class="w-5 h-5"></i>
+            </button>
+            <textarea id="chat-input" rows="1" placeholder="例：新卒社員へのインタビューをもとに、入社1年の振り返りブログを書いて。"
+              class="flex-1 resize-none border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed focus:border-[#1E2761] outline-none thin-scroll"
+              style="max-height: 120px;"></textarea>
+            <button id="send-btn"
+              class="w-10 h-10 shrink-0 rounded-lg bg-[#1E2761] flex items-center justify-center text-white hover:opacity-90 disabled:opacity-40">
+              <i data-lucide="send" class="w-5 h-5"></i>
+            </button>
+          </div>
+          <p class="mt-1.5 text-[11px] text-[#9CA3AF]">Enterで送信／Shift+Enterで改行</p>
+        </div>
+      </section>
+
+      <!-- ===== 右：プレビュー ===== -->
+      <section class="lg:col-span-2 bg-white border border-[#E5E7EB] rounded-xl flex flex-col" style="height: 78vh; min-height: 560px;">
+        <div class="flex border-b border-[#E5E7EB]">
+          <button data-tab="draft" class="tab-btn flex-1 px-4 py-3 text-sm font-medium border-b-2 border-[#1E2761] text-[#1E2761]">
+            生成原稿
+          </button>
+          <button data-tab="preview" class="tab-btn flex-1 px-4 py-3 text-sm font-medium border-b-2 border-transparent text-[#6B7280]">
+            公開プレビュー
+          </button>
+        </div>
+
+        <!-- 生成原稿（編集） -->
+        <div id="tab-draft" class="flex-1 overflow-y-auto thin-scroll p-5">
+          <label class="block text-[13px] font-medium text-[#374151] mb-1">記事タイトル</label>
+          <input id="news-title" type="text" placeholder="ブログ記事のタイトル"
+            class="w-full border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm focus:border-[#1E2761] outline-none" />
+
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <div>
+              <label class="block text-[13px] font-medium text-[#374151] mb-1">カテゴリー</label>
+              <select id="blog-category"
+                class="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:border-[#1E2761] outline-none bg-white"></select>
+            </div>
+            <div>
+              <label class="block text-[13px] font-medium text-[#374151] mb-1">タグ
+                <span class="text-[11px] font-normal text-[#9CA3AF]">（カンマ区切り）</span>
+              </label>
+              <input id="blog-tags" type="text" placeholder="例：新卒, 成長, インタビュー"
+                class="w-full border border-[#E5E7EB] rounded-lg px-3 py-2.5 text-sm focus:border-[#1E2761] outline-none" />
+            </div>
+          </div>
+
+          <label class="block text-[13px] font-medium text-[#374151] mb-1 mt-4">本文</label>
+          <textarea id="news-body" rows="9" placeholder="AIが生成したブログ本文がここに入ります。直接編集することもできます。"
+            class="w-full border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed focus:border-[#1E2761] outline-none thin-scroll"></textarea>
+
+          <div class="flex items-center justify-between gap-2 mb-1 mt-4">
+            <label class="block text-[13px] font-medium text-[#374151]">アイキャッチ画像
+              <span class="text-[11px] font-normal text-[#9CA3AF]">（AIが自動選択／クリックで変更）</span>
+            </label>
+            <button id="upload-img-btn" type="button"
+              class="shrink-0 inline-flex items-center gap-1 text-[12px] font-medium text-[#1E2761] hover:underline">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i> 画像をアップロード
+            </button>
+          </div>
+          <input type="file" id="img-file" accept="image/*" class="hidden" />
+          <div id="image-picker" class="grid grid-cols-3 gap-2"></div>
+        </div>
+
+        <!-- 公開プレビュー -->
+        <div id="tab-preview" class="hidden flex-1 overflow-y-auto thin-scroll p-5 bg-[#F5F7FA]">
+          <p class="text-[12px] text-[#6B7280] mb-3">採用ページのブログカードでの見え方：</p>
+          <div class="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
+            <img id="pv-image" alt="" class="w-full h-44 object-cover bg-[#EEF2FF]" />
+            <div class="p-5">
+              <div class="flex items-center gap-2">
+                <span id="pv-category" class="inline-block text-[11px] font-semibold text-white bg-[#00B8D9] rounded px-2 py-0.5"></span>
+                <span id="pv-date" class="text-[12px] text-[#9CA3AF]"></span>
+              </div>
+              <h3 id="pv-title" class="mt-2 text-base font-bold text-[#1A1A1A] leading-snug">（タイトル未入力）</h3>
+              <p id="pv-body" class="mt-2 text-sm text-[#666] article-body"></p>
+              <div id="pv-tags" class="mt-3 flex flex-wrap gap-1.5"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- アクション -->
+        <div class="px-5 py-3.5 border-t border-[#E5E7EB] flex items-center gap-2">
+          <button id="discard-btn"
+            class="px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm font-medium text-[#6B7280] hover:bg-[#F9FAFB]">
+            破棄
+          </button>
+          <button id="save-btn"
+            class="flex-1 px-3.5 py-2.5 rounded-lg bg-[#1E2761] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-40">
+            下書き保存
+          </button>
+          <button id="publish-btn"
+            class="flex-1 px-3.5 py-2.5 rounded-lg bg-[#10B981] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-40">
+            公開する
+          </button>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script src="/assets/store.js"></script>
+<script src="/assets/admin.js"></script>
+<script>
+  const user = initAdmin("blog");
+
+  /* ---- 状態 ---- */
+  let editId = null;
+  let editStatus = null;
+  let conversationHistory = [];
+  let selectedImage = "general";
+  let generatedImage = null;
+  let uploadedImage = null;
+  let busy = false;
+
+  const chat = document.getElementById("chat");
+  const input = document.getElementById("chat-input");
+  const titleEl = document.getElementById("news-title");
+  const bodyEl = document.getElementById("news-body");
+  const categoryEl = document.getElementById("blog-category");
+  const tagsEl = document.getElementById("blog-tags");
+  const publishBtn = document.getElementById("publish-btn");
+
+  /* ---- カテゴリー選択肢 ---- */
+  categoryEl.innerHTML = window.BLOG_CATEGORIES
+    .map((c) => `<option value="${c}">${escapeHtml(window.BLOG_CATEGORY_LABELS[c] || c)}</option>`)
+    .join("");
+
+  /* ---- チャット描画 ---- */
+  function addUserMsg(text) {
+    const el = document.createElement("div");
+    el.className = "fade-in flex justify-end";
+    el.innerHTML = `<div class="max-w-[80%] bg-[#1E2761] text-white text-sm rounded-2xl rounded-br-sm px-4 py-2.5 leading-relaxed whitespace-pre-wrap">${escapeHtml(text)}</div>`;
+    chat.appendChild(el);
+    chat.scrollTop = chat.scrollHeight;
+  }
+  function addAiMsg(html) {
+    const el = document.createElement("div");
+    el.className = "fade-in flex gap-2.5";
+    el.innerHTML = `
+      <span class="w-8 h-8 shrink-0 rounded-full bg-[#1E2761] flex items-center justify-center text-white">
+        <i data-lucide="bot" class="w-4 h-4"></i>
+      </span>
+      <div class="max-w-[85%] bg-[#F3F4F6] text-[#111827] text-sm rounded-2xl rounded-bl-sm px-4 py-2.5 leading-relaxed">${html}</div>`;
+    chat.appendChild(el);
+    lucide.createIcons();
+    chat.scrollTop = chat.scrollHeight;
+    return el;
+  }
+  function addTyping() {
+    const el = addAiMsg(`<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>`);
+    el.dataset.typing = "1";
+    return el;
+  }
+
+  /* ---- プレビュー同期 ---- */
+  function syncPreview() {
+    document.getElementById("pv-title").textContent = titleEl.value || "（タイトル未入力）";
+    document.getElementById("pv-body").textContent = bodyEl.value || "（本文未入力）";
+    document.getElementById("pv-image").src = window.newsImageUrl(selectedImage);
+    const cat = categoryEl.value;
+    document.getElementById("pv-category").textContent = window.BLOG_CATEGORY_LABELS[cat] || cat;
+    const d = new Date();
+    document.getElementById("pv-date").textContent =
+      `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+    const tags = tagsEl.value.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 6);
+    document.getElementById("pv-tags").innerHTML = tags
+      .map((t) => `<span class="text-[11px] text-[#6B7280] bg-[#F3F4F6] rounded px-2 py-0.5">#${escapeHtml(t)}</span>`)
+      .join("");
+  }
+  titleEl.addEventListener("input", syncPreview);
+  bodyEl.addEventListener("input", syncPreview);
+  categoryEl.addEventListener("change", syncPreview);
+  tagsEl.addEventListener("input", syncPreview);
+
+  /* ---- アイキャッチ画像ピッカー ---- */
+  function imageTile(key, src, label, on) {
+    return `<button type="button" data-key="${key}"
+      class="relative rounded-lg overflow-hidden border-2 ${on ? "border-[#1E2761]" : "border-[#E5E7EB]"}">
+      <img src="${src}" alt="" class="w-full h-14 object-cover" />
+      <span class="block text-[10px] py-0.5 text-center ${on ? "bg-[#1E2761] text-white" : "bg-[#F3F4F6] text-[#6B7280]"}">${label}</span>
+      ${on ? '<span class="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#1E2761] text-white flex items-center justify-center"><i data-lucide="check" class="w-3 h-3"></i></span>' : ""}
+    </button>`;
+  }
+  function renderImagePicker() {
+    const host = document.getElementById("image-picker");
+    let html = "";
+    if (uploadedImage) {
+      html += imageTile("__uploaded__", uploadedImage, "アップロード画像", selectedImage === uploadedImage);
+    }
+    if (generatedImage) {
+      html += imageTile("__generated__", generatedImage, "AI生成画像", selectedImage === generatedImage);
+    }
+    html += window.NEWS_IMAGE_KEYS
+      .map((key) => imageTile(key, window.newsImageUrl(key), window.NEWS_IMAGE_LABELS[key], key === selectedImage))
+      .join("");
+    host.innerHTML = html;
+    if (window.lucide) lucide.createIcons();
+  }
+  document.getElementById("image-picker").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-key]");
+    if (!btn) return;
+    const k = btn.dataset.key;
+    selectedImage = k === "__generated__" ? generatedImage
+      : k === "__uploaded__" ? uploadedImage
+      : k;
+    renderImagePicker();
+    syncPreview();
+  });
+
+  /* ---- 画像アップロード（縮小してデータURL化）---- */
+  document.getElementById("upload-img-btn").addEventListener("click", () => {
+    document.getElementById("img-file").click();
+  });
+  document.getElementById("img-file").addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast("画像ファイルを選択してください", "error");
+      return;
+    }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const maxW = 1280;
+      const scale = Math.min(1, maxW / img.width);
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      uploadedImage = canvas.toDataURL("image/jpeg", 0.85);
+      selectedImage = uploadedImage;
+      renderImagePicker();
+      syncPreview();
+      toast("画像をアップロードしました", "success");
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      toast("画像を読み込めませんでした", "error");
+    };
+    img.src = url;
+  });
+
+  /* ---- AIアイキャッチ画像生成（Gemini）---- */
+  let imgBusy = false;
+  async function generateThumbnail(topic, instruction) {
+    if (imgBusy) return;
+    imgBusy = true;
+    const genBtn = document.getElementById("gen-img-btn");
+    genBtn.disabled = true;
+    const note = addAiMsg(`<span class="text-[#6B7280]"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span> アイキャッチ画像をAIで生成しています…（10〜20秒ほどかかります）</span>`);
+    try {
+      const url = await window.Store.generateImage(topic, instruction);
+      note.remove();
+      if (url) {
+        generatedImage = url;
+        selectedImage = url;
+        renderImagePicker();
+        syncPreview();
+        addAiMsg("アイキャッチ画像を生成し、プレビューに反映しました。下の一覧からライブラリ画像に差し替えることもできます。");
+      } else {
+        addAiMsg(`<span class="text-[#6B7280]">アイキャッチ画像はライブラリ画像を使用します（画像生成が無効、またはデモ期間外のため）。</span>`);
+      }
+    } catch {
+      note.remove();
+    } finally {
+      imgBusy = false;
+      genBtn.disabled = false;
+    }
+  }
+
+  /* ---- タブ切替 ---- */
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll(".tab-btn").forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle("border-[#1E2761]", on);
+        b.classList.toggle("text-[#1E2761]", on);
+        b.classList.toggle("border-transparent", !on);
+        b.classList.toggle("text-[#6B7280]", !on);
+      });
+      document.getElementById("tab-draft").classList.toggle("hidden", tab !== "draft");
+      document.getElementById("tab-preview").classList.toggle("hidden", tab !== "preview");
+      if (tab === "preview") syncPreview();
+    });
+  });
+
+  /* ---- AI生成 ---- */
+  async function generate() {
+    if (busy) return;
+    const text = input.value.trim();
+    if (!text) return;
+    busy = true;
+    document.getElementById("send-btn").disabled = true;
+    input.value = "";
+    input.style.height = "auto";
+    addUserMsg(text);
+    const typing = addTyping();
+
+    try {
+      const result = await apiGenerate(text, conversationHistory, "blog");
+      typing.remove();
+
+      titleEl.value = result.title || "";
+      bodyEl.value = result.body || "";
+      if (result.category && window.BLOG_CATEGORIES.includes(result.category)) {
+        categoryEl.value = result.category;
+      }
+      if (Array.isArray(result.tags) && result.tags.length) {
+        tagsEl.value = result.tags.join(", ");
+      }
+      selectedImage = window.NEWS_IMAGE_KEYS.includes(result.imageKey) ? result.imageKey : "general";
+      renderImagePicker();
+      syncPreview();
+
+      conversationHistory.push({ role: "user", content: text });
+      conversationHistory.push({
+        role: "assistant",
+        content: JSON.stringify({ title: result.title, body: result.body }),
+      });
+
+      const meta = result.mode === "live"
+        ? `claude-sonnet-4-6 ／ ${result.tokensUsed} トークン`
+        : `${result.model}`;
+      addAiMsg(`${escapeHtml(result.chatMessage)}
+        <span class="block mt-1.5 text-[11px] text-[#9CA3AF]">右側のプレビューに反映しました（${escapeHtml(meta)}）</span>`);
+
+      apiLog({
+        userName: user.name, action: "generate",
+        targetTitle: result.title, aiModel: result.model,
+        userPrompt: text, aiOutput: result.body, tokensUsed: result.tokensUsed,
+      });
+
+      if (document.getElementById("img-toggle").checked) {
+        const instr = document.getElementById("img-instruction").value.trim();
+        generateThumbnail(result.title || text, instr);
+      }
+    } catch (err) {
+      typing.remove();
+      addAiMsg(`<span class="text-[#EF4444]">申し訳ありません、AIアシスタントとの通信に失敗しました。</span>
+        <span class="block mt-1.5 text-[11px] text-[#9CA3AF]">理由：${escapeHtml(err && err.message ? err.message : String(err))}</span>
+        <span class="block mt-1 text-[11px] text-[#9CA3AF]">しばらく待ってから、もう一度お試しください。</span>`);
+    } finally {
+      busy = false;
+      document.getElementById("send-btn").disabled = false;
+      input.focus();
+    }
+  }
+
+  document.getElementById("send-btn").addEventListener("click", generate);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); generate(); }
+  });
+  input.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 120) + "px";
+  });
+
+  document.getElementById("mic-btn").addEventListener("click", () => {
+    toast("※ デモでは音声入力は無効です", "info");
+  });
+
+  // 採用ページを別ウィンドウでプレビュー
+  document.getElementById("preview-site-btn").addEventListener("click", () => {
+    window.open(location.origin + "/recruit.html?t=" + Date.now(),
+      "infonet_recruit_preview", "width=1200,height=860");
+  });
+
+  // アイキャッチ画像を手動で生成／再生成
+  document.getElementById("gen-img-btn").addEventListener("click", () => {
+    const topic = titleEl.value.trim();
+    const instr = document.getElementById("img-instruction").value.trim();
+    if (!topic && !instr) {
+      toast("先にブログ原稿を生成するか、画像の指示を入力してください", "error");
+      return;
+    }
+    generateThumbnail(topic || instr, instr);
+  });
+
+  /* ---- 保存・公開・破棄 ---- */
+  function validate() {
+    if (!titleEl.value.trim() || !bodyEl.value.trim()) {
+      toast("タイトルと本文を入力してください", "error");
+      return false;
+    }
+    return true;
+  }
+  function collectData(status) {
+    return {
+      title: titleEl.value.trim(),
+      body: bodyEl.value,
+      image: selectedImage,
+      category: categoryEl.value,
+      tags: tagsEl.value.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 6),
+      status,
+      authorName: user.name,
+    };
+  }
+
+  document.getElementById("save-btn").addEventListener("click", async () => {
+    if (!validate()) return;
+    try {
+      const data = collectData("draft");
+      const saved = editId ? await apiUpdateBlog(editId, data) : await apiCreateBlog(data);
+      await apiLog({ userName: user.name, action: "save_draft", targetId: saved.id, targetTitle: saved.title });
+      toast("下書きを保存しました", "success");
+      setTimeout(() => (location.href = `/admin/blog-list.html?new=${saved.id}`), 600);
+    } catch (err) {
+      toast("保存に失敗しました：" + (err && err.message ? err.message : String(err)), "error");
+    }
+  });
+
+  publishBtn.addEventListener("click", async () => {
+    if (!validate()) return;
+    const updating = editStatus === "published";
+    const ok = await confirmModal({
+      title: updating ? "このブログを更新公開しますか？" : "このブログを公開しますか？",
+      message: updating
+        ? "編集内容で採用ページのブログ記事を更新します。"
+        : "採用ページのブログ一覧に、この記事が即時に掲載されます。",
+      okText: updating ? "更新公開する" : "公開する",
+    });
+    if (!ok) return;
+    try {
+      const data = collectData("published");
+      const saved = editId ? await apiUpdateBlog(editId, data) : await apiCreateBlog(data);
+      await apiLog({ userName: user.name, action: "publish", targetId: saved.id, targetTitle: saved.title });
+      toast(updating ? "ブログを更新公開しました" : "ブログを公開しました", "success");
+      setTimeout(() => (location.href = `/admin/blog-list.html?new=${saved.id}`), 600);
+    } catch (err) {
+      toast("公開に失敗しました：" + (err && err.message ? err.message : String(err)), "error");
+    }
+  });
+
+  document.getElementById("discard-btn").addEventListener("click", async () => {
+    const ok = await confirmModal({
+      title: "編集内容を破棄しますか？",
+      message: "入力中のタイトル・本文・チャット履歴がクリアされます。",
+      okText: "破棄する", danger: true,
+    });
+    if (!ok) return;
+    titleEl.value = ""; bodyEl.value = "";
+    categoryEl.value = window.BLOG_CATEGORIES[0];
+    tagsEl.value = "";
+    selectedImage = "general";
+    generatedImage = null;
+    uploadedImage = null;
+    conversationHistory = [];
+    chat.innerHTML = "";
+    initChat();
+    renderImagePicker();
+    syncPreview();
+    toast("編集内容を破棄しました", "info");
+  });
+
+  /* ---- 初期化 ---- */
+  function initChat() {
+    addAiMsg(`こんにちは、採用ブログアシスタント「らくらくAI」です。<br>
+      どんな記事を書きますか？ テーマや伝えたいことを教えてください。
+      <span class="block mt-2 text-[12px] text-[#6B7280]">例：「社内イベントの様子を、社員のコメントを交えて紹介するブログを書いて」</span>`);
+  }
+
+  async function init() {
+    const id = new URLSearchParams(location.search).get("id");
+    if (id) {
+      let n = null;
+      try {
+        n = await apiGetBlog(id);
+      } catch (err) {
+        initChat();
+        renderImagePicker();
+        syncPreview();
+        addAiMsg(`<span class="text-[#EF4444]">記事の読み込みに失敗しました。</span>
+          <span class="block mt-1.5 text-[11px] text-[#9CA3AF]">理由：${escapeHtml(err && err.message ? err.message : String(err))}</span>`);
+        lucide.createIcons();
+        return;
+      }
+      if (n) {
+        editId = n.id;
+        editStatus = n.status;
+        titleEl.value = n.title;
+        bodyEl.value = n.body;
+        if (n.category && window.BLOG_CATEGORIES.includes(n.category)) categoryEl.value = n.category;
+        tagsEl.value = Array.isArray(n.tags) ? n.tags.join(", ") : "";
+        if (typeof n.image === "string" && (n.image.startsWith("data:") || n.image.startsWith("/"))) {
+          generatedImage = n.image;
+          selectedImage = n.image;
+        } else {
+          selectedImage = window.NEWS_IMAGE_KEYS.includes(n.image) ? n.image : "general";
+        }
+        document.getElementById("page-title").textContent = "ブログを編集";
+        const badge = document.getElementById("mode-badge");
+        badge.textContent = n.status === "published" ? "公開中の記事を編集中" : "下書きの記事を編集中";
+        badge.classList.remove("hidden");
+        publishBtn.textContent = n.status === "published" ? "更新公開" : "公開する";
+        renderImagePicker();
+        syncPreview();
+        initChat();
+        addAiMsg(`既存の${n.status === "published" ? "公開中の記事" : "下書きの記事"}「${escapeHtml(n.title)}」を読み込みました。<br>
+          チャットで修正指示を出すか、右側で直接編集してください。`);
+        lucide.createIcons();
+        return;
+      }
+    }
+    initChat();
+    renderImagePicker();
+    syncPreview();
+    lucide.createIcons();
+  }
+  init();
+</script>
+</body>
+</html>
