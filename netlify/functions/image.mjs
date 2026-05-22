@@ -60,7 +60,11 @@ export default async (req) => {
       }
     );
 
-    if (!res.ok) throw new Error("Gemini API がステータス " + res.status + " を返しました");
+    if (!res.ok) {
+      let detail = "";
+      try { detail = (await res.text()).slice(0, 500); } catch {}
+      throw new Error("Gemini API status " + res.status + " — " + detail);
+    }
 
     const data = await res.json();
     const parts = data?.candidates?.[0]?.content?.parts || [];
