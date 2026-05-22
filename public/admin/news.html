@@ -126,7 +126,8 @@
   let editId = null;
   let editStatus = null;            // 編集中の記事の現在ステータス
   let conversationHistory = [];     // Claude API 連携用の会話履歴
-  let selectedImage = "general";    // 選択中のサムネイル画像
+  let selectedImage = "general";    // 選択中のサムネイル画像（キー or データURL）
+  let generatedImage = null;        // AIが生成した画像（データURL）
   let busy = false;
 
   const chat = document.getElementById("chat");
@@ -175,26 +176,53 @@
   bodyEl.addEventListener("input", syncPreview);
 
   /* ---- サムネイル画像ピッカー ---- */
+  function imageTile(key, src, label, on) {
+    return `<button type="button" data-key="${key}"
+      class="relative rounded-lg overflow-hidden border-2 ${on ? "border-[#1E2761]" : "border-[#E5E7EB]"}">
+      <img src="${src}" alt="" class="w-full h-14 object-cover" />
+      <span class="block text-[10px] py-0.5 text-center ${on ? "bg-[#1E2761] text-white" : "bg-[#F3F4F6] text-[#6B7280]"}">${label}</span>
+      ${on ? '<span class="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#1E2761] text-white flex items-center justify-center"><i data-lucide="check" class="w-3 h-3"></i></span>' : ""}
+    </button>`;
+  }
   function renderImagePicker() {
     const host = document.getElementById("image-picker");
-    host.innerHTML = window.NEWS_IMAGE_KEYS.map((key) => {
-      const on = key === selectedImage;
-      return `<button type="button" data-key="${key}"
-        class="relative rounded-lg overflow-hidden border-2 ${on ? "border-[#1E2761]" : "border-[#E5E7EB]"}">
-        <img src="${window.newsImageUrl(key)}" alt="" class="w-full h-14 object-cover" />
-        <span class="block text-[10px] py-0.5 text-center ${on ? "bg-[#1E2761] text-white" : "bg-[#F3F4F6] text-[#6B7280]"}">${window.NEWS_IMAGE_LABELS[key]}</span>
-        ${on ? '<span class="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#1E2761] text-white flex items-center justify-center"><i data-lucide="check" class="w-3 h-3"></i></span>' : ""}
-      </button>`;
-    }).join("");
+    let html = "";
+    if (generatedImage) {
+      html += imageTile("__generated__", generatedImage, "AI生成画像", selectedImage === generatedImage);
+    }
+    html += window.NEWS_IMAGE_KEYS
+      .map((key) => imageTile(key, window.newsImageUrl(key), window.NEWS_IMAGE_LABELS[key], key === selectedImage))
+      .join("");
+    host.innerHTML = html;
     if (window.lucide) lucide.createIcons();
   }
   document.getElementById("image-picker").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-key]");
     if (!btn) return;
-    selectedImage = btn.dataset.key;
+    selectedImage = btn.dataset.key === "__generated__" ? generatedImage : btn.dataset.key;
     renderImagePicker();
     syncPreview();
   });
+
+  /* ---- AIサムネイル画像生成（Gemini）---- */
+  async function generateThumbnail(topic) {
+    const note = addAiMsg(`<span class="text-[#6B7280]"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span> サムネイル画像をAIで生成しています…（10〜20秒ほどかかります）</span>`);
+    try {
+      const url = await window.Store.generateImage(topic);
+      note.remove();
+      if (url) {
+        generatedImage = url;
+        selectedImage = url;
+        renderImagePicker();
+        syncPreview();
+        addAiMsg("サムネイル画像を生成し、プレビューに反映しました。下の一覧からライブラリ画像に差し替えることもできます。");
+      } else {
+        addAiMsg(`<span class="text-[#6B7280]">サムネイル画像はライブラリ画像を使用します（画像生成が無効、またはデモ期間外のため）。</span>`);
+      }
+    } catch {
+      note.remove();
+    }
+  }
 
   /* ---- タブ切替 ---- */
   document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -254,6 +282,9 @@
         targetTitle: result.title, aiModel: result.model,
         userPrompt: text, aiOutput: result.body, tokensUsed: result.tokensUsed,
       });
+
+      // 続けてサムネイル画像をAI生成（テキストは先に表示済み）
+      generateThumbnail(result.title || text);
     } catch {
       typing.remove();
       addAiMsg(`<span class="text-[#EF4444]">申し訳ありません、AIアシスタントとの通信に失敗しました。もう一度お試しください。</span>`);
@@ -330,6 +361,7 @@
     if (!ok) return;
     titleEl.value = ""; bodyEl.value = "";
     selectedImage = "general";
+    generatedImage = null;
     conversationHistory = [];
     chat.innerHTML = "";
     initChat();
@@ -354,7 +386,12 @@
         editStatus = n.status;
         titleEl.value = n.title;
         bodyEl.value = n.body;
-        selectedImage = window.NEWS_IMAGE_KEYS.includes(n.image) ? n.image : "general";
+        if (typeof n.image === "string" && n.image.startsWith("data:")) {
+          generatedImage = n.image;
+          selectedImage = n.image;
+        } else {
+          selectedImage = window.NEWS_IMAGE_KEYS.includes(n.image) ? n.image : "general";
+        }
         document.getElementById("page-title").textContent = "ニュース編集";
         const badge = document.getElementById("mode-badge");
         badge.textContent = n.status === "published" ? "公開済み記事を編集中" : "下書きを編集中";

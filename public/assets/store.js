@@ -23,7 +23,16 @@
     general: "お知らせ全般",
   };
   function imageUrl(key) {
+    // データURL（AI生成画像）や外部URLはそのまま返す
+    if (typeof key === "string" && (key.startsWith("data:") || key.startsWith("http"))) {
+      return key;
+    }
     return "/assets/news/" + (IMAGE_KEYS.includes(key) ? key : "general") + ".webp";
+  }
+  // image の値を正規化（AI生成画像のデータURL or ライブラリキー）
+  function normalizeImage(v) {
+    if (typeof v === "string" && v.startsWith("data:image/")) return v;
+    return IMAGE_KEYS.includes(v) ? v : "general";
   }
 
   /* ---- 初期お知らせ（news.mjs のシードと同一）---- */
@@ -148,7 +157,7 @@
           id: "n-" + Date.now().toString(36),
           title: (data.title || "無題のお知らせ").trim(),
           body: data.body || "",
-          image: IMAGE_KEYS.includes(data.image) ? data.image : "general",
+          image: normalizeImage(data.image),
           status: pub ? "published" : "draft",
           authorId: "demo-user-01",
           authorName: data.authorName || "インフォネット担当者",
@@ -172,7 +181,7 @@
         const next = { ...prev, updatedAt: now };
         if ("title" in data) next.title = (data.title || "無題のお知らせ").trim();
         if ("body" in data) next.body = data.body;
-        if ("image" in data && IMAGE_KEYS.includes(data.image)) next.image = data.image;
+        if ("image" in data) next.image = normalizeImage(data.image);
         if (data.status && data.status !== prev.status) {
           next.status = data.status;
           if (data.status === "published") next.publishedAt = now;
@@ -243,6 +252,22 @@
           chatMessage: "ドラフトを作成しました。本文とサムネイル画像を右側のプレビューでご確認ください。（オフラインデモ）",
           tokensUsed: 0, model: "デモモック（ローカル）", mode: "local-mock",
         };
+      }
+    },
+
+    // お知らせ内容に合うサムネイル画像をAI生成。
+    // 失敗・未対応時は null を返す（呼び出し側は固定ライブラリ画像を使う）
+    async generateImage(topic) {
+      try {
+        const r = await fetch(`${API}/image`, {
+          method: "POST", headers: H,
+          body: JSON.stringify({ topic: topic || "" }),
+        });
+        if (!r.ok) return null;
+        const d = await r.json();
+        return d && d.imageDataUrl ? d.imageDataUrl : null;
+      } catch {
+        return null;
       }
     },
   };

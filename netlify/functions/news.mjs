@@ -51,6 +51,12 @@ const SEED = [
 
 const IMAGE_KEYS = ["maintenance", "recruit", "relocation", "seminar", "general"];
 
+// image はライブラリキー（maintenance 等）または AI生成画像のデータURL
+function normalizeImage(v) {
+  if (typeof v === "string" && v.startsWith("data:image/")) return v;
+  return IMAGE_KEYS.includes(v) ? v : "general";
+}
+
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
     status,
@@ -110,7 +116,7 @@ export default async (req) => {
         id: "n-" + Date.now().toString(36),
         title: (body.title || "無題のお知らせ").trim(),
         body: body.body || "",
-        image: IMAGE_KEYS.includes(body.image) ? body.image : "general",
+        image: normalizeImage(body.image),
         status: publish ? "published" : "draft",
         authorId: "demo-user-01",
         authorName: body.authorName || "インフォネット担当者",
@@ -134,7 +140,7 @@ export default async (req) => {
       const next = { ...prev, updatedAt: now };
       if ("title" in body) next.title = (body.title || "無題のお知らせ").trim();
       if ("body" in body) next.body = body.body;
-      if ("image" in body && IMAGE_KEYS.includes(body.image)) next.image = body.image;
+      if ("image" in body) next.image = normalizeImage(body.image);
       if (body.status && body.status !== prev.status) {
         next.status = body.status;
         if (body.status === "published") next.publishedAt = now;
