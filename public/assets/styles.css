@@ -65,6 +65,52 @@ body {
 .theme-gray  .sec-eyebrow { color: #5B6B7F !important; }
 .theme-gray  .sec-accent  { background-color: #5B6B7F !important; }
 
+/* ブログセクション：躍動感のある背景（光のグラデーション＋浮遊する色の玉） */
+.blog-vivid {
+  background: linear-gradient(160deg, #FFFFFF 0%, #EFF8F5 48%, #E6F4F7 100%);
+}
+.blog-orb {
+  position: absolute;
+  display: block;
+  border-radius: 9999px;
+  filter: blur(72px);
+  pointer-events: none;
+  will-change: transform;
+}
+.blog-orb-1 {
+  width: 380px; height: 380px;
+  background: #00B8D9; opacity: .42;
+  top: -130px; left: -90px;
+  animation: blog-drift-1 19s ease-in-out infinite;
+}
+.blog-orb-2 {
+  width: 340px; height: 340px;
+  background: #5FCB91; opacity: .40;
+  bottom: -150px; right: -70px;
+  animation: blog-drift-2 23s ease-in-out infinite;
+}
+.blog-orb-3 {
+  width: 240px; height: 240px;
+  background: #FFCF6B; opacity: .30;
+  top: 34%; right: 15%;
+  animation: blog-drift-3 27s ease-in-out infinite;
+}
+@keyframes blog-drift-1 {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(46px, 34px); }
+}
+@keyframes blog-drift-2 {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(-40px, -32px); }
+}
+@keyframes blog-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-30px, 28px) scale(1.14); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .blog-orb { animation: none !important; }
+}
+
 /* スクロール時のセクション表示アニメーション */
 .reveal {
   opacity: 0;
