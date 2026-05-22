@@ -55,7 +55,6 @@ export default async (req) => {
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             responseModalities: ["TEXT", "IMAGE"],
-            responseFormat: { image: { aspectRatio: "16:9", imageSize: "1K" } },
           },
         }),
       }
