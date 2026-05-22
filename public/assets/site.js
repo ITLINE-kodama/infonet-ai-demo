@@ -126,7 +126,7 @@ async function renderNewsDetail() {
 }
 
 /* ---------- 採用ページ：募集職種カードのHTML（レイアウト別）---------- */
-var POSITIONS_STYLES = ["default", "wide", "horizontal"];
+var POSITIONS_STYLES = ["default", "wide", "horizontal", "row"];
 function jobCardHtml(n, style) {
   const url = "/job.html?id=" + encodeURIComponent(n.id);
   const img = window.newsImageUrl(n.image);
@@ -154,18 +154,18 @@ function jobCardHtml(n, style) {
       </a>`;
   }
 
-  if (style === "wide") {
+  if (style === "wide" || style === "row") {
     return `
       <a href="${url}"
          class="group relative block bg-white border border-[#E8EDF2] rounded-[20px] overflow-hidden shadow-[0_3px_16px_-8px_rgba(15,42,74,0.16)] transition duration-300 hover:-translate-y-1.5 hover:border-[#CDDBE8] hover:shadow-[0_26px_50px_-22px_rgba(15,42,74,0.32)]">
         <span class="absolute top-0 inset-x-0 h-1 z-10 bg-gradient-to-r from-[#00B8D9] via-[#3FB5C9] to-[#5FCB91]"></span>
         <div class="overflow-hidden">
-          <img src="${img}" alt="" class="w-full h-52 object-cover transition duration-500 group-hover:scale-105" />
+          <img src="${img}" alt="" class="w-full ${style === "row" ? "h-44" : "h-52"} object-cover transition duration-500 group-hover:scale-105" />
         </div>
-        <div class="p-7">
+        <div class="${style === "row" ? "p-6" : "p-7"}">
           ${badge}
           <h3 class="mt-2.5 text-[16px] font-bold text-[#0F2A4A] leading-snug group-hover:text-[#0F3D7E]">${title}</h3>
-          <p class="mt-2 text-[13.5px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 76))}</p>
+          <p class="mt-2 text-[13.5px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, style === "row" ? 70 : 76))}</p>
           ${more}
         </div>
       </a>`;
@@ -204,6 +204,7 @@ async function renderJobsList() {
     default: "mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-6",
     wide: "mt-16 grid sm:grid-cols-2 gap-7",
     horizontal: "mt-16 grid lg:grid-cols-2 gap-6",
+    row: "mt-16 grid grid-cols-1 md:grid-cols-3 gap-6",
   }[style];
   host.className = gridClass;
 
