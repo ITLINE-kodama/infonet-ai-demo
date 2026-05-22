@@ -50,6 +50,8 @@ function apiGetJob(id) { return window.Store.getJob(id); }
 function apiCreateJob(data) { return window.Store.createJob(data); }
 function apiUpdateJob(id, data) { return window.Store.updateJob(id, data); }
 function apiDeleteJob(id) { return window.Store.deleteJob(id); }
+function apiGetRecruit() { return window.Store.getRecruit(); }
+function apiSaveRecruit(patch) { return window.Store.saveRecruit(patch); }
 function apiListLogs() { return window.Store.listLogs(); }
 async function apiLog(data) {
   try { await window.Store.addLog(data); } catch { /* ログ失敗はデモ進行を止めない */ }
@@ -135,7 +137,8 @@ const NAV_ITEMS = [
   { key: "news", label: "ニュース更新", href: "/admin/news.html", icon: "sparkles" },
   { key: "drafts", label: "下書き一覧", href: "/admin/drafts.html", icon: "file-text" },
   { key: "published", label: "公開済み", href: "/admin/published.html", icon: "globe" },
-  { key: "jobs", label: "採用情報", href: "/admin/jobs.html", icon: "briefcase", badge: "NEW" },
+  { key: "recruit-edit", label: "採用ページ編集", href: "/admin/recruit-edit.html", icon: "file-pen", badge: "NEW" },
+  { key: "jobs", label: "求人作成", href: "/admin/jobs.html", icon: "briefcase" },
   { key: "jobs-list", label: "求人一覧", href: "/admin/jobs-list.html", icon: "users" },
   { key: "logs", label: "ログ・履歴", href: "/admin/logs.html", icon: "scroll-text" },
 ];

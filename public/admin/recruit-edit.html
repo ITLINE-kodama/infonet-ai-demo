@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>採用ページ編集｜AIでらくらく更新</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/styles.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#F9FAFB] text-[#111827]">
+
+<div class="flex">
+  <aside id="sidebar"></aside>
+
+  <main class="flex-1 min-w-0 p-6 lg:p-8 max-w-[940px]">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h1 class="text-2xl font-bold">採用ページ編集</h1>
+        <p class="mt-1 text-sm text-[#6B7280]">採用ページの各セクションを、箇所ごとに編集・保存できます。</p>
+      </div>
+      <button id="preview-site-btn"
+        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#E5E7EB] bg-white text-sm font-medium text-[#374151] hover:bg-[#F9FAFB]">
+        <i data-lucide="external-link" class="w-4 h-4"></i> 採用ページを別画面で表示
+      </button>
+    </div>
+
+    <div id="loading" class="mt-8 text-sm text-[#6B7280]">読み込み中…</div>
+
+    <div id="editor" class="hidden mt-6 space-y-6">
+
+      <!-- メインビジュアル -->
+      <section class="bg-white border border-[#E5E7EB] rounded-xl p-6">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="image" class="w-4 h-4 text-[#1E2761]"></i> メインビジュアル</h2>
+          <button data-save="mv" class="px-3.5 py-1.5 rounded-lg bg-[#1E2761] text-white text-[13px] font-semibold hover:opacity-90">保存</button>
+        </div>
+        <p class="text-[12px] text-[#6B7280] mt-1">採用ページ上部の大見出しとサブテキストです。</p>
+        <label class="block text-[13px] font-medium text-[#374151] mb-1 mt-4">キャッチコピー</label>
+        <input id="mv-title" type="text"
+          class="w-full border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm focus:border-[#1E2761] outline-none" />
+        <label class="block text-[13px] font-medium text-[#374151] mb-1 mt-4">サブテキスト</label>
+        <textarea id="mv-subtitle" rows="2"
+          class="w-full border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed focus:border-[#1E2761] outline-none thin-scroll"></textarea>
+      </section>
+
+      <!-- 採用メッセージ -->
+      <section class="bg-white border border-[#E5E7EB] rounded-xl p-6">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="message-square-quote" class="w-4 h-4 text-[#1E2761]"></i> 採用メッセージ</h2>
+          <div class="flex items-center gap-2">
+            <button data-ai="message" class="px-2.5 py-1.5 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1E2761] hover:bg-[#F9FAFB]">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 inline"></i> AIで文章を作成
+            </button>
+            <button data-save="message" class="px-3.5 py-1.5 rounded-lg bg-[#1E2761] text-white text-[13px] font-semibold hover:opacity-90">保存</button>
+          </div>
+        </div>
+        <p class="text-[12px] text-[#6B7280] mt-1">求職者に向けた会社の想い・理念を伝えるメッセージです。</p>
+        <textarea id="rc-message" rows="7"
+          class="w-full border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed focus:border-[#1E2761] outline-none thin-scroll mt-4"></textarea>
+      </section>
+
+      <!-- 社員インタビュー -->
+      <section class="bg-white border border-[#E5E7EB] rounded-xl p-6">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-[#1E2761]"></i> 社員インタビュー（働く人の声）</h2>
+          <button data-save="interviews" class="px-3.5 py-1.5 rounded-lg bg-[#1E2761] text-white text-[13px] font-semibold hover:opacity-90">保存</button>
+        </div>
+        <p class="text-[12px] text-[#6B7280] mt-1">採用ページに掲載する社員紹介です。写真はクリックでアップロードできます。</p>
+        <div id="iv-list" class="mt-4 space-y-3"></div>
+        <button id="iv-add" class="mt-3 w-full py-2 rounded-lg border border-dashed border-[#C7CDD6] text-sm font-medium text-[#1E2761] hover:bg-[#F9FAFB]">
+          ＋ 社員を追加
+        </button>
+        <input type="file" id="iv-file" accept="image/*" class="hidden" />
+      </section>
+
+      <!-- 数字で見る会社 -->
+      <section class="bg-white border border-[#E5E7EB] rounded-xl p-6">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4 text-[#1E2761]"></i> 数字で見る会社</h2>
+          <button data-save="stats" class="px-3.5 py-1.5 rounded-lg bg-[#1E2761] text-white text-[13px] font-semibold hover:opacity-90">保存</button>
+        </div>
+        <p class="text-[12px] text-[#6B7280] mt-1">社員数・平均年齢などの数値項目です。</p>
+        <div id="stats-list" class="mt-4 space-y-2"></div>
+        <button id="stats-add" class="mt-3 w-full py-2 rounded-lg border border-dashed border-[#C7CDD6] text-sm font-medium text-[#1E2761] hover:bg-[#F9FAFB]">
+          ＋ 項目を追加
+        </button>
+      </section>
+
+      <!-- 福利厚生・働く環境 -->
+      <section class="bg-white border border-[#E5E7EB] rounded-xl p-6">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="heart-handshake" class="w-4 h-4 text-[#1E2761]"></i> 福利厚生・働く環境</h2>
+          <button data-save="benefits" class="px-3.5 py-1.5 rounded-lg bg-[#1E2761] text-white text-[13px] font-semibold hover:opacity-90">保存</button>
+        </div>
+        <p class="text-[12px] text-[#6B7280] mt-1">制度・働く環境の項目です。</p>
+        <div id="benefits-list" class="mt-4 space-y-2"></div>
+        <button id="benefits-add" class="mt-3 w-full py-2 rounded-lg border border-dashed border-[#C7CDD6] text-sm font-medium text-[#1E2761] hover:bg-[#F9FAFB]">
+          ＋ 項目を追加
+        </button>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script src="/assets/store.js"></script>
+<script src="/assets/admin.js"></script>
+<script>
+  const user = initAdmin("recruit-edit");
+  let data = null;
+  let ivUploadIdx = -1;
+
+  const $ = (id) => document.getElementById(id);
+
+  /* ---- セクション保存 ---- */
+  async function saveSection(patch, label) {
+    try {
+      await apiSaveRecruit(patch);
+      await apiLog({ userName: user.name, action: "edit", targetTitle: "採用ページ：" + label });
+      toast(label + "を保存しました", "success");
+    } catch {
+      toast("保存に失敗しました", "error");
+    }
+  }
+
+  /* ---- 社員インタビュー ---- */
+  function renderInterviews() {
+    const host = $("iv-list");
+    host.innerHTML = data.interviews.map((iv, i) => `
+      <div class="border border-[#E5E7EB] rounded-lg p-4" data-idx="${i}">
+        <div class="flex gap-4">
+          <button type="button" data-act="img" class="shrink-0" title="クリックで写真をアップロード">
+            <img src="${window.newsImageUrl(iv.image)}" alt="" class="w-24 h-16 object-cover rounded-md border border-[#E5E7EB]" />
+            <span class="block text-[10px] text-[#1E2761] mt-1">写真を変更</span>
+          </button>
+          <div class="flex-1 min-w-0 space-y-2">
+            <input data-field="name" type="text" value="${escapeHtml(iv.name)}" placeholder="氏名（例：佐藤 美咲）"
+              class="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#1E2761] outline-none" />
+            <input data-field="role" type="text" value="${escapeHtml(iv.role)}" placeholder="職種・入社年（例：Webディレクター（2021年入社））"
+              class="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#1E2761] outline-none" />
+          </div>
+          <button type="button" data-act="del" class="shrink-0 self-start text-[#EF4444] hover:bg-[#FEF2F2] rounded-md p-1.5" title="削除">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <textarea data-field="comment" rows="3" placeholder="インタビューコメント"
+          class="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm leading-relaxed focus:border-[#1E2761] outline-none thin-scroll mt-2">${escapeHtml(iv.comment)}</textarea>
+        <button type="button" data-act="ai" class="mt-1.5 inline-flex items-center gap-1 text-[12px] font-medium text-[#1E2761] hover:underline">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AIでコメントを作成
+        </button>
+      </div>`).join("");
+    if (window.lucide) lucide.createIcons();
+  }
+
+  $("iv-list").addEventListener("input", (e) => {
+    const row = e.target.closest("[data-idx]");
+    const field = e.target.dataset.field;
+    if (!row || !field) return;
+    data.interviews[Number(row.dataset.idx)][field] = e.target.value;
+  });
+
+  $("iv-list").addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-act]");
+    if (!btn) return;
+    const idx = Number(btn.closest("[data-idx]").dataset.idx);
+    const act = btn.dataset.act;
+    if (act === "del") {
+      data.interviews.splice(idx, 1);
+      renderInterviews();
+    } else if (act === "img") {
+      ivUploadIdx = idx;
+      $("iv-file").click();
+    } else if (act === "ai") {
+      const brief = prompt("この社員インタビューの方向性を教えてください。\n例：未経験から成長できたこと、チームの雰囲気の良さ");
+      if (!brief) return;
+      toast("AIがコメントを作成しています…", "info");
+      try {
+        const r = await apiGenerate(brief, [], "recruit");
+        data.interviews[idx].comment = r.body || "";
+        renderInterviews();
+        toast("コメントを作成しました", "success");
+      } catch {
+        toast("AI生成に失敗しました", "error");
+      }
+    }
+  });
+
+  $("iv-add").addEventListener("click", () => {
+    data.interviews.push({ id: "iv-" + Date.now().toString(36), name: "", role: "", comment: "", image: "recruit" });
+    renderInterviews();
+  });
+
+  $("iv-file").addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file || ivUploadIdx < 0) return;
+    if (!file.type.startsWith("image/")) { toast("画像ファイルを選択してください", "error"); return; }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, 800 / img.width);
+      const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+      const c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+      data.interviews[ivUploadIdx].image = c.toDataURL("image/jpeg", 0.85);
+      renderInterviews();
+      toast("写真をアップロードしました", "success");
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); toast("画像を読み込めませんでした", "error"); };
+    img.src = url;
+  });
+
+  /* ---- 数字で見る会社 ---- */
+  function renderStats() {
+    const host = $("stats-list");
+    host.innerHTML = data.stats.map((s, i) => `
+      <div class="flex items-center gap-2" data-idx="${i}">
+        <input data-field="label" type="text" value="${escapeHtml(s.label)}" placeholder="項目名（例：社員数）"
+          class="flex-1 border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#1E2761] outline-none" />
+        <input data-field="value" type="text" value="${escapeHtml(s.value)}" placeholder="数値（例：48名）"
+          class="w-36 border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#1E2761] outline-none" />
+        <button type="button" data-act="del" class="shrink-0 text-[#EF4444] hover:bg-[#FEF2F2] rounded-md p-1.5" title="削除">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+        </button>
+      </div>`).join("");
+    if (window.lucide) lucide.createIcons();
+  }
+  $("stats-list").addEventListener("input", (e) => {
+    const row = e.target.closest("[data-idx]");
+    const field = e.target.dataset.field;
+    if (!row || !field) return;
+    data.stats[Number(row.dataset.idx)][field] = e.target.value;
+  });
+  $("stats-list").addEventListener("click", (e) => {
+    const btn = e.target.closest('[data-act="del"]');
+    if (!btn) return;
+    data.stats.splice(Number(btn.closest("[data-idx]").dataset.idx), 1);
+    renderStats();
+  });
+  $("stats-add").addEventListener("click", () => {
+    data.stats.push({ label: "", value: "" });
+    renderStats();
+  });
+
+  /* ---- 福利厚生・働く環境 ---- */
+  function renderBenefits() {
+    const host = $("benefits-list");
+    host.innerHTML = data.benefits.map((b, i) => `
+      <div class="flex items-center gap-2" data-idx="${i}">
+        <input data-field="title" type="text" value="${escapeHtml(b.title)}" placeholder="制度名（例：リモートワーク可）"
+          class="w-56 border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#1E2761] outline-none" />
+        <input data-field="desc" type="text" value="${escapeHtml(b.desc)}" placeholder="説明"
+          class="flex-1 border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#1E2761] outline-none" />
+        <button type="button" data-act="del" class="shrink-0 text-[#EF4444] hover:bg-[#FEF2F2] rounded-md p-1.5" title="削除">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+        </button>
+      </div>`).join("");
+    if (window.lucide) lucide.createIcons();
+  }
+  $("benefits-list").addEventListener("input", (e) => {
+    const row = e.target.closest("[data-idx]");
+    const field = e.target.dataset.field;
+    if (!row || !field) return;
+    data.benefits[Number(row.dataset.idx)][field] = e.target.value;
+  });
+  $("benefits-list").addEventListener("click", (e) => {
+    const btn = e.target.closest('[data-act="del"]');
+    if (!btn) return;
+    data.benefits.splice(Number(btn.closest("[data-idx]").dataset.idx), 1);
+    renderBenefits();
+  });
+  $("benefits-add").addEventListener("click", () => {
+    data.benefits.push({ title: "", desc: "" });
+    renderBenefits();
+  });
+
+  /* ---- 保存ボタン（セクション別）---- */
+  document.querySelectorAll("[data-save]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const sec = btn.dataset.save;
+      if (sec === "mv") {
+        saveSection({ mvTitle: $("mv-title").value.trim(), mvSubtitle: $("mv-subtitle").value.trim() }, "メインビジュアル");
+      } else if (sec === "message") {
+        saveSection({ message: $("rc-message").value }, "採用メッセージ");
+      } else if (sec === "interviews") {
+        saveSection({ interviews: data.interviews }, "社員インタビュー");
+      } else if (sec === "stats") {
+        saveSection({ stats: data.stats }, "数字で見る会社");
+      } else if (sec === "benefits") {
+        saveSection({ benefits: data.benefits }, "福利厚生・働く環境");
+      }
+    });
+  });
+
+  /* ---- AIで文章を作成（採用メッセージ）---- */
+  document.querySelector('[data-ai="message"]').addEventListener("click", async () => {
+    const brief = prompt("どんな採用メッセージにしますか？\n例：挑戦を歓迎する社風と、成長できる環境を伝えたい");
+    if (!brief) return;
+    toast("AIが文章を作成しています…", "info");
+    try {
+      const r = await apiGenerate(brief, [], "recruit");
+      $("rc-message").value = r.body || "";
+      toast("採用メッセージを作成しました", "success");
+    } catch {
+      toast("AI生成に失敗しました", "error");
+    }
+  });
+
+  document.getElementById("preview-site-btn").addEventListener("click", () => {
+    window.open(location.origin + "/recruit.html?t=" + Date.now(), "infonet_recruit_preview", "width=1200,height=860");
+  });
+
+  /* ---- 読み込み ---- */
+  async function load() {
+    try {
+      data = await apiGetRecruit();
+    } catch {
+      toast("読み込みに失敗しました", "error");
+      return;
+    }
+    $("mv-title").value = data.mvTitle || "";
+    $("mv-subtitle").value = data.mvSubtitle || "";
+    $("rc-message").value = data.message || "";
+    if (!Array.isArray(data.interviews)) data.interviews = [];
+    if (!Array.isArray(data.stats)) data.stats = [];
+    if (!Array.isArray(data.benefits)) data.benefits = [];
+    renderInterviews();
+    renderStats();
+    renderBenefits();
+    $("loading").classList.add("hidden");
+    $("editor").classList.remove("hidden");
+    lucide.createIcons();
+  }
+  load();
+</script>
+</body>
+</html>

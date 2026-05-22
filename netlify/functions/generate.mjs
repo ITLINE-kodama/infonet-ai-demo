@@ -73,6 +73,30 @@ const JOB_SYSTEM_PROMPT = `あなたは「らくらくAI」という、企業の
 - 過度に誇張した表現
 - 不確実な情報の断定`;
 
+const RECRUIT_SYSTEM_PROMPT = `あなたは「らくらくAI」という、企業の採用ページ作成を支援するAIアシスタントです。
+
+【役割】
+- 担当者の指示に沿って、採用ページに掲載する文章（採用メッセージ、社員インタビューのコメント、キャッチコピー等）を作成する
+- 求職者に向けた、誠実で前向き、人間味のあるトーンで書く
+- 指示で求められた文章の長さ・形式に合わせる（短い一言から数段落まで）
+
+【出力ルール】
+- 必ず以下のJSON形式のみで応答する。JSON以外のテキスト（前置き・後書き）は出力しない
+{
+  "title": "（短い見出し。不要なら空文字）",
+  "body": "（依頼された文章の本文）",
+  "imageKey": "recruit",
+  "chatMessage": "（チャット欄に表示する一言メッセージ）"
+}
+
+【会社情報（参考）】
+- 会社名：株式会社インフォネット
+- 業種：Webサイト制作・システム開発・DXコンサルティング
+- 所在地：東京都港区新橋
+
+【避けるべき表現】
+- カジュアルすぎる口語、過度な誇張、不確実な情報の断定`;
+
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
     status,
@@ -140,6 +164,17 @@ function buildJobMock(message) {
   };
 }
 
+// --- 採用ページ文章モードのモック応答 -------------------------------
+function buildRecruitMock(message) {
+  const m = String(message || "");
+  return {
+    imageKey: "recruit",
+    title: "",
+    body: (m ? m + "\n\n" : "") +
+      "私たちは、学び続ける意欲を大切にしています。あなたの挑戦を、会社全体で後押しします。\n※この文章はデモ用のサンプル応答です。",
+  };
+}
+
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "POSTのみ対応しています" }, 405);
 
@@ -154,10 +189,14 @@ export default async (req) => {
     ? payload.conversationHistory
     : [];
 
-  // mode="job"（求人）/ それ以外はお知らせ
-  const isJob = payload.mode === "job";
-  const systemPrompt = isJob ? JOB_SYSTEM_PROMPT : SYSTEM_PROMPT;
-  const mockFn = isJob ? buildJobMock : buildMock;
+  // mode="job"（求人）/ "recruit"（採用ページ文章）/ それ以外はお知らせ
+  const mode = payload.mode;
+  const systemPrompt = mode === "job" ? JOB_SYSTEM_PROMPT
+    : mode === "recruit" ? RECRUIT_SYSTEM_PROMPT
+    : SYSTEM_PROMPT;
+  const mockFn = mode === "job" ? buildJobMock
+    : mode === "recruit" ? buildRecruitMock
+    : buildMock;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   const expired = isExpired();

@@ -13,6 +13,7 @@
   const NEWS_KEY = "infonet_demo_news";
   const LOGS_KEY = "infonet_demo_logs";
   const JOBS_KEY = "infonet_demo_jobs";
+  const RECRUIT_KEY = "infonet_demo_recruit";
 
   /* ---- AI生成サムネイル画像ライブラリ ---- */
   const IMAGE_KEYS = ["maintenance", "recruit", "relocation", "seminar", "general"];
@@ -92,6 +93,30 @@
     },
   ];
 
+  /* ---- 採用ページのセクション内容（recruit.mjs の初期値と同一）---- */
+  const RECRUIT_DEFAULT = {
+    mvTitle: "好奇心を、仕事にする。",
+    mvSubtitle: "株式会社インフォネットは、Webとデジタルの力で企業の挑戦を支えています。新しい価値づくりに、一緒に取り組む仲間を募集しています。",
+    message: "私たちが大切にしているのは、「なぜやるのか」を考え抜くことです。\n\n技術やスキルは、目的を実現するための手段にすぎません。お客様の課題に本気で向き合い、最適な答えを一緒に探していく。そんな姿勢を持った仲間と働きたいと考えています。\n\n経験よりも、学び続ける意欲を重視します。あなたの挑戦を、会社全体で後押しします。",
+    interviews: [
+      { id: "iv-1", name: "佐藤 美咲", role: "Webディレクター（2021年入社）", comment: "未経験で入社しましたが、先輩の手厚いサポートで一歩ずつ成長できました。お客様に「ありがとう」と言っていただける瞬間が、一番のやりがいです。", image: "recruit" },
+      { id: "iv-2", name: "田中 颯太", role: "フロントエンドエンジニア（2019年入社）", comment: "新しい技術にどんどん挑戦できる環境です。リモートワークも活用しながら、自分のペースで質の高い仕事ができています。", image: "recruit" },
+      { id: "iv-3", name: "鈴木 陽菜", role: "営業（2022年 新卒入社）", comment: "若手にも裁量を持って任せてもらえるので、毎日学びがあります。チームみんなで支え合う温かい雰囲気が気に入っています。", image: "recruit" },
+    ],
+    stats: [
+      { label: "社員数", value: "48名" },
+      { label: "平均年齢", value: "32歳" },
+      { label: "男女比", value: "6 : 4" },
+      { label: "リモート活用率", value: "85%" },
+    ],
+    benefits: [
+      { title: "リモートワーク可", desc: "職種に応じて在宅勤務を選択できます。" },
+      { title: "スキルアップ支援", desc: "研修・資格取得をサポートする制度があります。" },
+      { title: "フレックスタイム制", desc: "柔軟な勤務時間で、働きやすい環境です。" },
+      { title: "書籍購入補助", desc: "学びのための書籍購入を会社が補助します。" },
+    ],
+  };
+
   /* ---- localStorage ヘルパー ---- */
   function lsGetNews() {
     try {
@@ -123,6 +148,15 @@
     }
   }
   function lsSetJobs(list) { try { localStorage.setItem(JOBS_KEY, JSON.stringify(list)); } catch {} }
+  function lsGetRecruit() {
+    try {
+      const raw = localStorage.getItem(RECRUIT_KEY);
+      return raw ? { ...RECRUIT_DEFAULT, ...JSON.parse(raw) } : { ...RECRUIT_DEFAULT };
+    } catch {
+      return { ...RECRUIT_DEFAULT };
+    }
+  }
+  function lsSetRecruit(obj) { try { localStorage.setItem(RECRUIT_KEY, JSON.stringify(obj)); } catch {} }
 
   function sortRecency(list) {
     return [...list].sort((a, b) => {
@@ -326,6 +360,26 @@
       }
     },
 
+    /* ---- 採用ページのセクション内容 ---- */
+    async getRecruit() {
+      try {
+        return await tryFetch(`${API}/recruit`);
+      } catch {
+        return lsGetRecruit();
+      }
+    },
+
+    // patch に含まれるセクションのみ更新（独立保存）
+    async saveRecruit(patch) {
+      try {
+        return await tryFetch(`${API}/recruit`, { method: "PUT", headers: H, body: JSON.stringify(patch) });
+      } catch {
+        const next = { ...lsGetRecruit(), ...patch };
+        lsSetRecruit(next);
+        return next;
+      }
+    },
+
     async listLogs() {
       try {
         return await tryFetch(`${API}/logs`);
@@ -359,10 +413,12 @@
       try {
         await fetch(`${API}/news?reset=1`, { method: "DELETE" });
         await fetch(`${API}/jobs?reset=1`, { method: "DELETE" });
+        await fetch(`${API}/recruit?reset=1`, { method: "DELETE" });
         await fetch(`${API}/logs?reset=1`, { method: "DELETE" });
       } catch {}
       lsSetNews(SEED.map((n) => ({ ...n })));
       lsSetJobs(JOB_SEED.map((n) => ({ ...n })));
+      lsSetRecruit({ ...RECRUIT_DEFAULT });
       lsSetLogs([]);
     },
 

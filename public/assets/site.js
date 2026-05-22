@@ -202,6 +202,76 @@ async function renderJobDetail() {
   }
 }
 
+/* ---------- 採用ページ：各セクションの描画 ---------- */
+async function renderRecruitPage() {
+  const mvTitle = document.getElementById("rc-mv-title");
+  if (!mvTitle) return; // 採用ページ以外では何もしない
+  let r;
+  try {
+    r = await window.Store.getRecruit();
+  } catch {
+    return;
+  }
+  mvTitle.textContent = r.mvTitle || "採用情報";
+  const sub = document.getElementById("rc-mv-subtitle");
+  if (sub) sub.textContent = r.mvSubtitle || "";
+  const msg = document.getElementById("rc-message");
+  if (msg) msg.textContent = r.message || "";
+
+  const ivHost = document.getElementById("rc-interviews");
+  if (ivHost) {
+    const ivs = Array.isArray(r.interviews) ? r.interviews : [];
+    ivHost.innerHTML =
+      ivs.length === 0
+        ? `<p class="text-[#666] col-span-full text-center py-4">インタビューは準備中です。</p>`
+        : ivs
+            .map(
+              (iv) => `
+      <div class="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
+        <img src="${window.newsImageUrl(iv.image)}" alt="" class="w-full h-48 object-cover" />
+        <div class="p-5">
+          <h3 class="font-bold text-[#1A1A1A]">${escapeHtmlSite(iv.name)}</h3>
+          <p class="text-sm text-[#00B8D9] font-medium mt-0.5">${escapeHtmlSite(iv.role)}</p>
+          <p class="mt-3 text-sm text-[#666] leading-relaxed article-body">${escapeHtmlSite(iv.comment)}</p>
+        </div>
+      </div>`
+            )
+            .join("");
+  }
+
+  const stHost = document.getElementById("rc-stats");
+  if (stHost) {
+    const sts = Array.isArray(r.stats) ? r.stats : [];
+    stHost.innerHTML = sts
+      .map(
+        (s) => `
+      <div class="text-center">
+        <p class="text-3xl md:text-4xl font-bold">${escapeHtmlSite(s.value)}</p>
+        <p class="mt-1.5 text-sm text-white/70">${escapeHtmlSite(s.label)}</p>
+      </div>`
+      )
+      .join("");
+  }
+
+  const bnHost = document.getElementById("rc-benefits");
+  if (bnHost) {
+    const bns = Array.isArray(r.benefits) ? r.benefits : [];
+    bnHost.innerHTML = bns
+      .map(
+        (b) => `
+      <div class="bg-white rounded-xl p-6 border border-[#E5E7EB]">
+        <div class="w-10 h-10 rounded-lg bg-[#00B8D9]/10 flex items-center justify-center text-[#00B8D9]">
+          <i data-lucide="check" class="w-5 h-5"></i>
+        </div>
+        <h3 class="mt-3 font-semibold">${escapeHtmlSite(b.title)}</h3>
+        <p class="mt-1 text-sm text-[#666] leading-relaxed">${escapeHtmlSite(b.desc)}</p>
+      </div>`
+      )
+      .join("");
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
 /* ---------- モバイルメニュー ---------- */
 function initMobileMenu() {
   const btn = document.getElementById("menu-btn");
@@ -217,6 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderNewsDetail();
   renderJobsList();
   renderJobDetail();
+  renderRecruitPage();
   initMobileMenu();
   const y = document.getElementById("year");
   if (y) y.textContent = new Date().getFullYear();
