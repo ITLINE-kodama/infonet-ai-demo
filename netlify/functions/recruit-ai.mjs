@@ -14,7 +14,8 @@ const SYSTEM_PROMPT = `あなたは企業の採用ページの内容を編集す
   "interviews": [ { "id": "...", "name": "氏名", "role": "職種・入社年", "comment": "インタビュー本文", "image": "画像キー" } ],
   "stats": [ { "label": "項目名", "value": "数値" } ],
   "benefits": [ { "title": "制度名", "desc": "説明" } ],
-  "sectionThemes": { "message": "テーマ名", "positions": "テーマ名", "interview": "テーマ名", "benefits": "テーマ名", "flow": "テーマ名", "blog": "テーマ名" }
+  "sectionThemes": { "message": "テーマ名", "positions": "テーマ名", "interview": "テーマ名", "benefits": "テーマ名", "flow": "テーマ名", "blog": "テーマ名" },
+  "positionsStyle": "募集職種カードのレイアウト名"
 }
 
 【sectionThemes ─ セクションの配色（背景デザイン）】
@@ -30,6 +31,14 @@ sectionThemes のキーと対応セクション：
 背景色・配色・デザインの雰囲気に関する指示は、必ずこの sectionThemes で表現すること。
 変更するセクションのキーだけを含めればよい。
 例：「福利厚生の背景を緑にして自然が伝わるデザインに」→ {"sectionThemes": {"benefits": "green"}}
+
+【positionsStyle ─ 募集職種カードのレイアウト】
+募集職種（求人）カードの見た目を、次のプリセットから選んで指定できます。
+- "default"：3列の標準カード
+- "wide"：2列の幅広カード。上部にアクセントライン・角丸大きめ・やわらかい影（カードを横に大きく／枠・縁を上品でおしゃれにしたいとき）
+- "horizontal"：横長カード（画像が左、職種名・本文が右）
+募集職種カードの横幅・枠・縁・レイアウトに関する指示は、必ずこの positionsStyle で表現すること。
+例：「募集職種の枠を横に大きくして、縁をおしゃれに」→ {"positionsStyle": "wide"}
 
 【最重要ルール｜出力を最小限にする】
 - 指示によって変更が必要なトップレベルのキーだけを出力する

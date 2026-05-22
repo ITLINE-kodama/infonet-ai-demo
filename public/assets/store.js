@@ -145,6 +145,7 @@
       { title: "書籍購入補助", desc: "学びのための書籍購入を会社が補助します。" },
     ],
     sectionThemes: {},
+    positionsStyle: "default",
   };
 
   /* ---- localStorage ヘルパー ---- */

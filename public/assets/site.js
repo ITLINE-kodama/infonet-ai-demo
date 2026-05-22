@@ -125,43 +125,99 @@ async function renderNewsDetail() {
   }
 }
 
+/* ---------- 採用ページ：募集職種カードのHTML（レイアウト別）---------- */
+var POSITIONS_STYLES = ["default", "wide", "horizontal"];
+function jobCardHtml(n, style) {
+  const url = "/job.html?id=" + encodeURIComponent(n.id);
+  const img = window.newsImageUrl(n.image);
+  const title = escapeHtmlSite(n.title);
+  const badge =
+    '<span class="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-[#00B8D9]">' +
+    '<span class="w-1.5 h-1.5 rounded-full bg-[#00B8D9]"></span>募集中</span>';
+  const more =
+    '<span class="mt-5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#0F3D7E]">' +
+    '詳細を見る <i data-lucide="arrow-right" class="w-3.5 h-3.5 transition group-hover:translate-x-0.5"></i></span>';
+
+  if (style === "horizontal") {
+    return `
+      <a href="${url}"
+         class="group flex flex-col sm:flex-row bg-white border border-[#E8EDF2] rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-[#D5DEE8] hover:shadow-[0_22px_44px_-22px_rgba(15,42,74,0.28)]">
+        <div class="sm:w-[42%] shrink-0 overflow-hidden">
+          <img src="${img}" alt="" class="w-full h-44 sm:h-full object-cover transition duration-500 group-hover:scale-105" />
+        </div>
+        <div class="flex-1 p-6 sm:p-7">
+          ${badge}
+          <h3 class="mt-2.5 text-[16px] font-bold text-[#0F2A4A] leading-snug group-hover:text-[#0F3D7E]">${title}</h3>
+          <p class="mt-2 text-[13px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 92))}</p>
+          ${more}
+        </div>
+      </a>`;
+  }
+
+  if (style === "wide") {
+    return `
+      <a href="${url}"
+         class="group relative block bg-white border border-[#E8EDF2] rounded-[20px] overflow-hidden shadow-[0_3px_16px_-8px_rgba(15,42,74,0.16)] transition duration-300 hover:-translate-y-1.5 hover:border-[#CDDBE8] hover:shadow-[0_26px_50px_-22px_rgba(15,42,74,0.32)]">
+        <span class="absolute top-0 inset-x-0 h-1 z-10 bg-gradient-to-r from-[#00B8D9] via-[#3FB5C9] to-[#5FCB91]"></span>
+        <div class="overflow-hidden">
+          <img src="${img}" alt="" class="w-full h-52 object-cover transition duration-500 group-hover:scale-105" />
+        </div>
+        <div class="p-7">
+          ${badge}
+          <h3 class="mt-2.5 text-[16px] font-bold text-[#0F2A4A] leading-snug group-hover:text-[#0F3D7E]">${title}</h3>
+          <p class="mt-2 text-[13.5px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 76))}</p>
+          ${more}
+        </div>
+      </a>`;
+  }
+
+  // default
+  return `
+      <a href="${url}"
+         class="group block bg-white border border-[#E8EDF2] rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-1.5 hover:border-[#D5DEE8] hover:shadow-[0_22px_44px_-22px_rgba(15,42,74,0.28)]">
+        <div class="overflow-hidden">
+          <img src="${img}" alt="" class="w-full h-44 object-cover transition duration-500 group-hover:scale-105" />
+        </div>
+        <div class="p-6">
+          ${badge}
+          <h3 class="mt-2.5 text-[15px] font-bold text-[#0F2A4A] leading-snug group-hover:text-[#0F3D7E]">${title}</h3>
+          <p class="mt-2 text-[13px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 68))}</p>
+          ${more}
+        </div>
+      </a>`;
+}
+
 /* ---------- 採用ページ：募集職種一覧の描画 ---------- */
 async function renderJobsList() {
   const host = document.getElementById("jobs-list");
   if (!host) return;
+
+  // カードのレイアウト（AIおまかせ更新の positionsStyle で指定）
+  let style = "default";
+  try {
+    const r = await window.Store.getRecruit();
+    if (r && typeof r.positionsStyle === "string" && POSITIONS_STYLES.indexOf(r.positionsStyle) !== -1) {
+      style = r.positionsStyle;
+    }
+  } catch {}
+  const gridClass = {
+    default: "mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-6",
+    wide: "mt-16 grid sm:grid-cols-2 gap-7",
+    horizontal: "mt-16 grid lg:grid-cols-2 gap-6",
+  }[style];
+  host.className = gridClass;
+
   try {
     const list = await window.Store.listJobs("published");
     const items = Array.isArray(list) ? list : [];
     if (items.length === 0) {
-      host.innerHTML = `<p class="text-[#666] col-span-full text-center py-8">現在、募集中の職種はありません。</p>`;
+      host.innerHTML = `<p class="text-[#5B6B7F] col-span-full text-center py-8">現在、募集中の職種はありません。</p>`;
       return;
     }
-    host.innerHTML = items
-      .map(
-        (n) => `
-      <a href="/job.html?id=${encodeURIComponent(n.id)}"
-         class="group block bg-white border border-[#E8EDF2] rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-1.5 hover:border-[#D5DEE8] hover:shadow-[0_22px_44px_-22px_rgba(15,42,74,0.28)]">
-        <div class="overflow-hidden">
-          <img src="${window.newsImageUrl(n.image)}" alt="" class="w-full h-44 object-cover transition duration-500 group-hover:scale-105" />
-        </div>
-        <div class="p-6">
-          <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-[#00B8D9]">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#00B8D9]"></span>募集中
-          </span>
-          <h3 class="mt-2.5 text-[15px] font-bold text-[#0F2A4A] leading-snug group-hover:text-[#0F3D7E]">
-            ${escapeHtmlSite(n.title)}
-          </h3>
-          <p class="mt-2 text-[13px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 68))}</p>
-          <span class="mt-5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#0F3D7E]">
-            詳細を見る <i data-lucide="arrow-right" class="w-3.5 h-3.5 transition group-hover:translate-x-0.5"></i>
-          </span>
-        </div>
-      </a>`
-      )
-      .join("");
+    host.innerHTML = items.map((n) => jobCardHtml(n, style)).join("");
     if (window.lucide) lucide.createIcons();
   } catch {
-    host.innerHTML = `<p class="text-[#666] col-span-full text-center py-8">募集職種を読み込めませんでした。</p>`;
+    host.innerHTML = `<p class="text-[#5B6B7F] col-span-full text-center py-8">募集職種を読み込めませんでした。</p>`;
   }
 }
 

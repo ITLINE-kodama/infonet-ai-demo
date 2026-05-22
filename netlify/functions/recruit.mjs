@@ -55,6 +55,8 @@ const DEFAULT = {
   ],
   // 各セクションの配色テーマ（AIおまかせ更新で指定）。空 = 標準配色
   sectionThemes: {},
+  // 募集職種カードのレイアウト（AIおまかせ更新で指定）
+  positionsStyle: "default",
 };
 
 function json(obj, status = 200) {
