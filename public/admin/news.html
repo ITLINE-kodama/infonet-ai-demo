@@ -22,7 +22,13 @@
         <h1 id="page-title" class="text-2xl font-bold">ニュース更新</h1>
         <p class="mt-1 text-sm text-[#6B7280]">AIアシスタント「らくらくAI」に指示して、お知らせ原稿を作成します。</p>
       </div>
-      <span id="mode-badge" class="hidden text-[12px] font-semibold px-2.5 py-1 rounded-full bg-[#FEF3C7] text-[#92400E]"></span>
+      <div class="flex items-center gap-2">
+        <span id="mode-badge" class="hidden text-[12px] font-semibold px-2.5 py-1 rounded-full bg-[#FEF3C7] text-[#92400E]"></span>
+        <button id="preview-site-btn"
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#E5E7EB] bg-white text-sm font-medium text-[#374151] hover:bg-[#F9FAFB]">
+          <i data-lucide="external-link" class="w-4 h-4"></i> 公開サイトを別画面で表示
+        </button>
+      </div>
     </div>
 
     <div class="mt-6 grid lg:grid-cols-5 gap-6" style="min-height: 620px;">
@@ -306,6 +312,12 @@
 
   document.getElementById("mic-btn").addEventListener("click", () => {
     toast("※ デモでは音声入力は無効です", "info");
+  });
+
+  // 公開サイトを別ウィンドウでプレビュー（公開した結果をその場で確認）
+  document.getElementById("preview-site-btn").addEventListener("click", () => {
+    window.open(location.origin + "/?t=" + Date.now() + "#news",
+      "infonet_public_preview", "width=1200,height=860");
   });
 
   /* ---- 保存・公開・破棄 ---- */

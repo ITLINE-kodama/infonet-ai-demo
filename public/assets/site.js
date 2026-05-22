@@ -55,6 +55,33 @@ async function renderNewsSection() {
   }
 }
 
+/* ---------- ヒーロー右側：最新のお知らせカード ---------- */
+async function renderHeroLatest() {
+  const host = document.getElementById("hero-latest");
+  if (!host) return;
+  try {
+    const list = await window.Store.listNews("published");
+    const n = (Array.isArray(list) ? list : [])[0]; // 最新（公開日の新しい順）
+    if (!n) { host.style.display = "none"; return; }
+    host.href = "/news.html?id=" + encodeURIComponent(n.id);
+    host.innerHTML = `
+      <img src="${window.newsImageUrl(n.image)}" alt="" class="w-full h-44 object-cover" />
+      <div class="p-5">
+        <span class="inline-block text-xs font-semibold text-white bg-[#0F3D7E] rounded px-2 py-1">
+          ${formatDateSite(n.publishedAt || n.createdAt)}
+        </span>
+        <h3 class="mt-2.5 text-base font-bold text-[#1A1A1A] leading-snug">${escapeHtmlSite(n.title)}</h3>
+        <p class="mt-1.5 text-sm text-[#666] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 56))}</p>
+        <span class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#00B8D9]">
+          詳細を見る <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </span>
+      </div>`;
+    if (window.lucide) lucide.createIcons();
+  } catch {
+    host.style.display = "none";
+  }
+}
+
 /* ---------- お知らせ詳細ページの描画 ---------- */
 async function renderNewsDetail() {
   const host = document.getElementById("news-detail");
@@ -108,6 +135,7 @@ function initMobileMenu() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  renderHeroLatest();
   renderNewsSection();
   renderNewsDetail();
   initMobileMenu();
