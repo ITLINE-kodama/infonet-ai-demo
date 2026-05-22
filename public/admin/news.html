@@ -96,9 +96,16 @@
           <label class="block text-[13px] font-medium text-[#374151] mb-1 mt-4">本文</label>
           <textarea id="news-body" rows="10" placeholder="AIが生成した本文がここに入ります。直接編集することもできます。"
             class="w-full border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed focus:border-[#1E2761] outline-none thin-scroll"></textarea>
-          <label class="block text-[13px] font-medium text-[#374151] mb-1 mt-4">サムネイル画像
-            <span class="text-[11px] font-normal text-[#9CA3AF]">（AIが内容に応じて自動選択／クリックで変更可）</span>
-          </label>
+          <div class="flex items-center justify-between gap-2 mb-1 mt-4">
+            <label class="block text-[13px] font-medium text-[#374151]">サムネイル画像
+              <span class="text-[11px] font-normal text-[#9CA3AF]">（AIが自動選択／クリックで変更）</span>
+            </label>
+            <button id="upload-img-btn" type="button"
+              class="shrink-0 inline-flex items-center gap-1 text-[12px] font-medium text-[#1E2761] hover:underline">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i> 画像をアップロード
+            </button>
+          </div>
+          <input type="file" id="img-file" accept="image/*" class="hidden" />
           <div id="image-picker" class="grid grid-cols-3 gap-2"></div>
         </div>
 
@@ -146,6 +153,7 @@
   let conversationHistory = [];     // Claude API 連携用の会話履歴
   let selectedImage = "general";    // 選択中のサムネイル画像（キー or データURL）
   let generatedImage = null;        // AIが生成した画像（データURL）
+  let uploadedImage = null;         // ユーザーがアップロードした画像（データURL）
   let busy = false;
 
   const chat = document.getElementById("chat");
@@ -205,6 +213,9 @@
   function renderImagePicker() {
     const host = document.getElementById("image-picker");
     let html = "";
+    if (uploadedImage) {
+      html += imageTile("__uploaded__", uploadedImage, "アップロード画像", selectedImage === uploadedImage);
+    }
     if (generatedImage) {
       html += imageTile("__generated__", generatedImage, "AI生成画像", selectedImage === generatedImage);
     }
@@ -217,9 +228,49 @@
   document.getElementById("image-picker").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-key]");
     if (!btn) return;
-    selectedImage = btn.dataset.key === "__generated__" ? generatedImage : btn.dataset.key;
+    const k = btn.dataset.key;
+    selectedImage = k === "__generated__" ? generatedImage
+      : k === "__uploaded__" ? uploadedImage
+      : k;
     renderImagePicker();
     syncPreview();
+  });
+
+  /* ---- 画像アップロード（縮小してデータURL化）---- */
+  document.getElementById("upload-img-btn").addEventListener("click", () => {
+    document.getElementById("img-file").click();
+  });
+  document.getElementById("img-file").addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast("画像ファイルを選択してください", "error");
+      return;
+    }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const maxW = 1280;
+      const scale = Math.min(1, maxW / img.width);
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      uploadedImage = canvas.toDataURL("image/jpeg", 0.85);
+      selectedImage = uploadedImage;
+      renderImagePicker();
+      syncPreview();
+      toast("画像をアップロードしました", "success");
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      toast("画像を読み込めませんでした", "error");
+    };
+    img.src = url;
   });
 
   /* ---- AIサムネイル画像生成（Gemini）---- */
@@ -408,6 +459,7 @@
     titleEl.value = ""; bodyEl.value = "";
     selectedImage = "general";
     generatedImage = null;
+    uploadedImage = null;
     conversationHistory = [];
     chat.innerHTML = "";
     initChat();
