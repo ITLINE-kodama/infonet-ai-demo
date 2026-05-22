@@ -12,7 +12,8 @@
 const BRAND = {
   name: "INFONET",                 // ロゴに表示する英字
   fullName: "株式会社インフォネット",  // 正式社名
-  logoImage: null,                 // 画像ロゴのパス（null ならテキストロゴ）
+  logoImage: "/assets/infonet-logo.png", // 画像ロゴのパス（null ならテキストロゴ）
+  logoOnDark: true,                // 暗い背景用にロゴを白へ反転（明るいロゴならfalse）
   productName: "AIでらくらく更新",    // サービス名（管理画面の副題）
 };
 
@@ -134,7 +135,8 @@ const NAV_ITEMS = [
 
 function logoMarkup() {
   if (BRAND.logoImage) {
-    return `<img src="${escapeHtml(BRAND.logoImage)}" alt="${escapeHtml(BRAND.name)}" class="h-7 w-auto" />`;
+    const inv = BRAND.logoOnDark ? " brightness-0 invert" : "";
+    return `<img src="${escapeHtml(BRAND.logoImage)}" alt="${escapeHtml(BRAND.name)}" class="h-7 w-auto${inv}" />`;
   }
   return `<span class="text-white font-bold text-lg tracking-wide">${escapeHtml(BRAND.name)}</span>`;
 }

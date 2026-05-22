@@ -63,7 +63,7 @@
   // ロゴ差し替え設定を反映
   if (BRAND.logoImage) {
     document.getElementById("brand-logo").innerHTML =
-      `<img src="${BRAND.logoImage}" alt="${BRAND.name}" class="h-9 mx-auto" />`;
+      `<img src="${BRAND.logoImage}" alt="${BRAND.name}" class="h-9 mx-auto${BRAND.logoOnDark ? " brightness-0 invert" : ""}" />`;
   } else {
     document.getElementById("brand-logo").textContent = BRAND.name;
   }
