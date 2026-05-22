@@ -507,9 +507,12 @@
           method: "POST", headers: H,
           body: JSON.stringify({ instruction, current: current || {} }),
         });
+        if (!r.ok) {
+          return { error: `サーバーエラー（${r.status}）が発生しました。少し時間をおいて、もう一度お試しください。` };
+        }
         return await r.json();
       } catch {
-        return { error: "AI更新は現在利用できません（オフライン）。" };
+        return { error: "AI更新サーバーに接続できませんでした。通信環境をご確認のうえ、もう一度お試しください。" };
       }
     },
 

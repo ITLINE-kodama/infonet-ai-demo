@@ -4,9 +4,9 @@
 // =============================================================
 
 const SYSTEM_PROMPT = `あなたは企業の採用ページの内容を編集するAIアシスタントです。
-現在の採用ページ内容（JSON）と担当者からの指示を受け取り、指示どおりに更新したJSON全体を返します。
+現在の採用ページ内容（JSON）と担当者からの指示を受け取り、「変更が必要な項目だけ」を含むJSONを返します。
 
-【JSONスキーマ】
+【JSONスキーマ（トップレベルのキー）】
 {
   "mvTitle": "メインビジュアルのキャッチコピー（文字列）",
   "mvSubtitle": "メインビジュアルのサブテキスト（文字列）",
@@ -16,8 +16,13 @@ const SYSTEM_PROMPT = `あなたは企業の採用ページの内容を編集す
   "benefits": [ { "title": "制度名", "desc": "説明" } ]
 }
 
-【ルール】
-- 指示で求められた箇所だけを変更し、それ以外の項目・配列要素はすべてそのまま保持する
+【最重要ルール｜出力を最小限にする】
+- 指示によって変更が必要なトップレベルのキーだけを出力する
+- 変更しないキーは出力に一切含めない（例：メッセージだけを直す指示なら、出力は {"message": "..."} のみ）
+- 配列（interviews / stats / benefits）を変更する場合のみ、その配列を「全要素そろえて」出力する（変更しない要素も省略せず含める）
+- これは応答速度のために重要なルールです。必ず守ること
+
+【編集ルール】
 - 社員インタビューを追加する場合、id は "iv-" + 適当な英数字、image は "recruit" とする
 - image フィールドは、画像に関する指示がない限り元の値をそのまま保持する
 - 文章は求職者向けの誠実で前向きなトーンで書く
@@ -98,12 +103,15 @@ export default async (req) => {
       const match = rawText.match(/\{[\s\S]*\}/);
       parsed = match ? JSON.parse(match[0]) : null;
     }
-    if (!parsed || typeof parsed !== "object") {
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error("AI応答のフォーマットが不正です");
     }
 
+    // AIは「変更したキーだけ」を返すため、現在の内容にマージして全体を組み立てる
+    const recruit = { ...current, ...parsed };
+
     return json({
-      recruit: parsed,
+      recruit,
       tokensUsed: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0),
       model: "claude-sonnet-4-6",
     });

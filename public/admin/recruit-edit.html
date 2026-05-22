@@ -155,9 +155,13 @@
         <input id="ai-mv-instruction" type="text" placeholder="背景画像の指示（任意・例：活気のあるオフィス）"
           class="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-[12px] focus:border-[#1E2761] outline-none mt-2" />
         <button id="ai-run"
-          class="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#1E2761] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-40">
+          class="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#1E2761] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed">
           <i data-lucide="sparkles" class="w-4 h-4"></i> AIで採用ページを更新
         </button>
+        <div id="ai-status" class="hidden mt-3 flex items-start gap-2.5 rounded-lg bg-[#EEF2FF] border border-[#C7D2FE] px-3.5 py-3 text-[13px] text-[#1E2761]">
+          <i data-lucide="loader-2" class="w-4 h-4 mt-0.5 shrink-0 animate-spin"></i>
+          <span>AIが採用ページの内容を確認して更新しています。<br>完了まで <strong>20〜30秒ほど</strong> かかる場合があります。このままお待ちください。</span>
+        </div>
         <p class="mt-3 text-[12px] text-[#9CA3AF] leading-relaxed">
           ※ 更新後は「項目で編集」タブで内容を確認・微調整できます。意図と違う場合は、右上の「初期状態に戻す」で元に戻せます。
         </p>
@@ -409,22 +413,31 @@
   });
 
   /* ---- AIにおまかせ更新 ---- */
+  const AI_RUN_LABEL = '<i data-lucide="sparkles" class="w-4 h-4"></i> AIで採用ページを更新';
+  function setAiRunning(running) {
+    const btn = $("ai-run");
+    btn.disabled = running;
+    btn.innerHTML = running
+      ? '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> AIが更新中…'
+      : AI_RUN_LABEL;
+    $("ai-status").classList.toggle("hidden", !running);
+    if (window.lucide) lucide.createIcons();
+  }
+
   $("ai-run").addEventListener("click", async () => {
     const instruction = $("ai-instruction").value.trim();
     if (!instruction) { toast("AIへの指示を入力してください", "error"); return; }
-    const btn = $("ai-run");
-    btn.disabled = true;
-    toast("AIが採用ページを更新しています…", "info");
+    setAiRunning(true);
     try {
       const res = await apiRecruitAI(instruction, data);
       if (!res || !res.recruit) {
-        toast((res && res.error) || "AI更新に失敗しました", "error");
+        const reason = (res && res.error) ? res.error : "AIから有効な応答が得られませんでした";
+        toast("AI更新に失敗しました：" + reason, "error");
         return;
       }
       const updated = res.recruit;
       // メインビジュアル画像も生成
       if ($("ai-mv-toggle").checked) {
-        toast("背景画像を生成しています…", "info");
         const imgUrl = await window.Store.generateImage("採用ページのメインビジュアル背景", $("ai-mv-instruction").value.trim());
         if (imgUrl) updated.mvImage = imgUrl;
       }
@@ -438,10 +451,11 @@
       $("ai-instruction").value = "";
       switchMode("fields");
       toast("AIが採用ページを更新しました。内容をご確認ください。", "success");
-    } catch {
-      toast("AI更新に失敗しました", "error");
+    } catch (err) {
+      const reason = (err && err.message) ? err.message : "通信エラーが発生しました";
+      toast("AI更新に失敗しました：" + reason, "error");
     } finally {
-      btn.disabled = false;
+      setAiRunning(false);
     }
   });
 
