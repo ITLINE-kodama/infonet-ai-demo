@@ -125,6 +125,83 @@ async function renderNewsDetail() {
   }
 }
 
+/* ---------- 採用ページ：募集職種一覧の描画 ---------- */
+async function renderJobsList() {
+  const host = document.getElementById("jobs-list");
+  if (!host) return;
+  try {
+    const list = await window.Store.listJobs("published");
+    const items = Array.isArray(list) ? list : [];
+    if (items.length === 0) {
+      host.innerHTML = `<p class="text-[#666] col-span-full text-center py-8">現在、募集中の職種はありません。</p>`;
+      return;
+    }
+    host.innerHTML = items
+      .map(
+        (n) => `
+      <a href="/job.html?id=${encodeURIComponent(n.id)}"
+         class="group block bg-white border border-[#E5E7EB] rounded-xl overflow-hidden transition hover:-translate-y-1 hover:shadow-md">
+        <img src="${window.newsImageUrl(n.image)}" alt="" class="w-full h-40 object-cover" />
+        <div class="p-6">
+          <span class="inline-block text-xs font-semibold text-white bg-[#0F3D7E] rounded px-2 py-1">募集中</span>
+          <h3 class="mt-3 text-base font-semibold text-[#1A1A1A] leading-snug group-hover:text-[#0F3D7E]">
+            ${escapeHtmlSite(n.title)}
+          </h3>
+          <p class="mt-2 text-sm text-[#666] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 70))}</p>
+          <span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#00B8D9]">
+            詳細を見る <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </span>
+        </div>
+      </a>`
+      )
+      .join("");
+    if (window.lucide) lucide.createIcons();
+  } catch {
+    host.innerHTML = `<p class="text-[#666] col-span-full text-center py-8">募集職種を読み込めませんでした。</p>`;
+  }
+}
+
+/* ---------- 求人詳細ページの描画 ---------- */
+async function renderJobDetail() {
+  const host = document.getElementById("job-detail");
+  if (!host) return;
+  const params = new URLSearchParams(location.search);
+  let id = params.get("id");
+  if (!id) {
+    const m = location.pathname.match(/\/job\/([^/]+)/);
+    if (m) id = m[1];
+  }
+  if (!id) {
+    host.innerHTML = `<p class="text-[#666]">求人が指定されていません。</p>`;
+    return;
+  }
+  try {
+    const n = await window.Store.getJob(id);
+    if (!n || n.status !== "published") {
+      host.innerHTML = `<p class="text-[#666] py-12 text-center">この求人は公開されていないか、募集を終了しました。</p>`;
+      return;
+    }
+    document.title = `${n.title}｜採用情報｜株式会社インフォネット`;
+    host.innerHTML = `
+      <span class="inline-block text-sm font-semibold text-white bg-[#0F3D7E] rounded px-3 py-1">募集中</span>
+      <h1 class="mt-5 text-3xl font-bold text-[#1A1A1A] leading-tight">${escapeHtmlSite(n.title)}</h1>
+      <div class="mt-4 pb-6 border-b border-[#E5E7EB] text-sm text-[#666]">
+        採用情報 ／ 株式会社インフォネット
+      </div>
+      <img src="${window.newsImageUrl(n.image)}" alt="" class="w-full rounded-xl mt-8 border border-[#E5E7EB]" />
+      <div class="article-body mt-8 text-[15px] text-[#1A1A1A]">${escapeHtmlSite(n.body)}</div>
+      <div class="mt-10 pt-6 border-t border-[#E5E7EB] text-center">
+        <a href="/#contact" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#0F3D7E] text-white font-semibold hover:opacity-90">
+          この職種に応募する <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+        <p class="mt-3 text-[12px] text-[#9CA3AF]">※ デモのため、応募ボタンはお問い合わせフォームへ移動します</p>
+      </div>`;
+    if (window.lucide) lucide.createIcons();
+  } catch {
+    host.innerHTML = `<p class="text-[#666] py-12 text-center">求人情報を読み込めませんでした。</p>`;
+  }
+}
+
 /* ---------- モバイルメニュー ---------- */
 function initMobileMenu() {
   const btn = document.getElementById("menu-btn");
@@ -138,6 +215,8 @@ document.addEventListener("DOMContentLoaded", () => {
   renderHeroLatest();
   renderNewsSection();
   renderNewsDetail();
+  renderJobsList();
+  renderJobDetail();
   initMobileMenu();
   const y = document.getElementById("year");
   if (y) y.textContent = new Date().getFullYear();

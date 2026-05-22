@@ -39,6 +39,40 @@ const SYSTEM_PROMPT = `あなたは「らくらくAI」という、企業のWeb�
 - 過度に感情的な表現
 - 不確実な情報の断定`;
 
+const JOB_SYSTEM_PROMPT = `あなたは「らくらくAI」という、企業の採用ページ更新を支援するAIアシスタントです。
+
+【あなたの役割】
+- 担当者からの指示を受け取り、採用ページに掲載する「求人（募集職種）」のドラフトを作成する
+- 求職者に向けた、分かりやすく誠実でビジネス的なトーンで書く
+- 必ず「職種名（タイトル）」と「本文」の両方を含めて出力する
+
+【出力ルール】
+- 必ず以下のJSON形式で応答してください
+- JSON以外のテキスト（前置き・後書き・説明）は一切出力しない
+- JSONの最初の文字は「{」、最後の文字は「}」でなければなりません
+- フォーマット:
+{
+  "title": "（職種名。30文字以内推奨。例：フロントエンドエンジニア（中途））",
+  "body": "（求人本文。次の見出しを必ず「■ 」付きで含める：仕事内容／応募資格／雇用形態／勤務地。指示に情報がない項目は「※詳細は面談時にご案内いたします」とする。200〜600文字程度）",
+  "imageKey": "求人原稿のため原則 recruit を選ぶ（maintenance／recruit／relocation／seminar／general から）",
+  "chatMessage": "（チャット欄に表示する一言メッセージ）"
+}
+
+【文章作成ルール】
+- 段落・見出しは適切に改行する
+- 給与・勤務時間など指示にない条件は推測で断定しない
+- 勤務地が不明な場合は「東京都港区新橋」を用いてよい
+
+【会社情報（参考）】
+- 会社名：株式会社インフォネット
+- 業種：Webサイト制作・システム開発・DXコンサルティング
+- 所在地：東京都港区新橋
+
+【避けるべき表現】
+- カジュアルすぎる口語
+- 過度に誇張した表現
+- 不確実な情報の断定`;
+
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
     status,
@@ -94,6 +128,18 @@ function buildMock(message) {
   };
 }
 
+// --- 求人モードのモック応答 -----------------------------------------
+function buildJobMock(message) {
+  const m = String(message || "");
+  return {
+    imageKey: "recruit",
+    title: "募集職種",
+    body: "下記のとおり人材を募集いたします。\n\n■ 仕事内容\n" +
+      (m ? m + "\n\n" : "Webサイト制作・運用に関わる業務をお任せします。\n\n") +
+      "■ 応募資格\n※詳細は面談時にご案内いたします。\n\n■ 雇用形態\n正社員\n\n■ 勤務地\n東京都港区新橋\n\n※この文章はデモ用のサンプル応答です。",
+  };
+}
+
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "POSTのみ対応しています" }, 405);
 
@@ -108,12 +154,17 @@ export default async (req) => {
     ? payload.conversationHistory
     : [];
 
+  // mode="job"（求人）/ それ以外はお知らせ
+  const isJob = payload.mode === "job";
+  const systemPrompt = isJob ? JOB_SYSTEM_PROMPT : SYSTEM_PROMPT;
+  const mockFn = isJob ? buildJobMock : buildMock;
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   const expired = isExpired();
 
   // --- モードA: モック（キー未設定 / デモ期間終了）-----------------
   if (!apiKey || expired) {
-    const mock = buildMock(userMessage);
+    const mock = mockFn(userMessage);
     return json({
       title: mock.title,
       body: mock.body,
@@ -141,7 +192,7 @@ export default async (req) => {
         model: "claude-sonnet-4-6",
         max_tokens: 1500,
         temperature: 0.5,
-        system: SYSTEM_PROMPT,
+        system: systemPrompt,
         messages,
       }),
     });
@@ -177,7 +228,7 @@ export default async (req) => {
     });
   } catch (err) {
     // --- モードC: API障害時はモックへ自動フォールバック --------------
-    const mock = buildMock(userMessage);
+    const mock = mockFn(userMessage);
     return json({
       title: mock.title,
       body: mock.body,

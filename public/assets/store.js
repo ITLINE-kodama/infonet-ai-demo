@@ -12,6 +12,7 @@
   const H = { "content-type": "application/json" };
   const NEWS_KEY = "infonet_demo_news";
   const LOGS_KEY = "infonet_demo_logs";
+  const JOBS_KEY = "infonet_demo_jobs";
 
   /* ---- AI生成サムネイル画像ライブラリ ---- */
   const IMAGE_KEYS = ["maintenance", "recruit", "relocation", "seminar", "general"];
@@ -63,6 +64,34 @@
     },
   ];
 
+  /* ---- 初期求人（jobs.mjs のシードと同一）---- */
+  const JOB_SEED = [
+    {
+      id: "job-seed-001",
+      title: "Webディレクター（中途）",
+      body: "Webサイト制作プロジェクトの企画・進行管理をお任せします。\n\n■ 仕事内容\nクライアントのヒアリングから企画提案、制作チームのディレクション、納品までを一貫して担当いただきます。\n\n■ 応募資格\n・Web制作のディレクション経験3年以上\n・クライアント折衝のご経験\n\n■ 雇用形態\n正社員\n\n■ 勤務地\n東京都港区新橋（リモート併用可）\n\n※詳細は面談時にご案内いたします。",
+      image: "recruit",
+      status: "published", authorId: "demo-user-01", authorName: "インフォネット担当者",
+      createdAt: "2026-05-10T01:00:00.000Z", updatedAt: "2026-05-10T01:00:00.000Z", publishedAt: "2026-05-10T01:00:00.000Z",
+    },
+    {
+      id: "job-seed-002",
+      title: "フロントエンドエンジニア（中途）",
+      body: "コーポレートサイト・Webアプリケーションのフロントエンド開発を担当いただきます。\n\n■ 仕事内容\nHTML / CSS / JavaScript を用いた実装、UIコンポーネント開発、パフォーマンス改善。\n\n■ 応募資格\n・フロントエンド開発の実務経験2年以上\n・JavaScript / TypeScript の知識\n\n■ 雇用形態\n正社員\n\n■ 勤務地\n東京都港区新橋（フルリモート可）",
+      image: "recruit",
+      status: "published", authorId: "demo-user-01", authorName: "インフォネット担当者",
+      createdAt: "2026-05-08T02:00:00.000Z", updatedAt: "2026-05-08T02:00:00.000Z", publishedAt: "2026-05-08T02:00:00.000Z",
+    },
+    {
+      id: "job-seed-003",
+      title: "総合職（2027年度 新卒採用）",
+      body: "2027年度の新卒採用として、総合職を募集します。\n\n■ 仕事内容\nWebディレクション・営業・マーケティングなど、適性に応じて配属します。未経験から育成します。\n\n■ 応募資格\n・2027年3月までに四年制大学・大学院を卒業見込みの方\n・Webやデジタル領域に興味をお持ちの方\n\n■ 雇用形態\n正社員\n\n■ 勤務地\n東京都港区新橋",
+      image: "recruit",
+      status: "published", authorId: "demo-user-01", authorName: "インフォネット担当者",
+      createdAt: "2026-05-01T00:00:00.000Z", updatedAt: "2026-05-01T00:00:00.000Z", publishedAt: "2026-05-01T00:00:00.000Z",
+    },
+  ];
+
   /* ---- localStorage ヘルパー ---- */
   function lsGetNews() {
     try {
@@ -81,6 +110,19 @@
     try { const r = localStorage.getItem(LOGS_KEY); return r ? JSON.parse(r) : []; } catch { return []; }
   }
   function lsSetLogs(list) { try { localStorage.setItem(LOGS_KEY, JSON.stringify(list)); } catch {} }
+  function lsGetJobs() {
+    try {
+      const raw = localStorage.getItem(JOBS_KEY);
+      if (raw == null) {
+        localStorage.setItem(JOBS_KEY, JSON.stringify(JOB_SEED));
+        return JOB_SEED.map((n) => ({ ...n }));
+      }
+      return JSON.parse(raw);
+    } catch {
+      return JOB_SEED.map((n) => ({ ...n }));
+    }
+  }
+  function lsSetJobs(list) { try { localStorage.setItem(JOBS_KEY, JSON.stringify(list)); } catch {} }
 
   function sortRecency(list) {
     return [...list].sort((a, b) => {
@@ -111,6 +153,11 @@
     }
     return { imageKey: "general", title: "お知らせ",
       body: "平素より弊社サービスをご利用いただき、誠にありがとうございます。\n\n" + (m ? m + "\n\n" : "") + "詳細につきましては、改めてご案内いたします。\n\n今後とも何卒よろしくお願い申し上げます。\n※この文章はデモ用のサンプル応答です。" };
+  }
+  function buildJobMock(message) {
+    const m = String(message || "");
+    return { imageKey: "recruit", title: "募集職種",
+      body: "下記のとおり人材を募集いたします。\n\n■ 仕事内容\n" + (m ? m + "\n\n" : "Webサイト制作・運用に関わる業務をお任せします。\n\n") + "■ 応募資格\n※詳細は面談時にご案内いたします。\n\n■ 雇用形態\n正社員\n\n■ 勤務地\n東京都港区新橋\n\n※この文章はデモ用のサンプル応答です。" };
   }
 
   /* ---- fetch ラッパ（失敗時は throw してフォールバックへ）---- */
@@ -201,6 +248,84 @@
       }
     },
 
+    /* ---- 求人（採用情報）---- */
+    async listJobs(status) {
+      try {
+        const url = status ? `${API}/jobs?status=${status}` : `${API}/jobs`;
+        const data = await tryFetch(url);
+        this.mode = "api";
+        return data;
+      } catch {
+        this.mode = "local";
+        let list = lsGetJobs();
+        if (status) list = list.filter((n) => n.status === status);
+        return sortRecency(list);
+      }
+    },
+
+    async getJob(id) {
+      try {
+        return await tryFetch(`${API}/jobs?id=${encodeURIComponent(id)}`);
+      } catch {
+        return lsGetJobs().find((n) => n.id === id) || null;
+      }
+    },
+
+    async createJob(data) {
+      try {
+        return await tryFetch(`${API}/jobs`, { method: "POST", headers: H, body: JSON.stringify(data) });
+      } catch {
+        const list = lsGetJobs();
+        const now = new Date().toISOString();
+        const pub = data.status === "published";
+        const item = {
+          id: "j-" + Date.now().toString(36),
+          title: (data.title || "無題の求人").trim(),
+          body: data.body || "",
+          image: normalizeImage(data.image),
+          status: pub ? "published" : "draft",
+          authorId: "demo-user-01",
+          authorName: data.authorName || "インフォネット担当者",
+          createdAt: now, updatedAt: now, publishedAt: pub ? now : undefined,
+        };
+        list.push(item);
+        lsSetJobs(list);
+        return item;
+      }
+    },
+
+    async updateJob(id, data) {
+      try {
+        return await tryFetch(`${API}/jobs?id=${encodeURIComponent(id)}`, { method: "PUT", headers: H, body: JSON.stringify(data) });
+      } catch {
+        const list = lsGetJobs();
+        const i = list.findIndex((n) => n.id === id);
+        if (i < 0) throw new Error("求人が見つかりません");
+        const now = new Date().toISOString();
+        const prev = list[i];
+        const next = { ...prev, updatedAt: now };
+        if ("title" in data) next.title = (data.title || "無題の求人").trim();
+        if ("body" in data) next.body = data.body;
+        if ("image" in data) next.image = normalizeImage(data.image);
+        if (data.status && data.status !== prev.status) {
+          next.status = data.status;
+          if (data.status === "published") next.publishedAt = now;
+        }
+        list[i] = next;
+        lsSetJobs(list);
+        return next;
+      }
+    },
+
+    async deleteJob(id) {
+      try {
+        return await tryFetch(`${API}/jobs?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      } catch {
+        lsSetJobs(lsGetJobs().filter((n) => n.id !== id));
+        return { ok: true };
+      }
+    },
+
     async listLogs() {
       try {
         return await tryFetch(`${API}/logs`);
@@ -233,20 +358,22 @@
     async resetDemo() {
       try {
         await fetch(`${API}/news?reset=1`, { method: "DELETE" });
+        await fetch(`${API}/jobs?reset=1`, { method: "DELETE" });
         await fetch(`${API}/logs?reset=1`, { method: "DELETE" });
       } catch {}
       lsSetNews(SEED.map((n) => ({ ...n })));
+      lsSetJobs(JOB_SEED.map((n) => ({ ...n })));
       lsSetLogs([]);
     },
 
-    async generate(userMessage, conversationHistory) {
+    async generate(userMessage, conversationHistory, mode) {
       try {
         return await tryFetch(`${API}/generate`, {
           method: "POST", headers: H,
-          body: JSON.stringify({ userMessage, conversationHistory: conversationHistory || [] }),
+          body: JSON.stringify({ userMessage, conversationHistory: conversationHistory || [], mode: mode || "news" }),
         });
       } catch {
-        const m = buildMock(userMessage);
+        const m = (mode === "job" ? buildJobMock : buildMock)(userMessage);
         return {
           title: m.title, body: m.body, imageKey: m.imageKey,
           chatMessage: "ドラフトを作成しました。本文とサムネイル画像を右側のプレビューでご確認ください。（オフラインデモ）",

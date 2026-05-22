@@ -37,14 +37,19 @@ function logout() {
  * Store は Netlify Functions を優先し、サーバーが使えない場合は
  * localStorage に自動フォールバックします（store.js 参照）。
  */
-function apiGenerate(userMessage, conversationHistory) {
-  return window.Store.generate(userMessage, conversationHistory);
+function apiGenerate(userMessage, conversationHistory, mode) {
+  return window.Store.generate(userMessage, conversationHistory, mode);
 }
 function apiListNews(status) { return window.Store.listNews(status); }
 function apiGetNews(id) { return window.Store.getNews(id); }
 function apiCreateNews(data) { return window.Store.createNews(data); }
 function apiUpdateNews(id, data) { return window.Store.updateNews(id, data); }
 function apiDeleteNews(id) { return window.Store.deleteNews(id); }
+function apiListJobs(status) { return window.Store.listJobs(status); }
+function apiGetJob(id) { return window.Store.getJob(id); }
+function apiCreateJob(data) { return window.Store.createJob(data); }
+function apiUpdateJob(id, data) { return window.Store.updateJob(id, data); }
+function apiDeleteJob(id) { return window.Store.deleteJob(id); }
 function apiListLogs() { return window.Store.listLogs(); }
 async function apiLog(data) {
   try { await window.Store.addLog(data); } catch { /* ログ失敗はデモ進行を止めない */ }
@@ -127,9 +132,11 @@ function confirmModal({ title, message, okText = "実行する", cancelText = "�
 /* ---------- サイドバー & 画面初期化 ---------- */
 const NAV_ITEMS = [
   { key: "dashboard", label: "ダッシュボード", href: "/admin/dashboard.html", icon: "layout-dashboard" },
-  { key: "news", label: "ニュース更新", href: "/admin/news.html", icon: "sparkles", badge: "NEW" },
+  { key: "news", label: "ニュース更新", href: "/admin/news.html", icon: "sparkles" },
   { key: "drafts", label: "下書き一覧", href: "/admin/drafts.html", icon: "file-text" },
   { key: "published", label: "公開済み", href: "/admin/published.html", icon: "globe" },
+  { key: "jobs", label: "採用情報", href: "/admin/jobs.html", icon: "briefcase", badge: "NEW" },
+  { key: "jobs-list", label: "求人一覧", href: "/admin/jobs-list.html", icon: "users" },
   { key: "logs", label: "ログ・履歴", href: "/admin/logs.html", icon: "scroll-text" },
 ];
 
