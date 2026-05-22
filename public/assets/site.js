@@ -140,16 +140,20 @@ async function renderJobsList() {
       .map(
         (n) => `
       <a href="/job.html?id=${encodeURIComponent(n.id)}"
-         class="group block bg-white border border-[#E5E7EB] rounded-xl overflow-hidden transition hover:-translate-y-1 hover:shadow-md">
-        <img src="${window.newsImageUrl(n.image)}" alt="" class="w-full h-40 object-cover" />
+         class="group block bg-white border border-[#E8EDF2] rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-1.5 hover:border-[#D5DEE8] hover:shadow-[0_22px_44px_-22px_rgba(15,42,74,0.28)]">
+        <div class="overflow-hidden">
+          <img src="${window.newsImageUrl(n.image)}" alt="" class="w-full h-44 object-cover transition duration-500 group-hover:scale-105" />
+        </div>
         <div class="p-6">
-          <span class="inline-block text-xs font-semibold text-white bg-[#0F3D7E] rounded px-2 py-1">募集中</span>
-          <h3 class="mt-3 text-base font-semibold text-[#1A1A1A] leading-snug group-hover:text-[#0F3D7E]">
+          <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-[#00B8D9]">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#00B8D9]"></span>募集中
+          </span>
+          <h3 class="mt-2.5 text-[15px] font-bold text-[#0F2A4A] leading-snug group-hover:text-[#0F3D7E]">
             ${escapeHtmlSite(n.title)}
           </h3>
-          <p class="mt-2 text-sm text-[#666] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 70))}</p>
-          <span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#00B8D9]">
-            詳細を見る <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          <p class="mt-2 text-[13px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 68))}</p>
+          <span class="mt-5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#0F3D7E]">
+            詳細を見る <i data-lucide="arrow-right" class="w-3.5 h-3.5 transition group-hover:translate-x-0.5"></i>
           </span>
         </div>
       </a>`
@@ -229,14 +233,16 @@ async function renderRecruitPage() {
         : ivs
             .map(
               (iv) => `
-      <div class="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-        <img src="${window.newsImageUrl(iv.image)}" alt="" class="w-full h-60 object-cover" />
-        <div class="p-6">
-          <i data-lucide="quote" class="w-6 h-6 text-[#00B8D9]"></i>
-          <p class="mt-2 text-sm text-[#374151] leading-relaxed article-body">${escapeHtmlSite(iv.comment)}</p>
-          <div class="mt-5 pt-4 border-t border-[#E5E7EB]">
-            <p class="font-bold text-[#1A1A1A]">${escapeHtmlSite(iv.name)}</p>
-            <p class="text-[13px] text-[#00B8D9] font-medium mt-0.5">${escapeHtmlSite(iv.role)}</p>
+      <div class="group bg-white border border-[#E8EDF2] rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-1.5 hover:border-[#D5DEE8] hover:shadow-[0_22px_44px_-22px_rgba(15,42,74,0.28)]">
+        <div class="overflow-hidden">
+          <img src="${window.newsImageUrl(iv.image)}" alt="" class="w-full h-60 object-cover transition duration-500 group-hover:scale-105" />
+        </div>
+        <div class="p-7">
+          <i data-lucide="quote" class="w-7 h-7 text-[#00B8D9]/35"></i>
+          <p class="mt-3 text-[13.5px] text-[#3D4D60] leading-[1.95] article-body">${escapeHtmlSite(iv.comment)}</p>
+          <div class="mt-6 pt-5 border-t border-[#E8EDF2]">
+            <p class="font-bold text-[#0F2A4A]">${escapeHtmlSite(iv.name)}</p>
+            <p class="text-[12.5px] text-[#5B6B7F] mt-1">${escapeHtmlSite(iv.role)}</p>
           </div>
         </div>
       </div>`
@@ -251,9 +257,9 @@ async function renderRecruitPage() {
       .map(
         (s) => `
       <div class="text-center">
-        <p class="text-4xl md:text-5xl font-extrabold">${escapeHtmlSite(s.value)}</p>
-        <div class="mt-2.5 w-8 h-0.5 bg-[#00B8D9] mx-auto"></div>
-        <p class="mt-2.5 text-sm text-white/70">${escapeHtmlSite(s.label)}</p>
+        <p class="text-[11px] font-semibold tracking-[0.16em] text-[#00B8D9]">${escapeHtmlSite(s.label)}</p>
+        <p class="mt-3 text-[2.6rem] md:text-[3.1rem] font-extrabold leading-none tracking-tight">${escapeHtmlSite(s.value)}</p>
+        <div class="mt-4 w-7 h-px bg-white/25 mx-auto"></div>
       </div>`
       )
       .join("");
@@ -265,12 +271,12 @@ async function renderRecruitPage() {
     bnHost.innerHTML = bns
       .map(
         (b) => `
-      <div class="bg-white rounded-2xl p-7 border border-[#E5E7EB]">
+      <div class="bg-white rounded-2xl p-7 border border-[#E8EDF2] transition duration-300 hover:-translate-y-1 hover:border-[#D5DEE8] hover:shadow-[0_18px_36px_-20px_rgba(15,42,74,0.22)]">
         <div class="w-11 h-11 rounded-xl bg-[#00B8D9]/10 flex items-center justify-center text-[#00B8D9]">
           <i data-lucide="check" class="w-5 h-5"></i>
         </div>
-        <h3 class="mt-4 font-bold">${escapeHtmlSite(b.title)}</h3>
-        <p class="mt-1.5 text-sm text-[#666] leading-relaxed">${escapeHtmlSite(b.desc)}</p>
+        <h3 class="mt-5 font-bold text-[15px] text-[#0F2A4A]">${escapeHtmlSite(b.title)}</h3>
+        <p class="mt-2 text-[13px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(b.desc)}</p>
       </div>`
       )
       .join("");
@@ -299,23 +305,23 @@ async function renderBlogList() {
       .map(
         (n) => `
       <a href="/blog.html?id=${encodeURIComponent(n.id)}"
-         class="group block bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden transition hover:-translate-y-1 hover:shadow-md">
-        <div class="relative">
-          <img src="${window.newsImageUrl(n.image)}" alt="" class="w-full h-44 object-cover" />
-          <span class="absolute top-3 left-3 text-[11px] font-semibold text-white bg-[#00B8D9] rounded px-2 py-0.5">
+         class="group block bg-white border border-[#E8EDF2] rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-1.5 hover:border-[#D5DEE8] hover:shadow-[0_22px_44px_-22px_rgba(15,42,74,0.28)]">
+        <div class="relative overflow-hidden">
+          <img src="${window.newsImageUrl(n.image)}" alt="" class="w-full h-44 object-cover transition duration-500 group-hover:scale-105" />
+          <span class="absolute top-3.5 left-3.5 text-[10.5px] font-semibold tracking-wide text-white bg-[#0F2A4A]/85 backdrop-blur-sm rounded-full px-2.5 py-1">
             ${escapeHtmlSite(blogCategoryLabel(n.category))}
           </span>
         </div>
         <div class="p-6">
-          <span class="text-[12px] text-[#9CA3AF]">${formatDateSite(n.publishedAt || n.createdAt)}</span>
-          <h3 class="mt-1.5 text-base font-bold text-[#1A1A1A] leading-snug group-hover:text-[#0F3D7E]">
+          <span class="text-[12px] font-medium text-[#9AA7B6]">${formatDateSite(n.publishedAt || n.createdAt)}</span>
+          <h3 class="mt-2 text-[15.5px] font-bold text-[#0F2A4A] leading-snug group-hover:text-[#0F3D7E]">
             ${escapeHtmlSite(n.title)}
           </h3>
-          <p class="mt-2 text-sm text-[#666] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 70))}</p>
+          <p class="mt-2 text-[13px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 66))}</p>
           ${
             Array.isArray(n.tags) && n.tags.length
-              ? `<div class="mt-3 flex flex-wrap gap-1.5">${n.tags
-                  .map((t) => `<span class="text-[11px] text-[#6B7280] bg-[#F5F7FA] rounded px-2 py-0.5">#${escapeHtmlSite(t)}</span>`)
+              ? `<div class="mt-4 flex flex-wrap gap-1.5">${n.tags
+                  .map((t) => `<span class="text-[11px] text-[#5B6B7F] bg-[#F2F5F8] rounded-full px-2.5 py-0.5">#${escapeHtmlSite(t)}</span>`)
                   .join("")}</div>`
               : ""
           }
@@ -395,6 +401,28 @@ function initMobileMenu() {
   }
 }
 
+/* ---------- スクロール時のセクション表示アニメーション ---------- */
+function initReveal() {
+  const els = document.querySelectorAll(".reveal");
+  if (!els.length) return;
+  if (!("IntersectionObserver" in window)) {
+    els.forEach((el) => el.classList.add("is-visible"));
+    return;
+  }
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add("is-visible");
+          io.unobserve(e.target);
+        }
+      });
+    },
+    { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+  );
+  els.forEach((el) => io.observe(el));
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   renderHeroLatest();
   renderNewsSection();
@@ -405,6 +433,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderBlogList();
   renderBlogDetail();
   initMobileMenu();
+  initReveal();
   const y = document.getElementById("year");
   if (y) y.textContent = new Date().getFullYear();
 });

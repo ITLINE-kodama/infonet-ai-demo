@@ -50,6 +50,19 @@ body {
 /* お知らせ本文の改行表示 */
 .article-body { white-space: pre-wrap; line-height: 1.9; }
 
+/* スクロール時のセクション表示アニメーション */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .8s cubic-bezier(.16, .84, .44, 1),
+              transform .8s cubic-bezier(.16, .84, .44, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
 /* リンクのフォーカス可視化 */
 a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
   outline: 2px solid #00B8D9; outline-offset: 2px;
