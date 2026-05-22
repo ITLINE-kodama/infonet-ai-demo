@@ -7,7 +7,7 @@
 <meta name="description" content="株式会社インフォネットの採用情報。私たちと一緒に、企業のWeb戦略を支える仲間を募集しています。" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/assets/styles.css" />
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -49,111 +49,130 @@
 </header>
 
 <!-- ===== メインビジュアル ===== -->
-<section class="relative overflow-hidden bg-gradient-to-br from-[#0F3D7E] via-[#13468f] to-[#0a2c5c] text-white">
-  <div class="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-sky/20 blur-3xl"></div>
-  <div class="absolute right-32 bottom-0 w-72 h-72 rounded-full bg-white/5 blur-2xl"></div>
-  <div class="relative max-w-[1100px] mx-auto px-6 py-24 md:py-32 text-center">
-    <p class="text-sky font-semibold tracking-widest">RECRUIT</p>
-    <h1 id="rc-mv-title" class="mt-4 text-3xl md:text-5xl font-bold leading-tight">採用情報</h1>
-    <p id="rc-mv-subtitle" class="mt-6 max-w-2xl mx-auto text-white/80 leading-relaxed"></p>
+<section class="relative min-h-[78vh] flex items-center text-white overflow-hidden">
+  <img id="rc-mv-img" alt="" class="absolute inset-0 w-full h-full object-cover bg-[#0a2c5c]" />
+  <div class="absolute inset-0 bg-gradient-to-r from-[#081f42]/95 via-[#0a2c5c]/80 to-[#0a2c5c]/35"></div>
+  <div class="relative max-w-[1200px] mx-auto px-6 w-full py-24">
+    <p class="text-sky font-bold tracking-[0.28em] text-sm">RECRUIT</p>
+    <h1 id="rc-mv-title" class="mt-5 text-4xl md:text-6xl font-extrabold leading-[1.3] drop-shadow"></h1>
+    <p id="rc-mv-subtitle" class="mt-7 max-w-xl text-white/85 leading-relaxed md:text-lg"></p>
+    <a href="#positions" class="mt-10 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-sky text-white font-semibold hover:opacity-90 transition">
+      募集職種を見る <i data-lucide="arrow-down" class="w-4 h-4"></i>
+    </a>
   </div>
 </section>
 
 <!-- ===== 採用メッセージ ===== -->
-<section class="py-20 md:py-24">
-  <div class="max-w-[760px] mx-auto px-6 text-center">
-    <p class="text-sky font-semibold">MESSAGE</p>
-    <h2 class="mt-2 text-2xl md:text-3xl font-bold">私たちの想い</h2>
-    <p id="rc-message" class="article-body mt-7 text-[15px] text-[#374151] text-left"></p>
+<section class="py-24 md:py-32">
+  <div class="max-w-[820px] mx-auto px-6">
+    <div class="flex items-center gap-3">
+      <span class="w-10 h-px bg-sky"></span>
+      <p class="text-sky font-bold tracking-[0.2em] text-sm">MESSAGE</p>
+    </div>
+    <h2 class="mt-4 text-3xl md:text-4xl font-bold leading-snug">私たちの想い</h2>
+    <p id="rc-message" class="article-body mt-8 text-[16px] leading-[2] text-[#374151]"></p>
   </div>
 </section>
 
 <!-- ===== 募集職種 ===== -->
-<section class="py-20 md:py-24 bg-mist">
+<section id="positions" class="py-24 md:py-28 bg-mist">
   <div class="max-w-[1200px] mx-auto px-6">
     <div class="text-center">
-      <p class="text-sky font-semibold">OPEN POSITIONS</p>
-      <h2 class="mt-2 text-2xl md:text-3xl font-bold">募集職種</h2>
-      <p class="mt-3 text-[#666]">現在募集中のポジションです。気になる職種をご覧ください。</p>
+      <p class="text-sky font-bold tracking-[0.2em] text-sm">POSITIONS</p>
+      <h2 class="mt-3 text-3xl md:text-4xl font-bold">募集職種</h2>
+      <div class="mt-4 w-12 h-1 bg-sky mx-auto rounded-full"></div>
+      <p class="mt-5 text-[#666]">現在募集中のポジションです。気になる職種をご覧ください。</p>
     </div>
-    <div id="jobs-list" class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div id="jobs-list" class="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <p class="text-[#666] col-span-full text-center py-8">募集職種を読み込んでいます…</p>
     </div>
   </div>
 </section>
 
 <!-- ===== 社員インタビュー ===== -->
-<section class="py-20 md:py-24">
+<section class="py-24 md:py-28">
   <div class="max-w-[1200px] mx-auto px-6">
     <div class="text-center">
-      <p class="text-sky font-semibold">INTERVIEW</p>
-      <h2 class="mt-2 text-2xl md:text-3xl font-bold">働く人の声</h2>
-      <p class="mt-3 text-[#666]">インフォネットで働く社員のインタビューをご紹介します。</p>
+      <p class="text-sky font-bold tracking-[0.2em] text-sm">INTERVIEW</p>
+      <h2 class="mt-3 text-3xl md:text-4xl font-bold">働く人の声</h2>
+      <div class="mt-4 w-12 h-1 bg-sky mx-auto rounded-full"></div>
+      <p class="mt-5 text-[#666]">インフォネットで働く社員のリアルな声をご紹介します。</p>
     </div>
-    <div id="rc-interviews" class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <div id="rc-interviews" class="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-7"></div>
   </div>
 </section>
 
 <!-- ===== 数字で見る会社 ===== -->
-<section class="py-16 md:py-20 bg-gradient-to-br from-[#0F3D7E] to-[#0a2c5c] text-white">
-  <div class="max-w-[1100px] mx-auto px-6">
+<section class="relative py-20 md:py-24 text-white overflow-hidden bg-gradient-to-br from-[#0F3D7E] to-[#081f42]">
+  <div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-sky/20 blur-3xl"></div>
+  <div class="relative max-w-[1100px] mx-auto px-6">
     <div class="text-center">
-      <p class="text-sky font-semibold">NUMBERS</p>
-      <h2 class="mt-2 text-2xl md:text-3xl font-bold">数字で見るインフォネット</h2>
+      <p class="text-sky font-bold tracking-[0.2em] text-sm">NUMBERS</p>
+      <h2 class="mt-3 text-3xl md:text-4xl font-bold">数字で見るインフォネット</h2>
     </div>
-    <div id="rc-stats" class="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-6"></div>
+    <div id="rc-stats" class="mt-14 grid grid-cols-2 lg:grid-cols-4 gap-8"></div>
   </div>
 </section>
 
 <!-- ===== 福利厚生・働く環境 ===== -->
-<section class="py-20 md:py-24 bg-mist">
+<section class="py-24 md:py-28 bg-mist">
   <div class="max-w-[1100px] mx-auto px-6">
     <div class="text-center">
-      <p class="text-sky font-semibold">ENVIRONMENT</p>
-      <h2 class="mt-2 text-2xl md:text-3xl font-bold">福利厚生・働く環境</h2>
+      <p class="text-sky font-bold tracking-[0.2em] text-sm">ENVIRONMENT</p>
+      <h2 class="mt-3 text-3xl md:text-4xl font-bold">福利厚生・働く環境</h2>
+      <div class="mt-4 w-12 h-1 bg-sky mx-auto rounded-full"></div>
     </div>
-    <div id="rc-benefits" class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+    <div id="rc-benefits" class="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
   </div>
 </section>
 
 <!-- ===== 選考フロー ===== -->
-<section class="py-20 md:py-24">
+<section class="py-24 md:py-28">
   <div class="max-w-[1100px] mx-auto px-6">
     <div class="text-center">
-      <p class="text-sky font-semibold">FLOW</p>
-      <h2 class="mt-2 text-2xl md:text-3xl font-bold">選考フロー</h2>
+      <p class="text-sky font-bold tracking-[0.2em] text-sm">FLOW</p>
+      <h2 class="mt-3 text-3xl md:text-4xl font-bold">選考フロー</h2>
+      <div class="mt-4 w-12 h-1 bg-sky mx-auto rounded-full"></div>
     </div>
-    <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="bg-white border border-line rounded-xl p-6 text-center">
-        <div class="mx-auto w-12 h-12 rounded-full bg-ink text-white flex items-center justify-center font-bold">1</div>
-        <h3 class="mt-3 font-semibold">エントリー</h3>
-        <p class="mt-1 text-sm text-[#666]">お問い合わせフォームよりご応募ください。</p>
+    <div class="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="relative bg-white border border-line rounded-2xl p-7">
+        <span class="text-5xl font-extrabold text-mist absolute top-3 right-5 select-none">01</span>
+        <div class="relative">
+          <h3 class="font-bold text-lg">エントリー</h3>
+          <p class="mt-2 text-sm text-[#666] leading-relaxed">お問い合わせフォームよりご応募ください。</p>
+        </div>
       </div>
-      <div class="bg-white border border-line rounded-xl p-6 text-center">
-        <div class="mx-auto w-12 h-12 rounded-full bg-ink text-white flex items-center justify-center font-bold">2</div>
-        <h3 class="mt-3 font-semibold">書類選考</h3>
-        <p class="mt-1 text-sm text-[#666]">ご経歴をもとに選考いたします。</p>
+      <div class="relative bg-white border border-line rounded-2xl p-7">
+        <span class="text-5xl font-extrabold text-mist absolute top-3 right-5 select-none">02</span>
+        <div class="relative">
+          <h3 class="font-bold text-lg">書類選考</h3>
+          <p class="mt-2 text-sm text-[#666] leading-relaxed">ご経歴をもとに選考いたします。</p>
+        </div>
       </div>
-      <div class="bg-white border border-line rounded-xl p-6 text-center">
-        <div class="mx-auto w-12 h-12 rounded-full bg-ink text-white flex items-center justify-center font-bold">3</div>
-        <h3 class="mt-3 font-semibold">面接（1〜2回）</h3>
-        <p class="mt-1 text-sm text-[#666]">オンライン面接も可能です。</p>
+      <div class="relative bg-white border border-line rounded-2xl p-7">
+        <span class="text-5xl font-extrabold text-mist absolute top-3 right-5 select-none">03</span>
+        <div class="relative">
+          <h3 class="font-bold text-lg">面接（1〜2回）</h3>
+          <p class="mt-2 text-sm text-[#666] leading-relaxed">オンライン面接も可能です。</p>
+        </div>
       </div>
-      <div class="bg-white border border-line rounded-xl p-6 text-center">
-        <div class="mx-auto w-12 h-12 rounded-full bg-sky text-white flex items-center justify-center font-bold">4</div>
-        <h3 class="mt-3 font-semibold">内定</h3>
-        <p class="mt-1 text-sm text-[#666]">条件をご相談のうえ、ご入社となります。</p>
+      <div class="relative bg-ink text-white rounded-2xl p-7">
+        <span class="text-5xl font-extrabold text-white/15 absolute top-3 right-5 select-none">04</span>
+        <div class="relative">
+          <h3 class="font-bold text-lg">内定</h3>
+          <p class="mt-2 text-sm text-white/75 leading-relaxed">条件をご相談のうえ、ご入社となります。</p>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ===== CTA ===== -->
-<section class="py-16 md:py-20 bg-mist">
-  <div class="max-w-[760px] mx-auto px-6 text-center">
-    <h2 class="text-2xl md:text-3xl font-bold">ご応募・お問い合わせ</h2>
-    <p class="mt-3 text-[#666]">ご興味をお持ちの方は、お気軽にお問い合わせください。</p>
-    <a href="/#contact" class="mt-7 inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-ink text-white font-semibold hover:opacity-90">
+<section class="relative py-20 md:py-24 text-white overflow-hidden bg-gradient-to-br from-[#0F3D7E] via-[#13468f] to-[#081f42]">
+  <div class="relative max-w-[760px] mx-auto px-6 text-center">
+    <h2 class="text-2xl md:text-4xl font-bold leading-snug">あなたの「好奇心」を、<br class="hidden sm:block" />インフォネットで活かしませんか。</h2>
+    <p class="mt-4 text-white/80">ご興味をお持ちの方は、お気軽にお問い合わせください。</p>
+    <a href="/#contact" class="mt-8 inline-flex items-center gap-2 px-8 py-4 rounded-full bg-sky text-white font-semibold hover:opacity-90 transition">
       お問い合わせ・エントリー <i data-lucide="arrow-right" class="w-4 h-4"></i>
     </a>
   </div>

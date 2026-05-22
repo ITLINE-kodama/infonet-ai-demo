@@ -52,6 +52,8 @@ function apiUpdateJob(id, data) { return window.Store.updateJob(id, data); }
 function apiDeleteJob(id) { return window.Store.deleteJob(id); }
 function apiGetRecruit() { return window.Store.getRecruit(); }
 function apiSaveRecruit(patch) { return window.Store.saveRecruit(patch); }
+function apiRecruitAI(instruction, current) { return window.Store.recruitAI(instruction, current); }
+function apiResetRecruit() { return window.Store.resetRecruit(); }
 function apiListLogs() { return window.Store.listLogs(); }
 async function apiLog(data) {
   try { await window.Store.addLog(data); } catch { /* ログ失敗はデモ進行を止めない */ }

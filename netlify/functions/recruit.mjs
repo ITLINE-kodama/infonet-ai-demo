@@ -10,6 +10,7 @@ import { getStore } from "@netlify/blobs";
 
 const DEFAULT = {
   mvTitle: "好奇心を、仕事にする。",
+  mvImage: "/assets/recruit-hero.webp",
   mvSubtitle:
     "株式会社インフォネットは、Webとデジタルの力で企業の挑戦を支えています。新しい価値づくりに、一緒に取り組む仲間を募集しています。",
   message:
@@ -21,7 +22,7 @@ const DEFAULT = {
       role: "Webディレクター（2021年入社）",
       comment:
         "未経験で入社しましたが、先輩の手厚いサポートで一歩ずつ成長できました。お客様に「ありがとう」と言っていただける瞬間が、一番のやりがいです。",
-      image: "recruit",
+      image: "/assets/news/iv-1.webp",
     },
     {
       id: "iv-2",
@@ -29,7 +30,7 @@ const DEFAULT = {
       role: "フロントエンドエンジニア（2019年入社）",
       comment:
         "新しい技術にどんどん挑戦できる環境です。リモートワークも活用しながら、自分のペースで質の高い仕事ができています。",
-      image: "recruit",
+      image: "/assets/news/iv-2.webp",
     },
     {
       id: "iv-3",
@@ -37,7 +38,7 @@ const DEFAULT = {
       role: "営業（2022年 新卒入社）",
       comment:
         "若手にも裁量を持って任せてもらえるので、毎日学びがあります。チームみんなで支え合う温かい雰囲気が気に入っています。",
-      image: "recruit",
+      image: "/assets/news/iv-3.webp",
     },
   ],
   stats: [

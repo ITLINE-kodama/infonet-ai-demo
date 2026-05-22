@@ -28,8 +28,21 @@
       </button>
     </div>
 
+    <!-- モード切替 -->
+    <div class="mt-5 flex items-center gap-3 flex-wrap">
+      <div class="inline-flex rounded-lg border border-[#E5E7EB] bg-white p-1">
+        <button id="tab-fields" class="px-4 py-1.5 rounded-md text-sm font-medium bg-[#1E2761] text-white">項目で編集</button>
+        <button id="tab-ai" class="px-4 py-1.5 rounded-md text-sm font-medium text-[#6B7280]">AIにおまかせ更新</button>
+      </div>
+      <button id="reset-btn"
+        class="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#FCA5A5] text-[13px] font-medium text-[#EF4444] hover:bg-[#FEF2F2]">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 採用ページを初期状態に戻す
+      </button>
+    </div>
+
     <div id="loading" class="mt-8 text-sm text-[#6B7280]">読み込み中…</div>
 
+    <!-- ===== 項目で編集 ===== -->
     <div id="editor" class="hidden mt-6 space-y-6">
 
       <!-- メインビジュアル -->
@@ -38,7 +51,28 @@
           <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="image" class="w-4 h-4 text-[#1E2761]"></i> メインビジュアル</h2>
           <button data-save="mv" class="px-3.5 py-1.5 rounded-lg bg-[#1E2761] text-white text-[13px] font-semibold hover:opacity-90">保存</button>
         </div>
-        <p class="text-[12px] text-[#6B7280] mt-1">採用ページ上部の大見出しとサブテキストです。</p>
+        <p class="text-[12px] text-[#6B7280] mt-1">採用ページ上部の背景画像・キャッチコピー・サブテキストです。</p>
+
+        <label class="block text-[13px] font-medium text-[#374151] mb-1 mt-4">背景画像</label>
+        <div class="flex items-start gap-3">
+          <img id="mv-image-preview" alt="" class="w-44 h-26 object-cover rounded-lg border border-[#E5E7EB] bg-[#EEF2FF]" style="height:6.5rem" />
+          <div class="flex-1 min-w-0 space-y-2">
+            <input id="mv-image-instruction" type="text" placeholder="画像の指示（例：夜景の見える開放的なオフィス）"
+              class="w-full border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 text-[12px] focus:border-[#1E2761] outline-none" />
+            <div class="flex gap-2">
+              <button id="mv-gen-img" type="button"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1E2761] hover:bg-[#F9FAFB] disabled:opacity-40">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AIで画像生成
+              </button>
+              <button id="mv-upload-img" type="button"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1E2761] hover:bg-[#F9FAFB]">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i> アップロード
+              </button>
+            </div>
+          </div>
+        </div>
+        <input type="file" id="mv-file" accept="image/*" class="hidden" />
+
         <label class="block text-[13px] font-medium text-[#374151] mb-1 mt-4">キャッチコピー</label>
         <input id="mv-title" type="text"
           class="w-full border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm focus:border-[#1E2761] outline-none" />
@@ -102,7 +136,32 @@
           ＋ 項目を追加
         </button>
       </section>
+    </div>
 
+    <!-- ===== AIにおまかせ更新 ===== -->
+    <div id="ai-panel" class="hidden mt-6">
+      <section class="bg-white border border-[#E5E7EB] rounded-xl p-6">
+        <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="wand-2" class="w-4 h-4 text-[#1E2761]"></i> AIにおまかせ更新</h2>
+        <p class="text-[12px] text-[#6B7280] mt-1.5 leading-relaxed">
+          指示文を入力すると、AIが採用ページの内容を指示どおりに更新します。社員インタビューの追加、文章の書き換えなどができます。
+        </p>
+        <label class="block text-[13px] font-medium text-[#374151] mb-1 mt-4">AIへの指示</label>
+        <textarea id="ai-instruction" rows="4" placeholder="例：社員インタビューに、入社5年目のエンジニア（男性）を1人追加して。技術への挑戦とやりがいについて前向きに書いて。"
+          class="w-full border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed focus:border-[#1E2761] outline-none thin-scroll"></textarea>
+        <label class="flex items-center gap-1.5 text-[13px] text-[#374151] cursor-pointer select-none mt-3">
+          <input type="checkbox" id="ai-mv-toggle" class="w-3.5 h-3.5 accent-[#1E2761]" />
+          メインビジュアルの背景画像もAIで生成する
+        </label>
+        <input id="ai-mv-instruction" type="text" placeholder="背景画像の指示（任意・例：活気のあるオフィス）"
+          class="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-[12px] focus:border-[#1E2761] outline-none mt-2" />
+        <button id="ai-run"
+          class="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#1E2761] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-40">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> AIで採用ページを更新
+        </button>
+        <p class="mt-3 text-[12px] text-[#9CA3AF] leading-relaxed">
+          ※ 更新後は「項目で編集」タブで内容を確認・微調整できます。意図と違う場合は、右上の「初期状態に戻す」で元に戻せます。
+        </p>
+      </section>
     </div>
   </main>
 </div>
@@ -113,8 +172,18 @@
   const user = initAdmin("recruit-edit");
   let data = null;
   let ivUploadIdx = -1;
-
   const $ = (id) => document.getElementById(id);
+
+  /* ---- モード切替 ---- */
+  function switchMode(m) {
+    const fields = m === "fields";
+    $("tab-fields").className = "px-4 py-1.5 rounded-md text-sm font-medium " + (fields ? "bg-[#1E2761] text-white" : "text-[#6B7280]");
+    $("tab-ai").className = "px-4 py-1.5 rounded-md text-sm font-medium " + (!fields ? "bg-[#1E2761] text-white" : "text-[#6B7280]");
+    $("editor").classList.toggle("hidden", !fields);
+    $("ai-panel").classList.toggle("hidden", fields);
+  }
+  $("tab-fields").addEventListener("click", () => switchMode("fields"));
+  $("tab-ai").addEventListener("click", () => switchMode("ai"));
 
   /* ---- セクション保存 ---- */
   async function saveSection(patch, label) {
@@ -129,8 +198,7 @@
 
   /* ---- 社員インタビュー ---- */
   function renderInterviews() {
-    const host = $("iv-list");
-    host.innerHTML = data.interviews.map((iv, i) => `
+    $("iv-list").innerHTML = data.interviews.map((iv, i) => `
       <div class="border border-[#E5E7EB] rounded-lg p-4" data-idx="${i}">
         <div class="flex gap-4">
           <button type="button" data-act="img" class="shrink-0" title="クリックで写真をアップロード">
@@ -155,14 +223,11 @@
       </div>`).join("");
     if (window.lucide) lucide.createIcons();
   }
-
   $("iv-list").addEventListener("input", (e) => {
     const row = e.target.closest("[data-idx]");
     const field = e.target.dataset.field;
-    if (!row || !field) return;
-    data.interviews[Number(row.dataset.idx)][field] = e.target.value;
+    if (row && field) data.interviews[Number(row.dataset.idx)][field] = e.target.value;
   });
-
   $("iv-list").addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-act]");
     if (!btn) return;
@@ -188,38 +253,42 @@
       }
     }
   });
-
   $("iv-add").addEventListener("click", () => {
     data.interviews.push({ id: "iv-" + Date.now().toString(36), name: "", role: "", comment: "", image: "recruit" });
     renderInterviews();
   });
 
-  $("iv-file").addEventListener("change", (e) => {
-    const file = e.target.files && e.target.files[0];
-    e.target.value = "";
-    if (!file || ivUploadIdx < 0) return;
+  /* ---- 画像縮小ユーティリティ ---- */
+  function readImageAsDataUrl(file, maxW, cb) {
     if (!file.type.startsWith("image/")) { toast("画像ファイルを選択してください", "error"); return; }
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
       URL.revokeObjectURL(url);
-      const scale = Math.min(1, 800 / img.width);
+      const scale = Math.min(1, maxW / img.width);
       const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
       const c = document.createElement("canvas");
       c.width = w; c.height = h;
       c.getContext("2d").drawImage(img, 0, 0, w, h);
-      data.interviews[ivUploadIdx].image = c.toDataURL("image/jpeg", 0.85);
-      renderInterviews();
-      toast("写真をアップロードしました", "success");
+      cb(c.toDataURL("image/jpeg", 0.85));
     };
     img.onerror = () => { URL.revokeObjectURL(url); toast("画像を読み込めませんでした", "error"); };
     img.src = url;
+  }
+  $("iv-file").addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file || ivUploadIdx < 0) return;
+    readImageAsDataUrl(file, 800, (dataUrl) => {
+      data.interviews[ivUploadIdx].image = dataUrl;
+      renderInterviews();
+      toast("写真をアップロードしました", "success");
+    });
   });
 
   /* ---- 数字で見る会社 ---- */
   function renderStats() {
-    const host = $("stats-list");
-    host.innerHTML = data.stats.map((s, i) => `
+    $("stats-list").innerHTML = data.stats.map((s, i) => `
       <div class="flex items-center gap-2" data-idx="${i}">
         <input data-field="label" type="text" value="${escapeHtml(s.label)}" placeholder="項目名（例：社員数）"
           class="flex-1 border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#1E2761] outline-none" />
@@ -234,8 +303,7 @@
   $("stats-list").addEventListener("input", (e) => {
     const row = e.target.closest("[data-idx]");
     const field = e.target.dataset.field;
-    if (!row || !field) return;
-    data.stats[Number(row.dataset.idx)][field] = e.target.value;
+    if (row && field) data.stats[Number(row.dataset.idx)][field] = e.target.value;
   });
   $("stats-list").addEventListener("click", (e) => {
     const btn = e.target.closest('[data-act="del"]');
@@ -243,15 +311,11 @@
     data.stats.splice(Number(btn.closest("[data-idx]").dataset.idx), 1);
     renderStats();
   });
-  $("stats-add").addEventListener("click", () => {
-    data.stats.push({ label: "", value: "" });
-    renderStats();
-  });
+  $("stats-add").addEventListener("click", () => { data.stats.push({ label: "", value: "" }); renderStats(); });
 
   /* ---- 福利厚生・働く環境 ---- */
   function renderBenefits() {
-    const host = $("benefits-list");
-    host.innerHTML = data.benefits.map((b, i) => `
+    $("benefits-list").innerHTML = data.benefits.map((b, i) => `
       <div class="flex items-center gap-2" data-idx="${i}">
         <input data-field="title" type="text" value="${escapeHtml(b.title)}" placeholder="制度名（例：リモートワーク可）"
           class="w-56 border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#1E2761] outline-none" />
@@ -266,8 +330,7 @@
   $("benefits-list").addEventListener("input", (e) => {
     const row = e.target.closest("[data-idx]");
     const field = e.target.dataset.field;
-    if (!row || !field) return;
-    data.benefits[Number(row.dataset.idx)][field] = e.target.value;
+    if (row && field) data.benefits[Number(row.dataset.idx)][field] = e.target.value;
   });
   $("benefits-list").addEventListener("click", (e) => {
     const btn = e.target.closest('[data-act="del"]');
@@ -275,9 +338,42 @@
     data.benefits.splice(Number(btn.closest("[data-idx]").dataset.idx), 1);
     renderBenefits();
   });
-  $("benefits-add").addEventListener("click", () => {
-    data.benefits.push({ title: "", desc: "" });
-    renderBenefits();
+  $("benefits-add").addEventListener("click", () => { data.benefits.push({ title: "", desc: "" }); renderBenefits(); });
+
+  /* ---- メインビジュアル画像 ---- */
+  function syncMvPreview() {
+    $("mv-image-preview").src = window.newsImageUrl(data.mvImage || "recruit");
+  }
+  $("mv-upload-img").addEventListener("click", () => $("mv-file").click());
+  $("mv-file").addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    readImageAsDataUrl(file, 1600, (dataUrl) => {
+      data.mvImage = dataUrl;
+      syncMvPreview();
+      toast("背景画像をアップロードしました（保存を押すと反映）", "success");
+    });
+  });
+  $("mv-gen-img").addEventListener("click", async () => {
+    const instr = $("mv-image-instruction").value.trim();
+    const btn = $("mv-gen-img");
+    btn.disabled = true;
+    toast("AIが背景画像を生成しています…（10〜20秒）", "info");
+    try {
+      const url = await window.Store.generateImage("採用ページのメインビジュアル背景", instr);
+      if (url) {
+        data.mvImage = url;
+        syncMvPreview();
+        toast("背景画像を生成しました（保存を押すと反映）", "success");
+      } else {
+        toast("画像生成は現在利用できません", "error");
+      }
+    } catch {
+      toast("画像生成に失敗しました", "error");
+    } finally {
+      btn.disabled = false;
+    }
   });
 
   /* ---- 保存ボタン（セクション別）---- */
@@ -285,7 +381,7 @@
     btn.addEventListener("click", () => {
       const sec = btn.dataset.save;
       if (sec === "mv") {
-        saveSection({ mvTitle: $("mv-title").value.trim(), mvSubtitle: $("mv-subtitle").value.trim() }, "メインビジュアル");
+        saveSection({ mvTitle: $("mv-title").value.trim(), mvSubtitle: $("mv-subtitle").value.trim(), mvImage: data.mvImage }, "メインビジュアル");
       } else if (sec === "message") {
         saveSection({ message: $("rc-message").value }, "採用メッセージ");
       } else if (sec === "interviews") {
@@ -312,11 +408,80 @@
     }
   });
 
-  document.getElementById("preview-site-btn").addEventListener("click", () => {
+  /* ---- AIにおまかせ更新 ---- */
+  $("ai-run").addEventListener("click", async () => {
+    const instruction = $("ai-instruction").value.trim();
+    if (!instruction) { toast("AIへの指示を入力してください", "error"); return; }
+    const btn = $("ai-run");
+    btn.disabled = true;
+    toast("AIが採用ページを更新しています…", "info");
+    try {
+      const res = await apiRecruitAI(instruction, data);
+      if (!res || !res.recruit) {
+        toast((res && res.error) || "AI更新に失敗しました", "error");
+        return;
+      }
+      const updated = res.recruit;
+      // メインビジュアル画像も生成
+      if ($("ai-mv-toggle").checked) {
+        toast("背景画像を生成しています…", "info");
+        const imgUrl = await window.Store.generateImage("採用ページのメインビジュアル背景", $("ai-mv-instruction").value.trim());
+        if (imgUrl) updated.mvImage = imgUrl;
+      }
+      await apiSaveRecruit(updated);
+      await apiLog({ userName: user.name, action: "edit", targetTitle: "採用ページ：AIで一括更新", userPrompt: instruction });
+      data = updated;
+      if (!Array.isArray(data.interviews)) data.interviews = [];
+      if (!Array.isArray(data.stats)) data.stats = [];
+      if (!Array.isArray(data.benefits)) data.benefits = [];
+      fillEditor();
+      $("ai-instruction").value = "";
+      switchMode("fields");
+      toast("AIが採用ページを更新しました。内容をご確認ください。", "success");
+    } catch {
+      toast("AI更新に失敗しました", "error");
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  /* ---- 初期状態に戻す ---- */
+  $("reset-btn").addEventListener("click", async () => {
+    const ok = await confirmModal({
+      title: "採用ページを初期状態に戻しますか？",
+      message: "メインビジュアル・採用メッセージ・社員インタビュー・数字・福利厚生の編集内容が、すべて初期内容に戻ります。",
+      okText: "初期状態に戻す",
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      data = await apiResetRecruit();
+      if (!Array.isArray(data.interviews)) data.interviews = [];
+      if (!Array.isArray(data.stats)) data.stats = [];
+      if (!Array.isArray(data.benefits)) data.benefits = [];
+      fillEditor();
+      switchMode("fields");
+      toast("採用ページを初期状態に戻しました", "info");
+    } catch {
+      toast("初期化に失敗しました", "error");
+    }
+  });
+
+  $("preview-site-btn").addEventListener("click", () => {
     window.open(location.origin + "/recruit.html?t=" + Date.now(), "infonet_recruit_preview", "width=1200,height=860");
   });
 
-  /* ---- 読み込み ---- */
+  /* ---- 画面に反映 ---- */
+  function fillEditor() {
+    $("mv-title").value = data.mvTitle || "";
+    $("mv-subtitle").value = data.mvSubtitle || "";
+    $("rc-message").value = data.message || "";
+    syncMvPreview();
+    renderInterviews();
+    renderStats();
+    renderBenefits();
+  }
+
   async function load() {
     try {
       data = await apiGetRecruit();
@@ -324,15 +489,10 @@
       toast("読み込みに失敗しました", "error");
       return;
     }
-    $("mv-title").value = data.mvTitle || "";
-    $("mv-subtitle").value = data.mvSubtitle || "";
-    $("rc-message").value = data.message || "";
     if (!Array.isArray(data.interviews)) data.interviews = [];
     if (!Array.isArray(data.stats)) data.stats = [];
     if (!Array.isArray(data.benefits)) data.benefits = [];
-    renderInterviews();
-    renderStats();
-    renderBenefits();
+    fillEditor();
     $("loading").classList.add("hidden");
     $("editor").classList.remove("hidden");
     lucide.createIcons();

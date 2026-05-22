@@ -25,8 +25,8 @@
     general: "お知らせ全般",
   };
   function imageUrl(key) {
-    // データURL（AI生成画像）や外部URLはそのまま返す
-    if (typeof key === "string" && (key.startsWith("data:") || key.startsWith("http"))) {
+    // データURL（AI生成画像）・外部URL・サイト内パスはそのまま返す
+    if (typeof key === "string" && (key.startsWith("data:") || key.startsWith("http") || key.startsWith("/"))) {
       return key;
     }
     return "/assets/news/" + (IMAGE_KEYS.includes(key) ? key : "general") + ".webp";
@@ -96,12 +96,13 @@
   /* ---- 採用ページのセクション内容（recruit.mjs の初期値と同一）---- */
   const RECRUIT_DEFAULT = {
     mvTitle: "好奇心を、仕事にする。",
+    mvImage: "/assets/recruit-hero.webp",
     mvSubtitle: "株式会社インフォネットは、Webとデジタルの力で企業の挑戦を支えています。新しい価値づくりに、一緒に取り組む仲間を募集しています。",
     message: "私たちが大切にしているのは、「なぜやるのか」を考え抜くことです。\n\n技術やスキルは、目的を実現するための手段にすぎません。お客様の課題に本気で向き合い、最適な答えを一緒に探していく。そんな姿勢を持った仲間と働きたいと考えています。\n\n経験よりも、学び続ける意欲を重視します。あなたの挑戦を、会社全体で後押しします。",
     interviews: [
-      { id: "iv-1", name: "佐藤 美咲", role: "Webディレクター（2021年入社）", comment: "未経験で入社しましたが、先輩の手厚いサポートで一歩ずつ成長できました。お客様に「ありがとう」と言っていただける瞬間が、一番のやりがいです。", image: "recruit" },
-      { id: "iv-2", name: "田中 颯太", role: "フロントエンドエンジニア（2019年入社）", comment: "新しい技術にどんどん挑戦できる環境です。リモートワークも活用しながら、自分のペースで質の高い仕事ができています。", image: "recruit" },
-      { id: "iv-3", name: "鈴木 陽菜", role: "営業（2022年 新卒入社）", comment: "若手にも裁量を持って任せてもらえるので、毎日学びがあります。チームみんなで支え合う温かい雰囲気が気に入っています。", image: "recruit" },
+      { id: "iv-1", name: "佐藤 美咲", role: "Webディレクター（2021年入社）", comment: "未経験で入社しましたが、先輩の手厚いサポートで一歩ずつ成長できました。お客様に「ありがとう」と言っていただける瞬間が、一番のやりがいです。", image: "/assets/news/iv-1.webp" },
+      { id: "iv-2", name: "田中 颯太", role: "フロントエンドエンジニア（2019年入社）", comment: "新しい技術にどんどん挑戦できる環境です。リモートワークも活用しながら、自分のペースで質の高い仕事ができています。", image: "/assets/news/iv-2.webp" },
+      { id: "iv-3", name: "鈴木 陽菜", role: "営業（2022年 新卒入社）", comment: "若手にも裁量を持って任せてもらえるので、毎日学びがあります。チームみんなで支え合う温かい雰囲気が気に入っています。", image: "/assets/news/iv-3.webp" },
     ],
     stats: [
       { label: "社員数", value: "48名" },
@@ -378,6 +379,28 @@
         lsSetRecruit(next);
         return next;
       }
+    },
+
+    // AIに指示して採用ページ内容を更新。{recruit} を返す。失敗時は {error}
+    async recruitAI(instruction, current) {
+      try {
+        const r = await fetch(`${API}/recruit-ai`, {
+          method: "POST", headers: H,
+          body: JSON.stringify({ instruction, current: current || {} }),
+        });
+        return await r.json();
+      } catch {
+        return { error: "AI更新は現在利用できません（オフライン）。" };
+      }
+    },
+
+    // 採用ページを初期内容に戻す
+    async resetRecruit() {
+      try {
+        await fetch(`${API}/recruit?reset=1`, { method: "DELETE" });
+      } catch {}
+      lsSetRecruit({ ...RECRUIT_DEFAULT });
+      return { ...RECRUIT_DEFAULT };
     },
 
     async listLogs() {

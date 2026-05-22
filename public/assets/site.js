@@ -213,6 +213,8 @@ async function renderRecruitPage() {
     return;
   }
   mvTitle.textContent = r.mvTitle || "採用情報";
+  const mvImg = document.getElementById("rc-mv-img");
+  if (mvImg && r.mvImage) mvImg.src = window.newsImageUrl(r.mvImage);
   const sub = document.getElementById("rc-mv-subtitle");
   if (sub) sub.textContent = r.mvSubtitle || "";
   const msg = document.getElementById("rc-message");
@@ -227,12 +229,15 @@ async function renderRecruitPage() {
         : ivs
             .map(
               (iv) => `
-      <div class="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
-        <img src="${window.newsImageUrl(iv.image)}" alt="" class="w-full h-48 object-cover" />
-        <div class="p-5">
-          <h3 class="font-bold text-[#1A1A1A]">${escapeHtmlSite(iv.name)}</h3>
-          <p class="text-sm text-[#00B8D9] font-medium mt-0.5">${escapeHtmlSite(iv.role)}</p>
-          <p class="mt-3 text-sm text-[#666] leading-relaxed article-body">${escapeHtmlSite(iv.comment)}</p>
+      <div class="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+        <img src="${window.newsImageUrl(iv.image)}" alt="" class="w-full h-60 object-cover" />
+        <div class="p-6">
+          <i data-lucide="quote" class="w-6 h-6 text-[#00B8D9]"></i>
+          <p class="mt-2 text-sm text-[#374151] leading-relaxed article-body">${escapeHtmlSite(iv.comment)}</p>
+          <div class="mt-5 pt-4 border-t border-[#E5E7EB]">
+            <p class="font-bold text-[#1A1A1A]">${escapeHtmlSite(iv.name)}</p>
+            <p class="text-[13px] text-[#00B8D9] font-medium mt-0.5">${escapeHtmlSite(iv.role)}</p>
+          </div>
         </div>
       </div>`
             )
@@ -246,8 +251,9 @@ async function renderRecruitPage() {
       .map(
         (s) => `
       <div class="text-center">
-        <p class="text-3xl md:text-4xl font-bold">${escapeHtmlSite(s.value)}</p>
-        <p class="mt-1.5 text-sm text-white/70">${escapeHtmlSite(s.label)}</p>
+        <p class="text-4xl md:text-5xl font-extrabold">${escapeHtmlSite(s.value)}</p>
+        <div class="mt-2.5 w-8 h-0.5 bg-[#00B8D9] mx-auto"></div>
+        <p class="mt-2.5 text-sm text-white/70">${escapeHtmlSite(s.label)}</p>
       </div>`
       )
       .join("");
@@ -259,12 +265,12 @@ async function renderRecruitPage() {
     bnHost.innerHTML = bns
       .map(
         (b) => `
-      <div class="bg-white rounded-xl p-6 border border-[#E5E7EB]">
-        <div class="w-10 h-10 rounded-lg bg-[#00B8D9]/10 flex items-center justify-center text-[#00B8D9]">
+      <div class="bg-white rounded-2xl p-7 border border-[#E5E7EB]">
+        <div class="w-11 h-11 rounded-xl bg-[#00B8D9]/10 flex items-center justify-center text-[#00B8D9]">
           <i data-lucide="check" class="w-5 h-5"></i>
         </div>
-        <h3 class="mt-3 font-semibold">${escapeHtmlSite(b.title)}</h3>
-        <p class="mt-1 text-sm text-[#666] leading-relaxed">${escapeHtmlSite(b.desc)}</p>
+        <h3 class="mt-4 font-bold">${escapeHtmlSite(b.title)}</h3>
+        <p class="mt-1.5 text-sm text-[#666] leading-relaxed">${escapeHtmlSite(b.desc)}</p>
       </div>`
       )
       .join("");
