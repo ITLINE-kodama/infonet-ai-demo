@@ -50,6 +50,21 @@ body {
 /* お知らせ本文の改行表示 */
 .article-body { white-space: pre-wrap; line-height: 1.9; }
 
+/* AIで指定できるセクション配色テーマ（採用ページ） */
+.theme-green { background-color: #EDF5EE !important; }
+.theme-blue  { background-color: #EAF1F8 !important; }
+.theme-warm  { background-color: #FBF4EC !important; }
+.theme-gray  { background-color: #F1F3F5 !important; }
+
+.theme-green .sec-eyebrow { color: #3F9C6B !important; }
+.theme-green .sec-accent  { background-color: #3F9C6B !important; }
+.theme-blue  .sec-eyebrow { color: #2F6FB0 !important; }
+.theme-blue  .sec-accent  { background-color: #2F6FB0 !important; }
+.theme-warm  .sec-eyebrow { color: #BE7F33 !important; }
+.theme-warm  .sec-accent  { background-color: #BE7F33 !important; }
+.theme-gray  .sec-eyebrow { color: #5B6B7F !important; }
+.theme-gray  .sec-accent  { background-color: #5B6B7F !important; }
+
 /* スクロール時のセクション表示アニメーション */
 .reveal {
   opacity: 0;

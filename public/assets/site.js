@@ -206,6 +206,21 @@ async function renderJobDetail() {
   }
 }
 
+/* ---------- 採用ページ：セクション配色テーマの適用 ---------- */
+var SECTION_THEME_NAMES = ["green", "blue", "warm", "gray"];
+function applySectionThemes(themes) {
+  const t = themes && typeof themes === "object" ? themes : {};
+  ["message", "positions", "interview", "benefits", "flow", "blog"].forEach((key) => {
+    const sec = document.querySelector('[data-theme-section="' + key + '"]');
+    if (!sec) return;
+    SECTION_THEME_NAMES.forEach((name) => sec.classList.remove("theme-" + name));
+    const theme = t[key];
+    if (theme && SECTION_THEME_NAMES.indexOf(theme) !== -1) {
+      sec.classList.add("theme-" + theme);
+    }
+  });
+}
+
 /* ---------- 採用ページ：各セクションの描画 ---------- */
 async function renderRecruitPage() {
   const mvTitle = document.getElementById("rc-mv-title");
@@ -216,6 +231,9 @@ async function renderRecruitPage() {
   } catch {
     return;
   }
+  // セクション配色テーマを適用（AIおまかせ更新で指定される）
+  applySectionThemes(r.sectionThemes);
+
   mvTitle.textContent = r.mvTitle || "採用情報";
   const mvImg = document.getElementById("rc-mv-img");
   if (mvImg && r.mvImage) mvImg.src = window.newsImageUrl(r.mvImage);

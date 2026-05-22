@@ -53,6 +53,8 @@ const DEFAULT = {
     { title: "フレックスタイム制", desc: "柔軟な勤務時間で、働きやすい環境です。" },
     { title: "書籍購入補助", desc: "学びのための書籍購入を会社が補助します。" },
   ],
+  // 各セクションの配色テーマ（AIおまかせ更新で指定）。空 = 標準配色
+  sectionThemes: {},
 };
 
 function json(obj, status = 200) {

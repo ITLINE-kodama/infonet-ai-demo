@@ -450,7 +450,7 @@
       fillEditor();
       $("ai-instruction").value = "";
       switchMode("fields");
-      toast("AIが採用ページを更新しました。内容をご確認ください。", "success");
+      toast("AIが採用ページを更新しました。「採用ページを別画面で表示」で仕上がりをご確認ください。", "success");
     } catch (err) {
       const reason = (err && err.message) ? err.message : "通信エラーが発生しました";
       toast("AI更新に失敗しました：" + reason, "error");

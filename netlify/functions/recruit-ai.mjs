@@ -13,8 +13,23 @@ const SYSTEM_PROMPT = `あなたは企業の採用ページの内容を編集す
   "message": "採用メッセージ本文（文字列・改行可）",
   "interviews": [ { "id": "...", "name": "氏名", "role": "職種・入社年", "comment": "インタビュー本文", "image": "画像キー" } ],
   "stats": [ { "label": "項目名", "value": "数値" } ],
-  "benefits": [ { "title": "制度名", "desc": "説明" } ]
+  "benefits": [ { "title": "制度名", "desc": "説明" } ],
+  "sectionThemes": { "message": "テーマ名", "positions": "テーマ名", "interview": "テーマ名", "benefits": "テーマ名", "flow": "テーマ名", "blog": "テーマ名" }
 }
+
+【sectionThemes ─ セクションの配色（背景デザイン）】
+各セクションの背景の配色を、次のプリセットから選んで指定できます。
+- "default"：標準（白／薄いグレー）
+- "green"：やわらかい緑。自然・環境・サステナブルさが伝わる配色
+- "blue"：落ち着いた青。誠実・信頼の印象
+- "warm"：あたたかいクリーム色。親しみやすい印象
+- "gray"：ニュートラルなグレー
+sectionThemes のキーと対応セクション：
+  message=採用メッセージ／positions=募集職種／interview=社員インタビュー／
+  benefits=福利厚生・働く環境／flow=選考フロー／blog=ブログ
+背景色・配色・デザインの雰囲気に関する指示は、必ずこの sectionThemes で表現すること。
+変更するセクションのキーだけを含めればよい。
+例：「福利厚生の背景を緑にして自然が伝わるデザインに」→ {"sectionThemes": {"benefits": "green"}}
 
 【最重要ルール｜出力を最小限にする】
 - 指示によって変更が必要なトップレベルのキーだけを出力する
@@ -109,6 +124,13 @@ export default async (req) => {
 
     // AIは「変更したキーだけ」を返すため、現在の内容にマージして全体を組み立てる
     const recruit = { ...current, ...parsed };
+    // sectionThemes は一部のキーだけ返ることがあるため、現在値と深くマージする
+    if (parsed.sectionThemes && typeof parsed.sectionThemes === "object") {
+      recruit.sectionThemes = {
+        ...(current.sectionThemes || {}),
+        ...parsed.sectionThemes,
+      };
+    }
 
     return json({
       recruit,
