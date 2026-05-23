@@ -301,6 +301,90 @@ async function renderRecruitPage() {
   const msg = document.getElementById("rc-message");
   if (msg) msg.textContent = r.message || ""; // .article-body の pre-wrap で改行が反映される
 
+  // セクション見出し・リード文（AIで編集可）
+  const txt = (r.sectionText && typeof r.sectionText === "object") ? r.sectionText : {};
+  const SECTION_TEXT_MAP = {
+    "rc-vision-heading": "visionHeading",
+    "rc-positions-heading": "positionsHeading",
+    "rc-positions-lead": "positionsLead",
+    "rc-interview-heading": "interviewHeading",
+    "rc-stats-heading": "statsHeading",
+    "rc-benefits-heading": "benefitsHeading",
+    "rc-flow-heading": "flowHeading",
+    "rc-blog-heading": "blogHeading",
+    "rc-cta-heading": "ctaHeading",
+    "rc-cta-subtext": "ctaSubtext",
+  };
+  Object.entries(SECTION_TEXT_MAP).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el && typeof txt[key] === "string" && txt[key].trim()) {
+      el.innerHTML = nlToBr(txt[key]);
+    }
+  });
+
+  // 選考フロー4ステップ（AIで編集可）
+  const flowHost = document.getElementById("rc-flow-steps");
+  if (flowHost) {
+    const steps = Array.isArray(r.flowSteps) && r.flowSteps.length
+      ? r.flowSteps
+      : [
+          { phase: "PHASE 01", title: "エントリー", desc: "数分で完了するスマートフォームよりご応募ください。" },
+          { phase: "PHASE 02", title: "オンライン選考", desc: "これまでの成果や、あなたが挑戦したいビジョンを拝見します。" },
+          { phase: "PHASE 03", title: "インタビュー", desc: "オンライン対応。スキルだけでなく、カルチャーフィットを対話します。" },
+          { phase: "PHASE 04", title: "オファー & ジョイン", desc: "条件確定後、インフォネットの未来のコアとしてお迎えします！" },
+        ];
+    flowHost.innerHTML = steps.map((s, i) => {
+      const isLast = i === steps.length - 1;
+      return isLast
+        ? `<div class="relative bg-gradient-to-br from-techblue to-blue-700 text-white rounded-2xl p-8 shadow-[0_15px_35px_rgba(0,82,255,0.3)] hover:scale-[1.02] transition-transform">
+            <span class="font-en font-black text-5xl text-white/10 absolute top-4 right-6 select-none">${String(i + 1).padStart(2, "0")}</span>
+            <div>
+              <p class="font-en font-black text-[11px] text-neonyellow tracking-widest">${escapeHtmlSite(s.phase || "")}</p>
+              <h3 class="mt-3 font-black text-lg text-white">${escapeHtmlSite(s.title || "")}</h3>
+              <p class="mt-3 text-sm text-white/80 leading-relaxed font-medium">${escapeHtmlSite(s.desc || "")}</p>
+            </div>
+          </div>`
+        : `<div class="relative bg-[#F8FAFC] border border-techblue/10 rounded-2xl p-8 group hover:bg-white hover:border-techblue/30 hover:shadow-[0_20px_40px_rgba(0,82,255,0.08)] transition-all duration-300">
+            <span class="font-en font-black text-5xl text-techblue/5 group-hover:text-techblue/10 absolute top-4 right-6 select-none transition-colors">${String(i + 1).padStart(2, "0")}</span>
+            <div>
+              <p class="font-en font-black text-[11px] text-techblue tracking-widest">${escapeHtmlSite(s.phase || "")}</p>
+              <h3 class="mt-3 font-black text-lg text-futuredark">${escapeHtmlSite(s.title || "")}</h3>
+              <p class="mt-3 text-sm text-futuredark/60 leading-relaxed font-medium">${escapeHtmlSite(s.desc || "")}</p>
+            </div>
+          </div>`;
+    }).join("");
+  }
+
+  // フォントサイズ等のスタイル上書き
+  const STYLE_TARGET_MAP = {
+    mvTitle: "rc-mv-title",
+    mvSubtitle: "rc-mv-subtitle",
+    message: "rc-message",
+    visionHeading: "rc-vision-heading",
+    positionsHeading: "rc-positions-heading",
+    positionsLead: "rc-positions-lead",
+    interviewHeading: "rc-interview-heading",
+    statsHeading: "rc-stats-heading",
+    benefitsHeading: "rc-benefits-heading",
+    flowHeading: "rc-flow-heading",
+    blogHeading: "rc-blog-heading",
+    ctaHeading: "rc-cta-heading",
+    ctaSubtext: "rc-cta-subtext",
+  };
+  const ALLOWED_STYLE_PROPS = ["fontSize", "fontWeight", "textAlign", "color", "letterSpacing", "lineHeight"];
+  const overrides = (r.styleOverrides && typeof r.styleOverrides === "object") ? r.styleOverrides : {};
+  Object.entries(overrides).forEach(([key, style]) => {
+    const id = STYLE_TARGET_MAP[key];
+    if (!id || !style || typeof style !== "object") return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    ALLOWED_STYLE_PROPS.forEach((prop) => {
+      if (typeof style[prop] === "string" && style[prop].trim()) {
+        el.style[prop] = style[prop];
+      }
+    });
+  });
+
   const ivHost = document.getElementById("rc-interviews");
   if (ivHost) {
     const ivs = Array.isArray(r.interviews) ? r.interviews : [];

@@ -18,6 +18,22 @@ const SYSTEM_PROMPT = `あなたは「らくらくAI」、株式会社インフ�
   "benefits": [ { "title": "制度名", "desc": "説明" } ],
   "sectionThemes": { "message": "テーマ名", "positions": "テーマ名", "interview": "テーマ名", "benefits": "テーマ名", "flow": "テーマ名", "blog": "テーマ名" },
   "positionsStyle": "募集職種カードのレイアウト名",
+  "sectionText": {
+    "visionHeading": "ビジョンセクションの見出し（例: テクノロジーで、まだ見ぬ最適解を導く。）",
+    "positionsHeading": "募集職種セクションの見出し（例: 募集中のミッション）",
+    "positionsLead": "募集職種セクションのリード文",
+    "interviewHeading": "社員インタビューセクションの見出し",
+    "statsHeading": "数字セクションの見出し",
+    "benefitsHeading": "福利厚生セクションの見出し",
+    "flowHeading": "選考フローセクションの見出し",
+    "blogHeading": "ブログセクションの見出し",
+    "ctaHeading": "CTAセクションの大見出し",
+    "ctaSubtext": "CTAセクションの本文"
+  },
+  "flowSteps": [ { "phase": "PHASE 01", "title": "エントリー", "desc": "..." }, ... ],
+  "styleOverrides": {
+    "<キー名>": { "fontSize": "3rem", "lineHeight": "1.4", "color": "#0052FF", ... }
+  },
   "chatMessage": "担当者への報告メッセージ",
   "applyAttachedImage": "（任意）添付画像を採用ページの画像として使う場合の指定"
 }
@@ -89,32 +105,63 @@ sectionThemes のキーと対応セクション：
 - 自然な改行位置の例：句読点（「、」「。」）の直後、意味のかたまりの区切り
 - 例：「メインビジュアルの改行を直して」で mvTitle が「好奇心を、仕事にする。」なら → {"mvTitle": "好奇心を、\n仕事にする。"}
 
-【採用ページの構造（編集できる範囲・できない範囲）】
-このAIで編集できるのは JSON スキーマのキーに対応する以下のデータだけです。それ以外の文字列はページデザインに直接書かれた固定（ハードコード）であり、書き換え不可です。
+【採用ページの編集可能データ（テキスト → 対応キー）】
+ページ上のテキストはほぼすべて以下のキーで編集できます。画像や指示でどのテキストを指しているかを判別し、対応するキーを編集してください。
 
-★編集できるデータ（JSONのキーで対応）：
-- mvTitle ：ヒーローの大見出し（標準：「好奇心を、仕事にする。」）
-- mvSubtitle ：ヒーローのサブテキスト
-- message ：「OUR VISION」セクション内のカードの本文段落（見出しではない）
-- interviews ：「未来を創る、メンバーの鼓動」の社員カード（コメント・氏名・役職・写真）
-- stats ：「データで見る、インフォネット」の数値とラベル
-- benefits ：「自律とパフォーマンスを最大化」の福利厚生項目
+★ヒーロー（メインビジュアル）
+- mvTitle ：大見出し（標準：「好奇心を、仕事にする。」）
+- mvSubtitle ：サブテキスト
+
+★ビジョン（OUR VISION）
+- sectionText.visionHeading ：見出し（標準：「テクノロジーで、まだ見ぬ最適解を導く。」）
+- message ：本文の段落（カード内）
+
+★募集職種（OPEN POSITIONS）
+- sectionText.positionsHeading ：見出し（標準：「募集中のミッション」）
+- sectionText.positionsLead ：見出し横のリード文
+
+★社員インタビュー（CREATORS & ENGINEERS）
+- sectionText.interviewHeading ：見出し（標準：「未来を創る、メンバーの鼓動」）
+- interviews ：カード内容
+
+★数字（INFONET DATA）
+- sectionText.statsHeading ：見出し（標準：「データで見る、インフォネット」）
+- stats ：数値とラベル
+
+★福利厚生（WORK ENVIRONMENT）
+- sectionText.benefitsHeading ：見出し（標準：「自律とパフォーマンスを最大化」）
+- benefits ：項目
+
+★選考フロー（RECRUITMENT PIPELINE）
+- sectionText.flowHeading ：見出し（標準：「ジョインまでのステップ」）
+- flowSteps ：4ステップ配列 [{phase, title, desc}, ...]。配列の最後の要素は強調カラー（青グラデ）で描画されます。ステップの追加・削除・並べ替えも可
+
+★ブログ（INSIDE STORIES）
+- sectionText.blogHeading ：見出し（標準：「インフォネットのテック＆カルチャー」）
+
+★CTA（BUILD THE NEXT GENERATION）
+- sectionText.ctaHeading ：大見出し
+- sectionText.ctaSubtext ：本文
+
+★全体のデザイン
 - sectionThemes ：各セクション背景色
 - positionsStyle ：募集職種カードのレイアウト
+- styleOverrides ：要素ごとのフォントサイズ・行間・色などのスタイル上書き（後述）
 
-★編集できない固定テキスト（ページのデザインに直接書かれているため、このAIでは触れません）：
-- 英字ラベル：NEXT-GEN WEB STRATEGY / OUR VISION / OPEN POSITIONS / CREATORS & ENGINEERS / INFONET DATA / WORK ENVIRONMENT / RECRUITMENT PIPELINE / INSIDE STORIES / BUILD THE NEXT GENERATION / FUTURE POSITIONS / APPLY NOW / PHASE 01-04 など
-- セクション見出し（和文）：「テクノロジーで、まだ見ぬ最適解を導く。」「募集中のミッション」「未来を創る、メンバーの鼓動」「データで見る、インフォネット」「自律とパフォーマンスを最大化」「ジョインまでのステップ」「インフォネットのテック＆カルチャー」「あなたの「好奇心」が、未来のWebインフラを加速させる。」
-- 募集職種セクションのリード文：「データ、AI、クリエイティブ。最先端の武器を手に、企業のDXとWeb戦略を加速させる仲間を求めています。」
-- 選考フロー4カードのタイトル・本文（エントリー／オンライン選考／インタビュー／オファー&ジョイン）
-- CTAセクションの本文・ボタン、ヘッダーのナビゲーション、フッター
+【今もAIで編集できないもの（=ページデザインの構造）】
+- 英字ラベル（NEXT-GEN WEB STRATEGY / OUR VISION / OPEN POSITIONS / PHASE 01-04 など）
+- ヘッダーのナビゲーション、フッター、ロゴ、DEMO バッジ
+これらの変更要望が来たら chatMessage で「ITLINE 小玉までご相談ください」と案内。それ以外の和文テキストは上記キーで編集可能。
 
-【画像で指示された箇所の判定（必ず厳密に）】
-画像内に映っているテキストが上記★編集できるデータのどれにも一致しない場合、勝手にデータを書き換えてはいけません。特に：
-- 「テクノロジーで、まだ見ぬ最適解を導く。」は MESSAGE セクションの**固定見出し**であり、mvTitle ではありません。これを mvTitle に入れてはいけません
-- 「募集中のミッション」「未来を創る、メンバーの鼓動」等のセクション見出しも同様
-- 現在の mvTitle の値（current.mvTitle）と画像内のテキストが大きく異なる場合は、別のテキストを指していると判断する
-- 該当箇所が固定テキストだった場合は、chatMessage で「この部分はページのデザインに固定されているため、AIでは編集できません。文章を変更したい場合は ITLINE 小玉までご相談ください」と丁寧に説明し、データキーは一切変更しない
+【styleOverrides ─ フォントサイズや色の調整】
+各テキストのフォントサイズや行間を変更できます。
+例：「メインビジュアルの文字を小さく」→ {"styleOverrides": {"mvTitle": {"fontSize": "3rem"}}}
+例：「ビジョンの見出しの行間を広く」→ {"styleOverrides": {"visionHeading": {"lineHeight": "1.6"}}}
+キーは編集データ名と同じ（mvTitle / mvSubtitle / message / visionHeading / positionsHeading / positionsLead / interviewHeading / statsHeading / benefitsHeading / flowHeading / blogHeading / ctaHeading / ctaSubtext）。
+許可される CSS プロパティ：fontSize / fontWeight / textAlign / color / letterSpacing / lineHeight のみ。値は CSS 文字列（"3rem", "16px", "#0052FF", "1.5" など）。
+
+【画像で指示されたとき】
+画像内のテキストが現在の各キーの値のどれと対応するかを慎重に判別してください。current.sectionText 等の現在値を見て、画像内のテキストと一致するキーを選び、そのキーだけを更新します。mvTitle と sectionText.visionHeading のように似た文字構造のものがあるので、現在の値を見比べて間違えないこと。
 
 【会社情報（参考）】
 - 株式会社インフォネット：Webサイト制作・システム開発・DXコンサルティング、東京都港区新橋。本デモの公開先・採用ページの主体。
@@ -286,12 +333,15 @@ export default async (req) => {
 
     // AIは「変更したキーだけ」を返すため、現在の内容にマージして全体を組み立てる
     const recruit = { ...current, ...parsed };
-    // sectionThemes は一部のキーだけ返ることがあるため、現在値と深くマージする
+    // 以下のオブジェクト系は一部のキーだけ返ることがあるため、現在値と深くマージする
     if (parsed.sectionThemes && typeof parsed.sectionThemes === "object") {
-      recruit.sectionThemes = {
-        ...(current.sectionThemes || {}),
-        ...parsed.sectionThemes,
-      };
+      recruit.sectionThemes = { ...(current.sectionThemes || {}), ...parsed.sectionThemes };
+    }
+    if (parsed.sectionText && typeof parsed.sectionText === "object") {
+      recruit.sectionText = { ...(current.sectionText || {}), ...parsed.sectionText };
+    }
+    if (parsed.styleOverrides && typeof parsed.styleOverrides === "object") {
+      recruit.styleOverrides = { ...(current.styleOverrides || {}), ...parsed.styleOverrides };
     }
     // 画像目印 [IMG] が AI から返ってきた場合は元の画像URLに戻す
     restoreImages(recruit, current);

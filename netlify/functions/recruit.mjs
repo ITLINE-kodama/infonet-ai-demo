@@ -57,6 +57,28 @@ const DEFAULT = {
   sectionThemes: {},
   // 募集職種カードのレイアウト（AIおまかせ更新で指定）
   positionsStyle: "default",
+  // 各セクションの見出し・リード文（AIおまかせ更新で編集可）
+  sectionText: {
+    visionHeading: "テクノロジーで、まだ見ぬ最適解を導く。",
+    positionsHeading: "募集中のミッション",
+    positionsLead: "データ、AI、クリエイティブ。最先端の武器を手に、企業のDXとWeb戦略を加速させる仲間を求めています。",
+    interviewHeading: "未来を創る、メンバーの鼓動",
+    statsHeading: "データで見る、インフォネット",
+    benefitsHeading: "自律とパフォーマンスを最大化",
+    flowHeading: "ジョインまでのステップ",
+    blogHeading: "インフォネットのテック＆カルチャー",
+    ctaHeading: "あなたの「好奇心」が、\n未来のWebインフラを加速させる。",
+    ctaSubtext: "最先端の技術と自由な発想を掛け合わせ、社会に大きなインパクトを。インフォネットで新しいキャリアのコミットを始めよう。",
+  },
+  // 選考フロー4ステップ（編集・増減可）
+  flowSteps: [
+    { phase: "PHASE 01", title: "エントリー", desc: "数分で完了するスマートフォームよりご応募ください。" },
+    { phase: "PHASE 02", title: "オンライン選考", desc: "これまでの成果や、あなたが挑戦したいビジョンを拝見します。" },
+    { phase: "PHASE 03", title: "インタビュー", desc: "オンライン対応。スキルだけでなく、カルチャーフィットを対話します。" },
+    { phase: "PHASE 04", title: "オファー & ジョイン", desc: "条件確定後、インフォネットの未来のコアとしてお迎えします！" },
+  ],
+  // フォントサイズ等のスタイル上書き（任意・キーは下記のSTYLEABLE参照）
+  styleOverrides: {},
 };
 
 function json(obj, status = 200) {
