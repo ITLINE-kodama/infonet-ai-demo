@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="scroll-smooth">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,167 +7,212 @@
 <meta name="description" content="株式会社インフォネットの採用情報。私たちと一緒に、企業のWeb戦略を支える仲間を募集しています。" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800;900&family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/assets/styles.css" />
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = { theme: { extend: { colors: {
-    ink: '#0F3D7E', sky: '#00B8D9', navy: '#0F2A4A', slate: '#5B6B7F',
-    mist: '#F7F9FB', line: '#E8EDF2'
+    // 最先端IT×若々しさを表現する高彩度カラー
+    techblue: '#0052FF',    // 進化を止めないデジタルブルー
+    neonyellow: '#DFFF00',  // 圧倒的な未来感のネオンイエロー
+    cybercyan: '#00F0FF',   // 先進的なシアン
+    futuredark: '#080C16',  // 最先端を引き締めるクリアな黒
+    glasswhite: 'rgba(255, 255, 255, 0.45)',
+  }, fontFamily: {
+    sans: ['"Noto Sans JP"', 'sans-serif'],
+    en: ['"Space Grotesk"', 'sans-serif'],
   } } } };
 </script>
 <script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  /* 最先端のデジタル感を演出するマトリクス・ドットグリッド */
+  .bg-digital-grid {
+    background-size: 32px 32px;
+    background-image: radial-gradient(rgba(0, 82, 255, 0.05) 1.5px, transparent 1.5px);
+  }
+  /* 流動的なサイバーオーブのアニメーション */
+  @keyframes float-orb {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+  }
+  .animate-orb {
+    animation: float-orb 8s infinite ease-in-out;
+  }
+</style>
 </head>
-<body class="bg-white text-navy">
+<body class="bg-[#F8FAFC] text-futuredark font-sans antialiased overflow-x-hidden bg-digital-grid">
 
-<!-- ===== ヘッダー ===== -->
-<header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-line">
-  <div class="max-w-[1180px] mx-auto px-6 h-16 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2">
+<header class="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-techblue/10">
+  <div class="max-w-[1200px] mx-auto px-6 h-20 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2 group">
       <img src="/assets/infonet-logo.png" alt="株式会社インフォネット" class="h-7 w-auto" />
-      <span class="text-[10px] font-bold text-[#92400E] bg-[#FEF3C7] border border-[#FCD34D] rounded px-1.5 py-0.5 leading-none">DEMO</span>
+      <span class="text-[10px] font-en font-black text-white bg-techblue rounded-full px-2.5 py-0.5 tracking-widest uppercase shadow-[0_4px_12px_rgba(0,82,255,0.2)]">DEMO</span>
     </a>
-    <nav class="hidden md:flex items-center gap-9 text-[13px] font-medium text-slate">
-      <a href="/#about" class="hover:text-ink transition">会社概要</a>
-      <a href="/#services" class="hover:text-ink transition">サービス</a>
-      <a href="/#news" class="hover:text-ink transition">お知らせ</a>
-      <a href="/recruit.html" class="text-ink font-semibold">採用情報</a>
-      <a href="/#contact" class="hover:text-ink transition">お問い合わせ</a>
+    <nav class="hidden md:flex items-center gap-8 text-[13px] font-black tracking-widest uppercase">
+      <a href="/#about" class="text-futuredark/70 hover:text-techblue transition-colors">会社概要</a>
+      <a href="/#services" class="text-futuredark/70 hover:text-techblue transition-colors">サービス</a>
+      <a href="/#news" class="text-futuredark/70 hover:text-techblue transition-colors">お知らせ</a>
+      <a href="/recruit.html" class="text-white bg-techblue px-5 py-2 rounded-full shadow-[0_8px_20px_rgba(0,82,255,0.25)] hover:scale-105 transition-all">採用情報</a>
+      <a href="/#contact" class="text-futuredark/70 hover:text-techblue transition-colors">お問い合わせ</a>
     </nav>
-    <button id="menu-btn" class="md:hidden text-ink" aria-label="メニュー">
+    <button id="menu-btn" class="md:hidden text-techblue p-2 bg-techblue/5 rounded-full" aria-label="メニュー">
       <i data-lucide="menu" class="w-6 h-6"></i>
     </button>
   </div>
-  <div id="mobile-menu" class="hidden md:hidden border-t border-line bg-white">
-    <div class="px-6 py-3 flex flex-col gap-1 text-sm font-medium">
-      <a href="/#about" class="py-2">会社概要</a>
-      <a href="/#services" class="py-2">サービス</a>
-      <a href="/#news" class="py-2">お知らせ</a>
-      <a href="/recruit.html" class="py-2 text-ink font-semibold">採用情報</a>
-      <a href="/#contact" class="py-2">お問い合わせ</a>
+  <div id="mobile-menu" class="hidden md:hidden border-t border-techblue/5 bg-white/95 backdrop-blur-md">
+    <div class="px-6 py-4 flex flex-col gap-1 text-sm font-black">
+      <a href="/#about" class="py-2.5">会社概要</a>
+      <a href="/#services" class="py-2.5">サービス</a>
+      <a href="/#news" class="py-2.5">お知らせ</a>
+      <a href="/recruit.html" class="py-2.5 text-techblue">採用情報</a>
+      <a href="/#contact" class="py-2.5">お問い合わせ</a>
     </div>
   </div>
 </header>
 
-<!-- ===== メインビジュアル ===== -->
-<section class="relative flex items-center text-white overflow-hidden" style="min-height: 88vh;">
-  <img id="rc-mv-img" alt="" class="absolute inset-0 w-full h-full object-cover bg-[#0a2440]" />
-  <div class="absolute inset-0 bg-[#0a2440]/35"></div>
-  <div class="absolute inset-0 bg-gradient-to-r from-[#0a2440]/96 via-[#0a2440]/72 to-transparent"></div>
-  <div class="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#0a2440]/75 to-transparent"></div>
-  <div class="relative max-w-[1180px] mx-auto px-6 w-full py-28">
-    <div class="max-w-2xl fade-in">
-      <div class="flex items-center gap-3">
-        <span class="w-8 h-px bg-sky"></span>
-        <p class="text-sky text-[11px] font-semibold tracking-[0.32em]">RECRUIT</p>
+<!-- ===== ヒーロー ===== -->
+<section class="relative flex items-center overflow-hidden bg-gradient-to-tr from-white via-[#EDF2FF] to-[#F3F4F6]" style="min-height: 88vh;">
+  <div class="absolute top-10 right-[-10%] w-[500px] h-[500px] bg-cybercyan/20 rounded-full blur-[140px] animate-orb pointer-events-none"></div>
+  <div class="absolute bottom-[-10%] left-[5%] w-[400px] h-[400px] bg-techblue/10 rounded-full blur-[120px] pointer-events-none" style="animation-delay: 2s;"></div>
+
+  <img id="rc-mv-img" alt="" class="absolute right-0 bottom-0 w-full lg:w-1/2 h-full object-cover mix-blend-luminosity opacity-20 lg:opacity-35 pointer-events-none" />
+
+  <div class="relative max-w-[1200px] mx-auto px-6 w-full py-24 z-10">
+    <div class="max-w-3xl fade-in">
+      <div class="inline-flex items-center gap-2 bg-techblue/5 border border-techblue/20 px-4 py-1.5 rounded-full backdrop-blur-sm">
+        <span class="flex h-2 w-2 relative">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-techblue opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-techblue"></span>
+        </span>
+        <p class="font-en font-black text-techblue text-[11px] tracking-[0.3em] uppercase">NEXT-GEN WEB STRATEGY</p>
       </div>
-      <h1 id="rc-mv-title" class="mt-6 text-[2.4rem] md:text-[3.4rem] font-bold leading-[1.3] tracking-tight"></h1>
-      <p id="rc-mv-subtitle" class="mt-7 max-w-xl text-white/75 leading-[2] md:text-[16px]"></p>
-      <a href="#positions" class="mt-10 inline-flex items-center gap-2.5 pl-7 pr-6 py-3.5 rounded-full bg-sky text-white text-sm font-semibold hover:bg-[#00a3c0] transition shadow-lg shadow-[#00B8D9]/25">
-        募集職種を見る <i data-lucide="arrow-down" class="w-4 h-4"></i>
-      </a>
+
+      <div class="mt-8 font-black tracking-tight text-futuredark">
+        <h1 id="rc-mv-title" class="text-4xl sm:text-6xl md:text-[5rem] leading-[1.15] font-black"></h1>
+      </div>
+      <p id="rc-mv-subtitle" class="mt-8 max-w-xl text-futuredark/70 leading-[2.1] text-base font-bold"></p>
+
+      <div class="mt-12">
+        <a href="#positions" class="group relative inline-flex items-center gap-3 px-8 py-4 bg-futuredark text-white font-en font-black text-sm tracking-widest rounded-xl transition-all shadow-[0_10px_30px_rgba(8,12,22,0.2)] hover:bg-techblue hover:shadow-[0_15px_35px_rgba(0,82,255,0.4)] hover:scale-[1.03]">
+          FUTURE POSITIONS
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-neonyellow group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+        </a>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ===== 採用メッセージ ===== -->
-<section data-theme-section="message" class="py-24 md:py-32 reveal">
-  <div class="max-w-[760px] mx-auto px-6">
+<!-- ===== ビジョン ===== -->
+<section data-theme-section="message" class="py-24 md:py-36 bg-white relative overflow-hidden border-b border-techblue/5 reveal">
+  <div class="max-w-[840px] mx-auto px-6 relative z-10">
     <div class="flex items-center gap-3">
-      <span class="sec-accent w-8 h-px bg-sky"></span>
-      <p class="sec-eyebrow text-sky text-[11px] font-semibold tracking-[0.3em]">MESSAGE</p>
+      <p class="sec-eyebrow font-en font-black text-techblue text-xs tracking-[0.2em] uppercase">OUR VISION</p>
+      <span class="sec-accent flex-1 h-px bg-gradient-to-r from-techblue to-transparent"></span>
     </div>
-    <h2 class="mt-5 text-[1.7rem] md:text-[2.4rem] font-bold leading-[1.5] tracking-tight">私たちの想い</h2>
-    <p id="rc-message" class="article-body mt-8 text-[15.5px] leading-[2.15] text-slate"></p>
+    <h2 class="mt-5 text-3xl md:text-5xl font-black tracking-tight text-futuredark leading-tight">
+      テクノロジーで、<br class="sm:hidden" />まだ見ぬ最適解を導く。
+    </h2>
+    <div class="mt-12 bg-gradient-to-br from-[#F8FAFC] to-white border border-techblue/10 p-8 md:p-10 rounded-2xl shadow-[0_20px_40px_rgba(0,82,255,0.03)]">
+      <p id="rc-message" class="article-body text-base md:text-[17px] leading-[2.3] text-futuredark/85 font-medium"></p>
+    </div>
   </div>
 </section>
 
 <!-- ===== 募集職種 ===== -->
-<section id="positions" data-theme-section="positions" class="py-24 md:py-32 bg-mist border-y border-line reveal">
-  <div class="max-w-[1180px] mx-auto px-6">
-    <div class="text-center max-w-xl mx-auto">
-      <p class="sec-eyebrow text-sky text-[11px] font-semibold tracking-[0.3em]">POSITIONS</p>
-      <h2 class="mt-3 text-[1.7rem] md:text-4xl font-bold tracking-tight">募集職種</h2>
-      <p class="mt-4 text-[14.5px] text-slate leading-relaxed">現在募集中のポジションです。気になる職種をご覧ください。</p>
+<section id="positions" data-theme-section="positions" class="py-24 md:py-36 bg-[#F8FAFC] relative reveal">
+  <div class="max-w-[1200px] mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-techblue/10 pb-8">
+      <div>
+        <p class="sec-eyebrow font-en font-black text-techblue text-xs tracking-[0.2em] uppercase">OPEN POSITIONS</p>
+        <h2 class="mt-2 text-3xl md:text-5xl font-black tracking-tight">募集中のミッション</h2>
+      </div>
+      <p class="text-sm md:text-base text-futuredark/60 max-w-sm font-bold leading-relaxed">
+        データ、AI、クリエイティブ。最先端の武器を手に、企業のDXとWeb戦略を加速させる仲間を求めています。
+      </p>
     </div>
-    <div id="jobs-list" class="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <p class="text-slate col-span-full text-center py-8">募集職種を読み込んでいます…</p>
+
+    <div id="jobs-list" class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <p class="text-futuredark/40 col-span-full text-center py-12 font-black tracking-widest animate-pulse">
+        <i data-lucide="scan" class="w-6 h-6 mx-auto mb-2 text-techblue"></i> SEARCHING DATA…
+      </p>
     </div>
   </div>
 </section>
 
 <!-- ===== 社員インタビュー ===== -->
-<section data-theme-section="interview" class="py-24 md:py-32 reveal">
-  <div class="max-w-[1180px] mx-auto px-6">
-    <div class="text-center max-w-xl mx-auto">
-      <p class="sec-eyebrow text-sky text-[11px] font-semibold tracking-[0.3em]">INTERVIEW</p>
-      <h2 class="mt-3 text-[1.7rem] md:text-4xl font-bold tracking-tight">働く人の声</h2>
-      <p class="mt-4 text-[14.5px] text-slate leading-relaxed">インフォネットで働く社員のリアルな声をご紹介します。</p>
+<section data-theme-section="interview" class="py-24 md:py-36 bg-white reveal">
+  <div class="max-w-[1200px] mx-auto px-6">
+    <div class="text-center max-w-2xl mx-auto">
+      <div class="inline-block bg-techblue/5 text-techblue px-4 py-1.5 rounded-full font-en font-black text-xs uppercase tracking-widest">CREATORS &amp; ENGINEERS</div>
+      <h2 class="mt-4 text-3xl md:text-5xl font-black tracking-tight text-futuredark">未来を創る、メンバーの鼓動</h2>
     </div>
-    <div id="rc-interviews" class="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-7"></div>
+    <div id="rc-interviews" class="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
   </div>
 </section>
 
-<!-- ===== 数字で見る会社 ===== -->
-<section class="py-24 md:py-28 text-white bg-navy reveal">
-  <div class="max-w-[1080px] mx-auto px-6">
+<!-- ===== 数字 ===== -->
+<section class="py-24 md:py-36 text-white bg-futuredark relative overflow-hidden rounded-[2.5rem] max-w-[1280px] mx-auto my-6 shadow-[0_30px_60px_rgba(8,12,22,0.4)] reveal">
+  <div class="absolute inset-0 bg-digital-grid opacity-10"></div>
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-techblue/20 rounded-full blur-[160px] pointer-events-none"></div>
+
+  <div class="max-w-[1100px] mx-auto px-6 relative z-10">
     <div class="text-center">
-      <p class="text-sky text-[11px] font-semibold tracking-[0.3em]">NUMBERS</p>
-      <h2 class="mt-3 text-[1.7rem] md:text-4xl font-bold tracking-tight">数字で見るインフォネット</h2>
+      <p class="font-en font-black text-neonyellow text-xs tracking-[0.3em] uppercase">INFONET DATA</p>
+      <h2 class="mt-2 text-3xl md:text-5xl font-black tracking-tight text-white">データで見る、インフォネット</h2>
     </div>
-    <div id="rc-stats" class="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-6"></div>
+    <div id="rc-stats" class="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-y-16 gap-x-8 font-en font-black text-center"></div>
   </div>
 </section>
 
-<!-- ===== 福利厚生・働く環境 ===== -->
-<section data-theme-section="benefits" class="py-24 md:py-32 bg-mist border-y border-line reveal">
-  <div class="max-w-[1080px] mx-auto px-6">
+<!-- ===== 福利厚生 ===== -->
+<section data-theme-section="benefits" class="py-24 md:py-36 bg-[#F8FAFC] reveal">
+  <div class="max-w-[1100px] mx-auto px-6">
     <div class="text-center max-w-xl mx-auto">
-      <p class="sec-eyebrow text-sky text-[11px] font-semibold tracking-[0.3em]">ENVIRONMENT</p>
-      <h2 class="mt-3 text-[1.7rem] md:text-4xl font-bold tracking-tight">福利厚生・働く環境</h2>
+      <p class="sec-eyebrow font-en font-black text-techblue text-xs tracking-[0.2em] uppercase">WORK ENVIRONMENT</p>
+      <h2 class="mt-2 text-3xl md:text-5xl font-black tracking-tight text-futuredark">自律とパフォーマンスを最大化</h2>
     </div>
-    <div id="rc-benefits" class="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-5"></div>
+    <div id="rc-benefits" class="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
   </div>
 </section>
 
 <!-- ===== 選考フロー ===== -->
-<section data-theme-section="flow" class="py-24 md:py-32 reveal">
-  <div class="max-w-[1080px] mx-auto px-6">
+<section data-theme-section="flow" class="py-24 md:py-36 bg-white relative overflow-hidden border-t border-techblue/5 reveal">
+  <div class="max-w-[1100px] mx-auto px-6">
     <div class="text-center max-w-xl mx-auto">
-      <p class="sec-eyebrow text-sky text-[11px] font-semibold tracking-[0.3em]">FLOW</p>
-      <h2 class="mt-3 text-[1.7rem] md:text-4xl font-bold tracking-tight">選考フロー</h2>
+      <p class="sec-eyebrow font-en font-black text-techblue text-xs tracking-[0.2em] uppercase">RECRUITMENT PIPELINE</p>
+      <h2 class="mt-2 text-3xl md:text-5xl font-black tracking-tight text-futuredark">ジョインまでのステップ</h2>
     </div>
-    <div class="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      <div class="relative bg-white border border-line rounded-2xl p-7 overflow-hidden">
-        <span class="text-[5rem] font-extrabold text-[#EEF2F6] absolute -top-2 right-3 select-none leading-none">01</span>
-        <div class="relative">
-          <p class="text-[11px] font-semibold tracking-[0.18em] text-sky">STEP 01</p>
-          <h3 class="mt-2 font-bold text-[17px]">エントリー</h3>
-          <p class="mt-2.5 text-[13.5px] text-slate leading-relaxed">お問い合わせフォームよりご応募ください。</p>
+    <div class="mt-20 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="relative bg-[#F8FAFC] border border-techblue/10 rounded-2xl p-8 group hover:bg-white hover:border-techblue/30 hover:shadow-[0_20px_40px_rgba(0,82,255,0.08)] transition-all duration-300">
+        <span class="font-en font-black text-5xl text-techblue/5 group-hover:text-techblue/10 absolute top-4 right-6 select-none transition-colors">01</span>
+        <div>
+          <p class="font-en font-black text-[11px] text-techblue tracking-widest">PHASE 01</p>
+          <h3 class="mt-3 font-black text-lg text-futuredark">エントリー</h3>
+          <p class="mt-3 text-sm text-futuredark/60 leading-relaxed font-medium">数分で完了するスマートフォームよりご応募ください。</p>
         </div>
       </div>
-      <div class="relative bg-white border border-line rounded-2xl p-7 overflow-hidden">
-        <span class="text-[5rem] font-extrabold text-[#EEF2F6] absolute -top-2 right-3 select-none leading-none">02</span>
-        <div class="relative">
-          <p class="text-[11px] font-semibold tracking-[0.18em] text-sky">STEP 02</p>
-          <h3 class="mt-2 font-bold text-[17px]">書類選考</h3>
-          <p class="mt-2.5 text-[13.5px] text-slate leading-relaxed">ご経歴をもとに選考いたします。</p>
+      <div class="relative bg-[#F8FAFC] border border-techblue/10 rounded-2xl p-8 group hover:bg-white hover:border-techblue/30 hover:shadow-[0_20px_40px_rgba(0,82,255,0.08)] transition-all duration-300">
+        <span class="font-en font-black text-5xl text-techblue/5 group-hover:text-techblue/10 absolute top-4 right-6 select-none transition-colors">02</span>
+        <div>
+          <p class="font-en font-black text-[11px] text-techblue tracking-widest">PHASE 02</p>
+          <h3 class="mt-3 font-black text-lg text-futuredark">オンライン選考</h3>
+          <p class="mt-3 text-sm text-futuredark/60 leading-relaxed font-medium">これまでの成果や、あなたが挑戦したいビジョンを拝見します。</p>
         </div>
       </div>
-      <div class="relative bg-white border border-line rounded-2xl p-7 overflow-hidden">
-        <span class="text-[5rem] font-extrabold text-[#EEF2F6] absolute -top-2 right-3 select-none leading-none">03</span>
-        <div class="relative">
-          <p class="text-[11px] font-semibold tracking-[0.18em] text-sky">STEP 03</p>
-          <h3 class="mt-2 font-bold text-[17px]">面接（1〜2回）</h3>
-          <p class="mt-2.5 text-[13.5px] text-slate leading-relaxed">オンライン面接も可能です。</p>
+      <div class="relative bg-[#F8FAFC] border border-techblue/10 rounded-2xl p-8 group hover:bg-white hover:border-techblue/30 hover:shadow-[0_20px_40px_rgba(0,82,255,0.08)] transition-all duration-300">
+        <span class="font-en font-black text-5xl text-techblue/5 group-hover:text-techblue/10 absolute top-4 right-6 select-none transition-colors">03</span>
+        <div>
+          <p class="font-en font-black text-[11px] text-techblue tracking-widest">PHASE 03</p>
+          <h3 class="mt-3 font-black text-lg text-futuredark">インタビュー</h3>
+          <p class="mt-3 text-sm text-futuredark/60 leading-relaxed font-medium">オンライン対応。スキルだけでなく、カルチャーフィットを対話します。</p>
         </div>
       </div>
-      <div class="relative bg-navy text-white rounded-2xl p-7 overflow-hidden">
-        <span class="text-[5rem] font-extrabold text-white/[0.07] absolute -top-2 right-3 select-none leading-none">04</span>
-        <div class="relative">
-          <p class="text-[11px] font-semibold tracking-[0.18em] text-sky">STEP 04</p>
-          <h3 class="mt-2 font-bold text-[17px]">内定</h3>
-          <p class="mt-2.5 text-[13.5px] text-white/70 leading-relaxed">条件をご相談のうえ、ご入社となります。</p>
+      <div class="relative bg-gradient-to-br from-techblue to-blue-700 text-white rounded-2xl p-8 shadow-[0_15px_35px_rgba(0,82,255,0.3)] hover:scale-[1.02] transition-transform">
+        <span class="font-en font-black text-5xl text-white/10 absolute top-4 right-6 select-none">04</span>
+        <div>
+          <p class="font-en font-black text-[11px] text-neonyellow tracking-widest">PHASE 04</p>
+          <h3 class="mt-3 font-black text-lg text-white">オファー &amp; ジョイン</h3>
+          <p class="mt-3 text-sm text-white/80 leading-relaxed font-medium">条件確定後、インフォネットの未来のコアとしてお迎えします！</p>
         </div>
       </div>
     </div>
@@ -175,43 +220,47 @@
 </section>
 
 <!-- ===== ブログ ===== -->
-<section id="blog" data-theme-section="blog" class="blog-vivid relative overflow-hidden py-24 md:py-32 reveal">
-  <span class="blog-orb blog-orb-1" aria-hidden="true"></span>
-  <span class="blog-orb blog-orb-2" aria-hidden="true"></span>
-  <span class="blog-orb blog-orb-3" aria-hidden="true"></span>
-  <div class="relative z-10 max-w-[1180px] mx-auto px-6">
+<section id="blog" data-theme-section="blog" class="relative overflow-hidden py-24 md:py-36 bg-[#F8FAFC] reveal">
+  <div class="relative z-10 max-w-[1200px] mx-auto px-6">
     <div class="text-center max-w-xl mx-auto">
-      <p class="sec-eyebrow text-sky text-[11px] font-semibold tracking-[0.3em]">BLOG</p>
-      <h2 class="mt-3 text-[1.7rem] md:text-4xl font-bold tracking-tight">インフォネットの日々</h2>
-      <p class="mt-4 text-[14.5px] text-slate leading-relaxed">社員の声や社内の出来事を、ブログでお届けします。</p>
+      <p class="sec-eyebrow font-en font-black text-techblue text-xs tracking-[0.2em] uppercase">INSIDE STORIES</p>
+      <h2 class="mt-2 text-3xl md:text-5xl font-black tracking-tight text-futuredark">インフォネットのテック＆カルチャー</h2>
     </div>
-    <div id="rc-blog-list" class="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
-      <p class="text-slate col-span-full text-center py-8">ブログを読み込んでいます…</p>
+    <div id="rc-blog-list" class="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <p class="text-futuredark/40 col-span-full text-center py-12 font-bold tracking-widest animate-pulse">UPDATING LOGIC LOADING…</p>
     </div>
   </div>
 </section>
 
 <!-- ===== CTA ===== -->
-<section class="relative py-24 md:py-28 text-white overflow-hidden bg-navy">
-  <div class="relative max-w-[720px] mx-auto px-6 text-center">
-    <div class="flex items-center justify-center gap-3">
-      <span class="w-8 h-px bg-sky"></span>
-      <p class="text-sky text-[11px] font-semibold tracking-[0.3em]">JOIN US</p>
-      <span class="w-8 h-px bg-sky"></span>
+<section class="relative py-32 md:py-40 text-white overflow-hidden bg-futuredark rounded-t-[3rem] shadow-[0_-20px_50px_rgba(8,12,22,0.2)]">
+  <div class="absolute inset-0 bg-digital-grid opacity-10"></div>
+  <div class="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-techblue/30 rounded-full blur-[140px] pointer-events-none"></div>
+  <div class="absolute top-[-20%] left-[-10%] w-[400px] h-[400px] bg-cybercyan/20 rounded-full blur-[120px] pointer-events-none"></div>
+
+  <div class="relative max-w-[850px] mx-auto px-6 text-center z-10">
+    <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full">
+      <p class="text-neonyellow font-en font-black text-xs uppercase tracking-widest">BUILD THE NEXT GENERATION</p>
     </div>
-    <h2 class="mt-6 text-2xl md:text-[2.4rem] font-bold leading-[1.5] tracking-tight">あなたの「好奇心」を、<br class="hidden sm:block" />インフォネットで活かしませんか。</h2>
-    <p class="mt-5 text-white/70 leading-relaxed">ご興味をお持ちの方は、お気軽にお問い合わせください。</p>
-    <a href="/#contact" class="mt-9 inline-flex items-center gap-2.5 pl-7 pr-6 py-3.5 rounded-full bg-sky text-white text-sm font-semibold hover:bg-[#00a3c0] transition shadow-lg shadow-[#00B8D9]/25">
-      お問い合わせ・エントリー <i data-lucide="arrow-right" class="w-4 h-4"></i>
-    </a>
+    <h2 class="mt-8 text-3xl md:text-6xl font-black leading-[1.2] tracking-tight text-white">
+      あなたの「好奇心」が、<br />未来のWebインフラを加速させる。
+    </h2>
+    <p class="mt-6 text-base text-white/70 max-w-xl mx-auto font-medium leading-relaxed">
+      最先端の技術と自由な発想を掛け合わせ、社会に大きなインパクトを。インフォネットで新しいキャリアのコミットを始めよう。
+    </p>
+    <div class="mt-12">
+      <a href="/#contact" class="group relative inline-flex items-center gap-3 px-12 py-5 bg-techblue text-white font-black text-base tracking-widest rounded-full transition-all shadow-[0_0_30px_rgba(0,82,255,0.4)] hover:shadow-[0_0_50px_rgba(0,82,255,0.7)] hover:scale-105">
+        APPLY NOW（エントリーはこちら）
+        <i data-lucide="arrow-right" class="w-5 h-5 text-white group-hover:translate-x-1 transition-transform"></i>
+      </a>
+    </div>
   </div>
 </section>
 
-<!-- ===== フッター ===== -->
-<footer class="bg-[#0a2440] text-white/55">
-  <div class="max-w-[1180px] mx-auto px-6 py-9 flex flex-wrap justify-between gap-3 text-xs">
+<footer class="bg-futuredark text-white/30 border-t border-white/5">
+  <div class="max-w-[1200px] mx-auto px-6 py-10 flex flex-wrap justify-between items-center gap-4 text-xs font-bold">
     <p>© <span id="year">2026</span> INFONET Inc. ｜ 本サイトは ITLINE による法人AIデモ環境です。</p>
-    <a href="/admin/" class="hover:text-white transition">管理画面</a>
+    <a href="/admin/" class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl hover:text-white hover:bg-white/10 transition-all">管理画面</a>
   </div>
 </footer>
 

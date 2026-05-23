@@ -132,23 +132,23 @@ function jobCardHtml(n, style) {
   const img = window.newsImageUrl(n.image);
   const title = escapeHtmlSite(n.title);
   const badge =
-    '<span class="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-[#00B8D9]">' +
-    '<span class="w-1.5 h-1.5 rounded-full bg-[#00B8D9]"></span>募集中</span>';
+    '<span class="inline-flex items-center gap-1.5 text-[10px] font-en font-black tracking-widest uppercase text-[#0052FF]">' +
+    '<span class="w-1.5 h-1.5 rounded-full bg-[#0052FF]"></span>OPEN</span>';
   const more =
-    '<span class="mt-5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#0F3D7E]">' +
-    '詳細を見る <i data-lucide="arrow-right" class="w-3.5 h-3.5 transition group-hover:translate-x-0.5"></i></span>';
+    '<span class="mt-5 inline-flex items-center gap-1.5 text-[11px] font-en font-black tracking-widest uppercase text-[#0052FF]">' +
+    'DETAILS <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5"></i></span>';
 
   if (style === "horizontal") {
     return `
       <a href="${url}"
-         class="group flex flex-col sm:flex-row bg-white border border-[#E8EDF2] rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-[#D5DEE8] hover:shadow-[0_22px_44px_-22px_rgba(15,42,74,0.28)]">
+         class="group flex flex-col sm:flex-row bg-white border border-[#0052FF]/10 rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-[#0052FF]/30 hover:shadow-[0_25px_50px_rgba(0,82,255,0.12)]">
         <div class="sm:w-[42%] shrink-0 overflow-hidden">
           <img src="${img}" alt="" class="w-full h-44 sm:h-full object-cover transition duration-500 group-hover:scale-105" />
         </div>
         <div class="flex-1 p-6 sm:p-7">
           ${badge}
-          <h3 class="mt-2.5 text-[16px] font-bold text-[#0F2A4A] leading-snug group-hover:text-[#0F3D7E]">${title}</h3>
-          <p class="mt-2 text-[13px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 92))}</p>
+          <h3 class="mt-3 text-[16px] font-black text-[#080C16] leading-snug group-hover:text-[#0052FF] transition-colors">${title}</h3>
+          <p class="mt-2 text-sm text-[#080C16]/60 leading-relaxed font-medium">${escapeHtmlSite(excerptSite(n.body, 92))}</p>
           ${more}
         </div>
       </a>`;
@@ -157,15 +157,15 @@ function jobCardHtml(n, style) {
   if (style === "wide" || style === "row") {
     return `
       <a href="${url}"
-         class="group relative block bg-white border border-[#E8EDF2] rounded-[20px] overflow-hidden shadow-[0_3px_16px_-8px_rgba(15,42,74,0.16)] transition duration-300 hover:-translate-y-1.5 hover:border-[#CDDBE8] hover:shadow-[0_26px_50px_-22px_rgba(15,42,74,0.32)]">
-        <span class="absolute top-0 inset-x-0 h-1 z-10 bg-gradient-to-r from-[#00B8D9] via-[#3FB5C9] to-[#5FCB91]"></span>
+         class="group relative block bg-white border border-[#0052FF]/10 rounded-[20px] overflow-hidden shadow-[0_5px_20px_rgba(0,82,255,0.06)] transition duration-300 hover:-translate-y-2 hover:border-[#0052FF]/30 hover:shadow-[0_30px_60px_rgba(0,82,255,0.15)]">
+        <span class="absolute top-0 inset-x-0 h-1 z-10 bg-gradient-to-r from-[#0052FF] via-[#00F0FF] to-[#DFFF00]"></span>
         <div class="overflow-hidden">
           <img src="${img}" alt="" class="w-full ${style === "row" ? "h-44" : "h-52"} object-cover transition duration-500 group-hover:scale-105" />
         </div>
         <div class="${style === "row" ? "p-6" : "p-7"}">
           ${badge}
-          <h3 class="mt-2.5 text-[16px] font-bold text-[#0F2A4A] leading-snug group-hover:text-[#0F3D7E]">${title}</h3>
-          <p class="mt-2 text-[13.5px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, style === "row" ? 70 : 76))}</p>
+          <h3 class="mt-3 text-[16px] font-black text-[#080C16] leading-snug group-hover:text-[#0052FF] transition-colors">${title}</h3>
+          <p class="mt-2 text-[13.5px] text-[#080C16]/60 leading-relaxed font-medium">${escapeHtmlSite(excerptSite(n.body, style === "row" ? 70 : 76))}</p>
           ${more}
         </div>
       </a>`;
@@ -174,14 +174,14 @@ function jobCardHtml(n, style) {
   // default
   return `
       <a href="${url}"
-         class="group block bg-white border border-[#E8EDF2] rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-1.5 hover:border-[#D5DEE8] hover:shadow-[0_22px_44px_-22px_rgba(15,42,74,0.28)]">
+         class="group block bg-white border border-[#0052FF]/10 rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-2 hover:border-[#0052FF]/30 hover:shadow-[0_25px_50px_rgba(0,82,255,0.12)]">
         <div class="overflow-hidden">
           <img src="${img}" alt="" class="w-full h-44 object-cover transition duration-500 group-hover:scale-105" />
         </div>
         <div class="p-6">
           ${badge}
-          <h3 class="mt-2.5 text-[15px] font-bold text-[#0F2A4A] leading-snug group-hover:text-[#0F3D7E]">${title}</h3>
-          <p class="mt-2 text-[13px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 68))}</p>
+          <h3 class="mt-3 text-[15px] font-black text-[#080C16] leading-snug group-hover:text-[#0052FF] transition-colors">${title}</h3>
+          <p class="mt-2 text-[13px] text-[#080C16]/60 leading-relaxed font-medium">${escapeHtmlSite(excerptSite(n.body, 68))}</p>
           ${more}
         </div>
       </a>`;
@@ -308,16 +308,16 @@ async function renderRecruitPage() {
         : ivs
             .map(
               (iv) => `
-      <div class="group bg-white border border-[#E8EDF2] rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-1.5 hover:border-[#D5DEE8] hover:shadow-[0_22px_44px_-22px_rgba(15,42,74,0.28)]">
+      <div class="group bg-white border border-[#0052FF]/10 rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-2 hover:border-[#0052FF]/30 hover:shadow-[0_25px_50px_rgba(0,82,255,0.12)]">
         <div class="overflow-hidden">
           <img src="${window.newsImageUrl(iv.image)}" alt="" class="w-full h-60 object-cover transition duration-500 group-hover:scale-105" />
         </div>
         <div class="p-7">
-          <i data-lucide="quote" class="w-7 h-7 text-[#00B8D9]/35"></i>
-          <p class="mt-3 text-[13.5px] text-[#3D4D60] leading-[1.95] article-body">${escapeHtmlSite(iv.comment)}</p>
-          <div class="mt-6 pt-5 border-t border-[#E8EDF2]">
-            <p class="font-bold text-[#0F2A4A]">${escapeHtmlSite(iv.name)}</p>
-            <p class="text-[12.5px] text-[#5B6B7F] mt-1">${escapeHtmlSite(iv.role)}</p>
+          <i data-lucide="quote" class="w-7 h-7 text-[#0052FF]/40"></i>
+          <p class="mt-3 text-[13.5px] text-[#080C16]/80 leading-[2] font-medium article-body">${escapeHtmlSite(iv.comment)}</p>
+          <div class="mt-6 pt-5 border-t border-[#0052FF]/10">
+            <p class="font-black text-[#080C16]">${escapeHtmlSite(iv.name)}</p>
+            <p class="font-en text-[12px] text-[#0052FF] mt-1 tracking-wider">${escapeHtmlSite(iv.role)}</p>
           </div>
         </div>
       </div>`
@@ -331,10 +331,10 @@ async function renderRecruitPage() {
     stHost.innerHTML = sts
       .map(
         (s) => `
-      <div class="text-center">
-        <p class="text-[11px] font-semibold tracking-[0.16em] text-[#00B8D9]">${escapeHtmlSite(s.label)}</p>
-        <p class="mt-3 text-[2.6rem] md:text-[3.1rem] font-extrabold leading-none tracking-tight">${escapeHtmlSite(s.value)}</p>
-        <div class="mt-4 w-7 h-px bg-white/25 mx-auto"></div>
+      <div>
+        <p class="text-[11px] text-[#DFFF00] tracking-[0.25em] uppercase font-black">${escapeHtmlSite(s.label)}</p>
+        <p class="mt-4 text-5xl md:text-[3.6rem] text-white tracking-tight leading-none">${escapeHtmlSite(s.value)}</p>
+        <div class="mt-5 w-8 h-px bg-white/20 mx-auto"></div>
       </div>`
       )
       .join("");
@@ -346,12 +346,12 @@ async function renderRecruitPage() {
     bnHost.innerHTML = bns
       .map(
         (b) => `
-      <div class="bg-white rounded-2xl p-7 border border-[#E8EDF2] transition duration-300 hover:-translate-y-1 hover:border-[#D5DEE8] hover:shadow-[0_18px_36px_-20px_rgba(15,42,74,0.22)]">
-        <div class="w-11 h-11 rounded-xl bg-[#00B8D9]/10 flex items-center justify-center text-[#00B8D9]">
+      <div class="bg-white rounded-2xl p-7 border border-[#0052FF]/10 transition duration-300 hover:-translate-y-1 hover:border-[#0052FF]/30 hover:shadow-[0_20px_40px_rgba(0,82,255,0.1)]">
+        <div class="w-12 h-12 rounded-xl bg-[#0052FF]/10 flex items-center justify-center text-[#0052FF]">
           <i data-lucide="check" class="w-5 h-5"></i>
         </div>
-        <h3 class="mt-5 font-bold text-[15px] text-[#0F2A4A]">${escapeHtmlSite(b.title)}</h3>
-        <p class="mt-2 text-[13px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(b.desc)}</p>
+        <h3 class="mt-5 font-black text-[15px] text-[#080C16]">${escapeHtmlSite(b.title)}</h3>
+        <p class="mt-2 text-[13px] text-[#080C16]/60 leading-relaxed font-medium">${escapeHtmlSite(b.desc)}</p>
       </div>`
       )
       .join("");
@@ -380,23 +380,23 @@ async function renderBlogList() {
       .map(
         (n) => `
       <a href="/blog.html?id=${encodeURIComponent(n.id)}"
-         class="group block bg-white border border-[#E8EDF2] rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-1.5 hover:border-[#D5DEE8] hover:shadow-[0_22px_44px_-22px_rgba(15,42,74,0.28)]">
+         class="group block bg-white border border-[#0052FF]/10 rounded-2xl overflow-hidden transition duration-300 hover:-translate-y-2 hover:border-[#0052FF]/30 hover:shadow-[0_25px_50px_rgba(0,82,255,0.12)]">
         <div class="relative overflow-hidden">
-          <img src="${window.newsImageUrl(n.image)}" alt="" class="w-full h-44 object-cover transition duration-500 group-hover:scale-105" />
-          <span class="absolute top-3.5 left-3.5 text-[10.5px] font-semibold tracking-wide text-white bg-[#0F2A4A]/85 backdrop-blur-sm rounded-full px-2.5 py-1">
+          <img src="${window.newsImageUrl(n.image)}" alt="" class="w-full h-48 object-cover transition duration-500 group-hover:scale-105" />
+          <span class="absolute top-3.5 left-3.5 text-[10px] font-en font-black tracking-widest uppercase text-[#080C16] bg-[#DFFF00] rounded-full px-2.5 py-1">
             ${escapeHtmlSite(blogCategoryLabel(n.category))}
           </span>
         </div>
         <div class="p-6">
-          <span class="text-[12px] font-medium text-[#9AA7B6]">${formatDateSite(n.publishedAt || n.createdAt)}</span>
-          <h3 class="mt-2 text-[15.5px] font-bold text-[#0F2A4A] leading-snug group-hover:text-[#0F3D7E]">
+          <span class="text-[11px] font-en font-black text-[#0052FF] tracking-widest uppercase">${formatDateSite(n.publishedAt || n.createdAt)}</span>
+          <h3 class="mt-2 text-[15.5px] font-black text-[#080C16] leading-snug group-hover:text-[#0052FF] transition-colors">
             ${escapeHtmlSite(n.title)}
           </h3>
-          <p class="mt-2 text-[13px] text-[#5B6B7F] leading-relaxed">${escapeHtmlSite(excerptSite(n.body, 66))}</p>
+          <p class="mt-2 text-[13px] text-[#080C16]/60 leading-relaxed font-medium">${escapeHtmlSite(excerptSite(n.body, 66))}</p>
           ${
             Array.isArray(n.tags) && n.tags.length
               ? `<div class="mt-4 flex flex-wrap gap-1.5">${n.tags
-                  .map((t) => `<span class="text-[11px] text-[#5B6B7F] bg-[#F2F5F8] rounded-full px-2.5 py-0.5">#${escapeHtmlSite(t)}</span>`)
+                  .map((t) => `<span class="text-[11px] text-[#080C16]/60 bg-[#F8FAFC] border border-[#0052FF]/10 rounded-full px-2.5 py-0.5 font-medium">#${escapeHtmlSite(t)}</span>`)
                   .join("")}</div>`
               : ""
           }
