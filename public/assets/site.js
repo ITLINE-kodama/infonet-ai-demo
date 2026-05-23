@@ -355,6 +355,20 @@ async function renderRecruitPage() {
     }).join("");
   }
 
+  // 各セクションの装飾背景画像（sectionImages.<key>）
+  const sectionImages = (r.sectionImages && typeof r.sectionImages === "object") ? r.sectionImages : {};
+  document.querySelectorAll("img.rc-section-img[data-section-img]").forEach((el) => {
+    const key = el.getAttribute("data-section-img");
+    const src = sectionImages[key];
+    if (typeof src === "string" && src) {
+      el.src = window.newsImageUrl(src);
+      el.style.opacity = "0.35";
+    } else {
+      el.removeAttribute("src");
+      el.style.opacity = "0";
+    }
+  });
+
   // フォントサイズ等のスタイル上書き
   const STYLE_TARGET_MAP = {
     mvTitle: "rc-mv-title",

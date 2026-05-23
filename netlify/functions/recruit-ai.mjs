@@ -81,13 +81,20 @@ sectionThemes のキーと対応セクション：
 担当者の意図は次の2パターンに分かれます。区別して対応してください。
 
 (A) 添付画像を**そのまま採用ページの画像として使いたい**場合
-- 指示例：「メインビジュアルをこの画像にして」「ヒーロー背景にこれを使って」「○○さんの社員写真をこれに差し替えて」
+- 指示例：「メインビジュアルをこの画像にして」「ヒーロー背景にこれを使って」「○○さんの社員写真をこれに差し替えて」「ビジョンセクションにテック感の画像を入れて」
 - このときは、応答JSONに次のキーだけ含めてください（他のデータキーは触らない）：
   - "applyAttachedImage": 値は以下のいずれか
     - "mvImage" … 添付画像をメインビジュアル背景として使用
     - "interview:<id>" … 添付画像を特定の社員インタビュー写真として使用（例：interview:iv-1）
-  - "chatMessage": 「添付画像をメインビジュアル背景に設定しました」等の報告
+    - "section:vision" … OUR VISIONセクションの装飾背景画像として使用
+    - "section:positions" … OPEN POSITIONSセクションの装飾背景画像として使用
+    - "section:interview" … CREATORS & ENGINEERSセクションの装飾背景画像として使用
+    - "section:benefits" … WORK ENVIRONMENTセクションの装飾背景画像として使用
+    - "section:flow" … RECRUITMENT PIPELINEセクションの装飾背景画像として使用
+    - "section:blog" … INSIDE STORIESセクションの装飾背景画像として使用
+  - "chatMessage": 「添付画像を○○セクションの背景に設定しました」等の報告
 - 画像データ本体は出力しないでください（フロントエンドが処理します）
+- どのセクションか不明確な場合は、chatMessage で確認すること（勝手に mvImage を選んで上書きしない）
 
 (B) 添付画像を**参考・指示の手がかり**として使う場合（直すべき箇所を画像で示している）
 - 指示例：「赤丸の部分を緑に」「ここの改行を直して」「この部分を変更」
@@ -217,6 +224,13 @@ function stripDataUrls(obj) {
       }
     });
   }
+  if (c.sectionImages && typeof c.sectionImages === "object") {
+    Object.keys(c.sectionImages).forEach((k) => {
+      if (typeof c.sectionImages[k] === "string" && c.sectionImages[k].startsWith("data:")) {
+        c.sectionImages[k] = IMG_PLACEHOLDER;
+      }
+    });
+  }
   return c;
 }
 function restoreImages(merged, original) {
@@ -230,6 +244,14 @@ function restoreImages(merged, original) {
     merged.interviews.forEach((iv) => {
       if (iv && iv.image === IMG_PLACEHOLDER && iv.id && byId[iv.id]) {
         iv.image = byId[iv.id];
+      }
+    });
+  }
+  if (merged.sectionImages && typeof merged.sectionImages === "object" &&
+      original.sectionImages && typeof original.sectionImages === "object") {
+    Object.keys(merged.sectionImages).forEach((k) => {
+      if (merged.sectionImages[k] === IMG_PLACEHOLDER && original.sectionImages[k]) {
+        merged.sectionImages[k] = original.sectionImages[k];
       }
     });
   }
@@ -342,6 +364,9 @@ export default async (req) => {
     }
     if (parsed.styleOverrides && typeof parsed.styleOverrides === "object") {
       recruit.styleOverrides = { ...(current.styleOverrides || {}), ...parsed.styleOverrides };
+    }
+    if (parsed.sectionImages && typeof parsed.sectionImages === "object") {
+      recruit.sectionImages = { ...(current.sectionImages || {}), ...parsed.sectionImages };
     }
     // 画像目印 [IMG] が AI から返ってきた場合は元の画像URLに戻す
     restoreImages(recruit, current);

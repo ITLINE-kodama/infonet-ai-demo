@@ -165,6 +165,7 @@
       { phase: "PHASE 04", title: "オファー & ジョイン", desc: "条件確定後、インフォネットの未来のコアとしてお迎えします！" },
     ],
     styleOverrides: {},
+    sectionImages: {},
   };
 
   /* ---- localStorage ヘルパー ---- */

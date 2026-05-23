@@ -176,6 +176,10 @@
               <i data-lucide="image-plus" class="w-5 h-5"></i>
             </button>
             <input type="file" id="ai-img-file" accept="image/*" class="hidden" />
+            <button id="ai-lib-btn" type="button" title="画像ライブラリから選ぶ"
+              class="w-10 h-10 shrink-0 rounded-lg border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:bg-[#F9FAFB] hover:text-[#1E2761] hover:border-[#1E2761]/40">
+              <i data-lucide="images" class="w-5 h-5"></i>
+            </button>
             <textarea id="ai-instruction" rows="1" placeholder="例：採用メッセージをもっと簡潔に。画像を貼って「ここを直して」とお願いもできます。"
               class="flex-1 resize-none border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed focus:border-[#1E2761] outline-none thin-scroll"
               style="max-height: 120px;"></textarea>
@@ -189,6 +193,26 @@
       </section>
     </div>
   </main>
+</div>
+
+<!-- ===== 画像ライブラリ モーダル ===== -->
+<div id="lib-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col">
+    <div class="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
+      <div>
+        <h3 class="text-base font-semibold flex items-center gap-2"><i data-lucide="images" class="w-5 h-5 text-[#1E2761]"></i> 画像ライブラリ</h3>
+        <p class="text-[12px] text-[#6B7280] mt-0.5">これまでにアップロード／生成した画像です。クリックでチャットに添付できます。</p>
+      </div>
+      <button id="lib-close" type="button" class="w-9 h-9 rounded-lg hover:bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div id="lib-grid" class="flex-1 overflow-y-auto thin-scroll p-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+    <div class="px-6 py-3 border-t border-[#E5E7EB] flex items-center justify-between gap-3">
+      <p class="text-[12px] text-[#6B7280]">最新の12件まで保存されます（端末内）</p>
+      <button id="lib-clear" type="button" class="text-[12px] font-medium text-[#EF4444] hover:underline">すべて削除</button>
+    </div>
+  </div>
 </div>
 
 <script src="/assets/store.js"></script>
@@ -378,6 +402,7 @@
     readImageAsDataUrl(file, 1600, (dataUrl) => {
       data.mvImage = dataUrl;
       syncMvPreview();
+      if (typeof saveToLibrary === "function") saveToLibrary(dataUrl, "MV アップロード");
       toast("背景画像をアップロードしました（保存を押すと反映）", "success");
     });
   });
@@ -391,6 +416,7 @@
       if (url) {
         data.mvImage = url;
         syncMvPreview();
+        if (typeof saveToLibrary === "function") saveToLibrary(url, "AI生成 (MV背景)");
         toast("背景画像を生成しました（保存を押すと反映）", "success");
       } else {
         toast("画像生成は現在利用できません", "error");
@@ -459,6 +485,7 @@
     if (!file) return;
     readImageAsDataUrl(file, 1280, (dataUrl) => {
       setAttachedImage(dataUrl);
+      saveToLibrary(dataUrl, "アップロード");
       toast("参考画像を添付しました", "success");
     });
   });
@@ -473,12 +500,97 @@
           e.preventDefault();
           readImageAsDataUrl(file, 1280, (dataUrl) => {
             setAttachedImage(dataUrl);
+            saveToLibrary(dataUrl, "クリップボード");
             toast("クリップボードから画像を貼り付けました", "success");
           });
           return;
         }
       }
     }
+  });
+
+  /* ---- 画像ライブラリ（localStorageに保存）---- */
+  const LIB_KEY = "infonet_demo_media";
+  const LIB_MAX = 12;
+  function loadLibrary() {
+    try { return JSON.parse(localStorage.getItem(LIB_KEY) || "[]"); } catch { return []; }
+  }
+  function saveToLibrary(dataUrl, label) {
+    if (!dataUrl || typeof dataUrl !== "string") return;
+    try {
+      const list = loadLibrary();
+      // 同じ画像が既にあれば追加しない
+      if (list.some((it) => it.dataUrl === dataUrl)) return;
+      list.unshift({
+        id: "m-" + Date.now().toString(36),
+        dataUrl,
+        label: label || "画像",
+        createdAt: new Date().toISOString(),
+      });
+      while (list.length > LIB_MAX) list.pop();
+      localStorage.setItem(LIB_KEY, JSON.stringify(list));
+    } catch {}
+  }
+  function clearLibrary() {
+    try { localStorage.removeItem(LIB_KEY); } catch {}
+  }
+  function renderLibraryGrid() {
+    const host = $("lib-grid");
+    const list = loadLibrary();
+    if (!list.length) {
+      host.innerHTML = `<div class="col-span-full text-center py-16 text-[13px] text-[#9CA3AF]">
+        まだ画像がありません。<br>
+        チャットで画像を添付・生成すると、ここに自動で保存されます。
+      </div>`;
+      return;
+    }
+    host.innerHTML = list.map((it) => `
+      <button type="button" data-id="${it.id}"
+        class="group relative aspect-square rounded-xl overflow-hidden border border-[#E5E7EB] hover:border-[#1E2761] hover:shadow-lg transition-all bg-[#F3F4F6]">
+        <img src="${it.dataUrl}" alt="" class="absolute inset-0 w-full h-full object-cover" />
+        <span class="absolute inset-x-0 bottom-0 px-2 py-1.5 bg-gradient-to-t from-black/70 to-transparent text-[10px] text-white text-left">
+          ${escapeHtml(it.label || "")}
+        </span>
+      </button>
+    `).join("");
+  }
+  function openLibraryModal() {
+    renderLibraryGrid();
+    const m = $("lib-modal");
+    m.classList.remove("hidden");
+    m.classList.add("flex");
+    if (window.lucide) lucide.createIcons();
+  }
+  function closeLibraryModal() {
+    const m = $("lib-modal");
+    m.classList.add("hidden");
+    m.classList.remove("flex");
+  }
+  $("ai-lib-btn").addEventListener("click", openLibraryModal);
+  $("lib-close").addEventListener("click", closeLibraryModal);
+  $("lib-modal").addEventListener("click", (e) => { if (e.target === $("lib-modal")) closeLibraryModal(); });
+  $("lib-grid").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-id]");
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const item = loadLibrary().find((x) => x.id === id);
+    if (item) {
+      setAttachedImage(item.dataUrl);
+      closeLibraryModal();
+      toast("ライブラリから画像を添付しました", "success");
+    }
+  });
+  $("lib-clear").addEventListener("click", async () => {
+    const ok = await confirmModal({
+      title: "画像ライブラリをすべて削除しますか？",
+      message: "保存されている画像をすべて削除します。この操作は取り消せません。",
+      okText: "すべて削除",
+      danger: true,
+    });
+    if (!ok) return;
+    clearLibrary();
+    renderLibraryGrid();
+    toast("画像ライブラリをクリアしました", "info");
   });
 
   function openRecruitPreview() {
@@ -562,12 +674,19 @@
           const id = tgt.slice("interview:".length);
           const iv = updated.interviews.find((x) => x && x.id === id);
           if (iv) iv.image = sentImage;
+        } else if (tgt.startsWith("section:")) {
+          const key = tgt.slice("section:".length);
+          if (!updated.sectionImages || typeof updated.sectionImages !== "object") updated.sectionImages = {};
+          updated.sectionImages[key] = sentImage;
         }
       }
       // メインビジュアル画像も生成
       if ($("ai-mv-toggle").checked) {
         const imgUrl = await window.Store.generateImage("採用ページのメインビジュアル背景", $("ai-mv-instruction").value.trim());
-        if (imgUrl) updated.mvImage = imgUrl;
+        if (imgUrl) {
+          updated.mvImage = imgUrl;
+          if (typeof saveToLibrary === "function") saveToLibrary(imgUrl, "AI生成 (MV背景)");
+        }
       }
       await apiSaveRecruit(updated);
       await apiLog({ userName: user.name, action: "edit", targetTitle: "採用ページ：AIで更新", userPrompt: instruction });

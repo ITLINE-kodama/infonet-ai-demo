@@ -79,6 +79,9 @@ const DEFAULT = {
   ],
   // フォントサイズ等のスタイル上書き（任意・キーは下記のSTYLEABLE参照）
   styleOverrides: {},
+  // 各セクションの装飾背景画像（任意・データURLまたは画像パス）
+  // キー: vision / positions / interview / benefits / flow / blog
+  sectionImages: {},
 };
 
 function json(obj, status = 200) {
