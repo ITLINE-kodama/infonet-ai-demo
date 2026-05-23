@@ -291,13 +291,15 @@ async function renderRecruitPage() {
   // セクション配色テーマを適用（AIおまかせ更新で指定される）
   applySectionThemes(r.sectionThemes);
 
-  mvTitle.textContent = r.mvTitle || "採用情報";
+  // mvTitle / mvSubtitle は \n を <br> に変換して表示する（AIが改行位置を指定できる）
+  const nlToBr = (s) => escapeHtmlSite(s).replace(/\r?\n/g, "<br>");
+  mvTitle.innerHTML = nlToBr(r.mvTitle || "採用情報");
   const mvImg = document.getElementById("rc-mv-img");
   if (mvImg && r.mvImage) mvImg.src = window.newsImageUrl(r.mvImage);
   const sub = document.getElementById("rc-mv-subtitle");
-  if (sub) sub.textContent = r.mvSubtitle || "";
+  if (sub) sub.innerHTML = nlToBr(r.mvSubtitle || "");
   const msg = document.getElementById("rc-message");
-  if (msg) msg.textContent = r.message || "";
+  if (msg) msg.textContent = r.message || ""; // .article-body の pre-wrap で改行が反映される
 
   const ivHost = document.getElementById("rc-interviews");
   if (ivHost) {
