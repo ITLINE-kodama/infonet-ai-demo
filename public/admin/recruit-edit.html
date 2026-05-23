@@ -162,8 +162,21 @@
             <input id="ai-mv-instruction" type="text" placeholder="背景画像の指示（任意・例：活気のあるオフィス）"
               class="flex-1 min-w-0 border border-[#E5E7EB] rounded-lg px-2.5 py-1 text-[12px] focus:border-[#1E2761] outline-none" />
           </div>
+          <!-- 添付画像プレビュー -->
+          <div id="ai-img-preview" class="hidden mb-2 inline-flex items-center gap-2 bg-[#EEF2FF] border border-[#C7D2FE] rounded-lg pl-2 pr-1 py-1">
+            <img id="ai-img-thumb" alt="" class="w-12 h-12 object-cover rounded border border-[#C7D2FE]" />
+            <span class="text-[11px] text-[#1E2761] font-medium">参考画像を添付中</span>
+            <button id="ai-img-clear" type="button" class="w-6 h-6 rounded hover:bg-white text-[#6B7280] flex items-center justify-center" title="画像を外す">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
           <div class="flex items-end gap-2">
-            <textarea id="ai-instruction" rows="1" placeholder="例：採用メッセージをもっと簡潔に。募集職種の枠を横に大きく。"
+            <button id="ai-img-btn" type="button" title="画像を添付（クリック／Ctrl+V）"
+              class="w-10 h-10 shrink-0 rounded-lg border border-[#E5E7EB] flex items-center justify-center text-[#6B7280] hover:bg-[#F9FAFB] hover:text-[#1E2761] hover:border-[#1E2761]/40">
+              <i data-lucide="image-plus" class="w-5 h-5"></i>
+            </button>
+            <input type="file" id="ai-img-file" accept="image/*" class="hidden" />
+            <textarea id="ai-instruction" rows="1" placeholder="例：採用メッセージをもっと簡潔に。画像を貼って「ここを直して」とお願いもできます。"
               class="flex-1 resize-none border border-[#E5E7EB] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed focus:border-[#1E2761] outline-none thin-scroll"
               style="max-height: 120px;"></textarea>
             <button id="ai-run"
@@ -171,7 +184,7 @@
               <i data-lucide="send" class="w-5 h-5"></i>
             </button>
           </div>
-          <p class="mt-1.5 text-[11px] text-[#9CA3AF]">Enterで送信／Shift+Enterで改行　｜　変更は自動で保存されます</p>
+          <p class="mt-1.5 text-[11px] text-[#9CA3AF]">Enterで送信／Shift+Enterで改行　｜　画像は左の📎または Ctrl+V で添付できます</p>
         </div>
       </section>
     </div>
@@ -426,15 +439,62 @@
   const aiInput = $("ai-instruction");
   let aiBusy = false;
   let aiChatInited = false;
+  let aiAttachedImage = null; // 添付された参考画像（data URL）
+
+  /* ---- 参考画像の添付（ファイル選択 / Ctrl+V 貼り付け）---- */
+  function setAttachedImage(dataUrl) {
+    aiAttachedImage = dataUrl;
+    if (dataUrl) {
+      $("ai-img-thumb").src = dataUrl;
+      $("ai-img-preview").classList.remove("hidden");
+    } else {
+      $("ai-img-thumb").removeAttribute("src");
+      $("ai-img-preview").classList.add("hidden");
+    }
+  }
+  $("ai-img-btn").addEventListener("click", () => $("ai-img-file").click());
+  $("ai-img-file").addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    readImageAsDataUrl(file, 1280, (dataUrl) => {
+      setAttachedImage(dataUrl);
+      toast("参考画像を添付しました", "success");
+    });
+  });
+  $("ai-img-clear").addEventListener("click", () => setAttachedImage(null));
+  // Ctrl+V / Cmd+V でクリップボード画像を取り込み
+  aiInput.addEventListener("paste", (e) => {
+    const items = (e.clipboardData && e.clipboardData.items) || [];
+    for (const it of items) {
+      if (it.kind === "file" && it.type.startsWith("image/")) {
+        const file = it.getAsFile();
+        if (file) {
+          e.preventDefault();
+          readImageAsDataUrl(file, 1280, (dataUrl) => {
+            setAttachedImage(dataUrl);
+            toast("クリップボードから画像を貼り付けました", "success");
+          });
+          return;
+        }
+      }
+    }
+  });
 
   function openRecruitPreview() {
     window.open(location.origin + "/recruit.html?t=" + Date.now(), "infonet_recruit_preview", "width=1200,height=860");
   }
 
-  function aiAddUser(text) {
+  function aiAddUser(text, imageDataUrl) {
     const el = document.createElement("div");
     el.className = "fade-in flex justify-end";
-    el.innerHTML = `<div class="max-w-[80%] bg-[#1E2761] text-white text-sm rounded-2xl rounded-br-sm px-4 py-2.5 leading-relaxed whitespace-pre-wrap">${escapeHtml(text)}</div>`;
+    const imgBlock = imageDataUrl
+      ? `<img src="${imageDataUrl}" alt="添付画像" class="max-w-[260px] max-h-[200px] object-cover rounded-xl rounded-br-sm mb-1 ml-auto block border border-white/20" />`
+      : "";
+    el.innerHTML = `<div class="max-w-[80%]">
+      ${imgBlock}
+      ${text ? `<div class="bg-[#1E2761] text-white text-sm rounded-2xl rounded-br-sm px-4 py-2.5 leading-relaxed whitespace-pre-wrap">${escapeHtml(text)}</div>` : ""}
+    </div>`;
     aiChat.appendChild(el);
     aiChat.scrollTop = aiChat.scrollHeight;
   }
@@ -473,15 +533,17 @@
   async function aiRun() {
     if (aiBusy) return;
     const instruction = aiInput.value.trim();
-    if (!instruction) return;
+    if (!instruction && !aiAttachedImage) return;
     aiBusy = true;
     $("ai-run").disabled = true;
     aiInput.value = "";
     aiInput.style.height = "auto";
-    aiAddUser(instruction);
+    const sentImage = aiAttachedImage;
+    aiAddUser(instruction, sentImage);
+    setAttachedImage(null);
     const typing = aiAddTyping();
     try {
-      const res = await apiRecruitAI(instruction, data);
+      const res = await apiRecruitAI(instruction || "添付画像の指示どおりに修正してください。", data, sentImage);
       if (!res || !res.recruit) {
         typing.remove();
         const reason = (res && res.error) ? res.error : "AIから有効な応答が得られませんでした";

@@ -60,6 +60,14 @@ sectionThemes のキーと対応セクション：
 - 出力は更新後のJSONオブジェクトのみ。説明・前置き・後書きは一切出力しない
 - JSONの最初の文字は「{」、最後の文字は「}」でなければならない
 
+【画像が添付されている場合】
+- メッセージに画像（スクリーンショット等）が添付されているときは、画像と指示文を合わせて解釈してください
+- 画像内に矢印・赤丸・ハイライト・「ここ」のような指し示しがあれば、その箇所を特定してください
+- 採用ページのどの部分（mvTitle/mvSubtitle/message/interviews/stats/benefits/sectionThemes/positionsStyle）に対応するかを判断し、該当キーを編集してください
+- 画像から色・配置・改行位置などのデザイン意図も読み取り、可能ならプリセット（sectionThemes / positionsStyle）にマッピングする
+- 指示文が短くても（例：「これ直して」「ここ緑」）、画像から読み取った情報で補ってください
+- 何を直すべきか画像からも判断できない場合は、chatMessage で「画像のどの部分を、どう変えたいかをもう少し教えてください」と丁寧に確認する
+
 【改行・レイアウト】
 - mvTitle / mvSubtitle / message に "\n"（改行コード）を入れると、その位置で表示が改行されます
 - 「改行がおかしい」「テキストが折り返す位置が変」「ここで改行したい」「○○の前で改行」などの指示は、適切な位置に "\n" を入れて返してください
@@ -150,7 +158,15 @@ export default async (req) => {
   }
   const instruction = String(payload.instruction || "").trim();
   const current = payload.current && typeof payload.current === "object" ? payload.current : {};
-  if (!instruction) return json({ error: "指示文を入力してください" }, 400);
+  // 担当者が「ここを直して」と画像で示すための参考画像（任意・data URL）
+  let attachedImage = null;
+  if (typeof payload.attachedImage === "string") {
+    const m = payload.attachedImage.match(/^data:(image\/(?:png|jpeg|jpg|gif|webp));base64,(.+)$/);
+    if (m) {
+      attachedImage = { media_type: m[1] === "image/jpg" ? "image/jpeg" : m[1], data: m[2] };
+    }
+  }
+  if (!instruction && !attachedImage) return json({ error: "指示文を入力してください" }, 400);
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey || isExpired()) {
@@ -162,11 +178,24 @@ export default async (req) => {
   }
 
   try {
-    const userMessage =
+    const textBlock =
       "現在の採用ページ内容（JSON）：\n" +
       JSON.stringify(stripDataUrls(current)) +
       "\n\n担当者からの指示：\n" +
-      instruction;
+      (instruction || "添付画像の指示どおりに修正してください。") +
+      (attachedImage
+        ? "\n\n（上記の添付画像をよく見て、画像内で示されている箇所・色・レイアウト・矢印・赤丸などを手がかりに、JSONのどのキーを直すべきか判断してください。）"
+        : "");
+
+    // 添付画像があればビジョン入力として渡す
+    const content = [];
+    if (attachedImage) {
+      content.push({
+        type: "image",
+        source: { type: "base64", media_type: attachedImage.media_type, data: attachedImage.data },
+      });
+    }
+    content.push({ type: "text", text: textBlock });
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -180,7 +209,7 @@ export default async (req) => {
         max_tokens: 4000,
         temperature: 0.4,
         system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userMessage }],
+        messages: [{ role: "user", content }],
       }),
     });
 

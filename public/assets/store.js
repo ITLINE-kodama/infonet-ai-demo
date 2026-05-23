@@ -503,11 +503,16 @@
     },
 
     // AIに指示して採用ページ内容を更新。{recruit} を返す。失敗時は {error}
-    async recruitAI(instruction, current) {
+    // attachedImage: data URL（任意）。担当者が「ここを直して」と画像で指示する用。
+    async recruitAI(instruction, current, attachedImage) {
       try {
         const r = await fetch(`${API}/recruit-ai`, {
           method: "POST", headers: H,
-          body: JSON.stringify({ instruction, current: current || {} }),
+          body: JSON.stringify({
+            instruction,
+            current: current || {},
+            attachedImage: attachedImage || null,
+          }),
         });
         if (!r.ok) {
           return { error: `サーバーエラー（${r.status}）が発生しました。少し時間をおいて、もう一度お試しください。` };
