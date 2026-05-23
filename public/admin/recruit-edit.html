@@ -553,6 +553,17 @@
         return;
       }
       const updated = res.recruit;
+      // 添付画像を採用ページの画像として適用する指示があった場合
+      if (sentImage && typeof res.applyAttachedImage === "string") {
+        const tgt = res.applyAttachedImage;
+        if (tgt === "mvImage") {
+          updated.mvImage = sentImage;
+        } else if (tgt.startsWith("interview:") && Array.isArray(updated.interviews)) {
+          const id = tgt.slice("interview:".length);
+          const iv = updated.interviews.find((x) => x && x.id === id);
+          if (iv) iv.image = sentImage;
+        }
+      }
       // メインビジュアル画像も生成
       if ($("ai-mv-toggle").checked) {
         const imgUrl = await window.Store.generateImage("採用ページのメインビジュアル背景", $("ai-mv-instruction").value.trim());

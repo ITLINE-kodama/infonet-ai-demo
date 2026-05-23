@@ -18,7 +18,8 @@ const SYSTEM_PROMPT = `あなたは「らくらくAI」、株式会社インフ�
   "benefits": [ { "title": "制度名", "desc": "説明" } ],
   "sectionThemes": { "message": "テーマ名", "positions": "テーマ名", "interview": "テーマ名", "benefits": "テーマ名", "flow": "テーマ名", "blog": "テーマ名" },
   "positionsStyle": "募集職種カードのレイアウト名",
-  "chatMessage": "担当者への報告メッセージ"
+  "chatMessage": "担当者への報告メッセージ",
+  "applyAttachedImage": "（任意）添付画像を採用ページの画像として使う場合の指定"
 }
 
 【sectionThemes ─ セクションの配色（背景デザイン）】
@@ -61,12 +62,25 @@ sectionThemes のキーと対応セクション：
 - JSONの最初の文字は「{」、最後の文字は「}」でなければならない
 
 【画像が添付されている場合】
-- メッセージに画像（スクリーンショット等）が添付されているときは、画像と指示文を合わせて解釈してください
-- 画像内に矢印・赤丸・ハイライト・「ここ」のような指し示しがあれば、その箇所を特定してください
-- 採用ページのどの部分（mvTitle/mvSubtitle/message/interviews/stats/benefits/sectionThemes/positionsStyle）に対応するかを判断し、該当キーを編集してください
-- 画像から色・配置・改行位置などのデザイン意図も読み取り、可能ならプリセット（sectionThemes / positionsStyle）にマッピングする
+担当者の意図は次の2パターンに分かれます。区別して対応してください。
+
+(A) 添付画像を**そのまま採用ページの画像として使いたい**場合
+- 指示例：「メインビジュアルをこの画像にして」「ヒーロー背景にこれを使って」「○○さんの社員写真をこれに差し替えて」
+- このときは、応答JSONに次のキーだけ含めてください（他のデータキーは触らない）：
+  - "applyAttachedImage": 値は以下のいずれか
+    - "mvImage" … 添付画像をメインビジュアル背景として使用
+    - "interview:<id>" … 添付画像を特定の社員インタビュー写真として使用（例：interview:iv-1）
+  - "chatMessage": 「添付画像をメインビジュアル背景に設定しました」等の報告
+- 画像データ本体は出力しないでください（フロントエンドが処理します）
+
+(B) 添付画像を**参考・指示の手がかり**として使う場合（直すべき箇所を画像で示している）
+- 指示例：「赤丸の部分を緑に」「ここの改行を直して」「この部分を変更」
+- 画像内の矢印・赤丸・ハイライト・「ここ」表記から該当箇所を特定し、対応するデータキー（mvTitle/mvSubtitle/message/sectionThemes/positionsStyle 等）を編集してください
+- 画像から色・配置・改行位置などのデザイン意図も読み取り、可能ならプリセットにマッピング
 - 指示文が短くても（例：「これ直して」「ここ緑」）、画像から読み取った情報で補ってください
-- 何を直すべきか画像からも判断できない場合は、chatMessage で「画像のどの部分を、どう変えたいかをもう少し教えてください」と丁寧に確認する
+
+判別のヒント：「この画像を使って／差し替え／背景に」=(A)、「ここを直して／変更／改善」=(B)。
+どちらか判別できない場合は、chatMessage で「この画像を背景として使う？それとも参考画像？」と丁寧に確認してください。
 
 【改行・レイアウト】
 - mvTitle / mvSubtitle / message に "\n"（改行コード）を入れると、その位置で表示が改行されます
@@ -236,6 +250,13 @@ export default async (req) => {
         : "採用ページを更新しました。";
     delete parsed.chatMessage;
 
+    // applyAttachedImage は「添付画像を○○として使う」というフロント側への指示。保存データには含めない
+    const applyAttachedImage =
+      typeof parsed.applyAttachedImage === "string" && parsed.applyAttachedImage.trim()
+        ? parsed.applyAttachedImage.trim()
+        : null;
+    delete parsed.applyAttachedImage;
+
     // AIは「変更したキーだけ」を返すため、現在の内容にマージして全体を組み立てる
     const recruit = { ...current, ...parsed };
     // sectionThemes は一部のキーだけ返ることがあるため、現在値と深くマージする
@@ -251,6 +272,7 @@ export default async (req) => {
     return json({
       recruit,
       chatMessage,
+      applyAttachedImage,
       tokensUsed: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0),
       model: "claude-sonnet-4-6",
     });
