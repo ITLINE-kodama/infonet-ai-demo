@@ -98,6 +98,40 @@ function isExpired() {
   return !Number.isNaN(t) && Date.now() > t;
 }
 
+// データURL画像（巨大な base64 文字列）は Claude API のリクエスト制限を超えるため、
+// AIに送る current からは短い目印に置き換える。
+// AIからの応答で目印が返ってきた箇所は、元の画像URLに復元する。
+const IMG_PLACEHOLDER = "[IMG]";
+function stripDataUrls(obj) {
+  const c = JSON.parse(JSON.stringify(obj));
+  if (typeof c.mvImage === "string" && c.mvImage.startsWith("data:")) {
+    c.mvImage = IMG_PLACEHOLDER;
+  }
+  if (Array.isArray(c.interviews)) {
+    c.interviews.forEach((iv) => {
+      if (iv && typeof iv.image === "string" && iv.image.startsWith("data:")) {
+        iv.image = IMG_PLACEHOLDER;
+      }
+    });
+  }
+  return c;
+}
+function restoreImages(merged, original) {
+  if (!merged) return;
+  if (merged.mvImage === IMG_PLACEHOLDER && original.mvImage) {
+    merged.mvImage = original.mvImage;
+  }
+  if (Array.isArray(merged.interviews) && Array.isArray(original.interviews)) {
+    const byId = {};
+    original.interviews.forEach((iv) => { if (iv && iv.id) byId[iv.id] = iv.image; });
+    merged.interviews.forEach((iv) => {
+      if (iv && iv.image === IMG_PLACEHOLDER && iv.id && byId[iv.id]) {
+        iv.image = byId[iv.id];
+      }
+    });
+  }
+}
+
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "POSTのみ対応しています" }, 405);
 
@@ -123,7 +157,7 @@ export default async (req) => {
   try {
     const userMessage =
       "現在の採用ページ内容（JSON）：\n" +
-      JSON.stringify(current) +
+      JSON.stringify(stripDataUrls(current)) +
       "\n\n担当者からの指示：\n" +
       instruction;
 
@@ -175,6 +209,8 @@ export default async (req) => {
         ...parsed.sectionThemes,
       };
     }
+    // 画像目印 [IMG] が AI から返ってきた場合は元の画像URLに戻す
+    restoreImages(recruit, current);
 
     return json({
       recruit,
