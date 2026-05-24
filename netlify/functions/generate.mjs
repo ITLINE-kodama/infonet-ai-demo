@@ -341,19 +341,27 @@ export default async (req) => {
       const match = rawText.match(/\{[\s\S]*\}/);
       parsed = match ? JSON.parse(match[0]) : null;
     }
-    if (!parsed || !parsed.title || !parsed.body) {
+    if (!parsed || typeof parsed !== "object") {
       throw new Error("AI応答のフォーマットが不正です");
+    }
+    // Q&Aモード（title/bodyが空でchatMessageのみ）はOKとして許可
+    const hasContent = !!(parsed.title || parsed.body);
+    const hasChatMessage = !!(parsed.chatMessage && parsed.chatMessage.trim());
+    if (!hasContent && !hasChatMessage) {
+      throw new Error("AI応答の中身が空です");
     }
 
     return json({
-      title: parsed.title,
-      body: parsed.body,
+      title: parsed.title || "",
+      body: parsed.body || "",
       imageKey: IMAGE_KEYS.includes(parsed.imageKey) ? parsed.imageKey : "general",
       category: parsed.category,
       tags: Array.isArray(parsed.tags) ? parsed.tags : [],
       chatMessage:
         parsed.chatMessage ||
-        "ドラフトを作成しました。右側のプレビューでご確認ください。",
+        (hasContent
+          ? "ドラフトを作成しました。右側のプレビューでご確認ください。"
+          : "ご質問にお答えしました。"),
       tokensUsed:
         (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0),
       model: "claude-sonnet-4-6",
