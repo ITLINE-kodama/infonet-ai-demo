@@ -153,6 +153,7 @@ const NAV_ITEMS = [
   { key: "blog-list", label: "ブログ一覧", href: "/admin/blog-list.html", icon: "newspaper" },
   { group: "その他" },
   { key: "analytics", label: "GA4分析", href: "/admin/analytics.html", icon: "bar-chart-3", badge: "NEW" },
+  { key: "seo", label: "SEO診断", href: "/admin/seo.html", icon: "search-check", badge: "NEW" },
   { key: "logs", label: "ログ・履歴", href: "/admin/logs.html", icon: "scroll-text" },
 ];
 

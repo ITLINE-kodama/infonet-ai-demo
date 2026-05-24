@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SEO診断｜AIでらくらく更新</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/styles.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#F9FAFB] text-[#111827]">
+
+<div class="flex">
+  <aside id="sidebar"></aside>
+
+  <main class="flex-1 min-w-0 p-6 lg:p-8 max-w-[1400px]">
+    <!-- ヘッダー -->
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h1 class="text-2xl font-bold flex items-center gap-2">
+          SEO診断
+          <span class="text-[11px] font-semibold bg-[#FEF3C7] text-[#92400E] rounded-full px-2.5 py-0.5">DEMO</span>
+        </h1>
+        <p class="text-sm text-[#6B7280] mt-1">構造化データ（JSON-LD）・メタタグ・サイトマップの自動付与状況と、各コンテンツのSEO品質を診断します。</p>
+      </div>
+    </div>
+
+    <!-- サイト全体のSEOステータス -->
+    <section class="mt-6 bg-white border border-[#E5E7EB] rounded-xl p-6">
+      <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4 text-[#1E2761]"></i> サイト全体のSEO設定</h2>
+      <ul id="site-checks" class="mt-4 grid sm:grid-cols-2 gap-3 text-[13px]"></ul>
+    </section>
+
+    <!-- 構造化データ（JSON-LD）の自動付与状況 -->
+    <section class="mt-6 bg-white border border-[#E5E7EB] rounded-xl p-6">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="braces" class="w-4 h-4 text-[#1E2761]"></i> 構造化データ（JSON-LD）の自動付与</h2>
+        <button id="ldld-preview-btn" class="text-[12px] font-medium text-[#1E2761] hover:underline">サンプルを表示</button>
+      </div>
+      <div class="mt-4 grid sm:grid-cols-2 gap-3 text-[13px]">
+        <div class="border border-[#E5E7EB] rounded-lg p-3 flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-[#10B981] mt-0.5"></i>
+          <div>
+            <p class="font-medium">Organization（会社情報）</p>
+            <p class="text-[12px] text-[#6B7280] mt-0.5">全ページに自動付与</p>
+          </div>
+        </div>
+        <div class="border border-[#E5E7EB] rounded-lg p-3 flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-[#10B981] mt-0.5"></i>
+          <div>
+            <p class="font-medium">BreadcrumbList（パンくず）</p>
+            <p class="text-[12px] text-[#6B7280] mt-0.5">下層ページに自動付与</p>
+          </div>
+        </div>
+        <div class="border border-[#E5E7EB] rounded-lg p-3 flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-[#10B981] mt-0.5"></i>
+          <div>
+            <p class="font-medium">JobPosting（求人）</p>
+            <p class="text-[12px] text-[#6B7280] mt-0.5">求人詳細ページに自動付与</p>
+          </div>
+        </div>
+        <div class="border border-[#E5E7EB] rounded-lg p-3 flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-[#10B981] mt-0.5"></i>
+          <div>
+            <p class="font-medium">NewsArticle / BlogPosting</p>
+            <p class="text-[12px] text-[#6B7280] mt-0.5">お知らせ・ブログ詳細に自動付与</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- コンテンツ品質診断 -->
+    <section class="mt-6 bg-white border border-[#E5E7EB] rounded-xl">
+      <div class="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between flex-wrap gap-2">
+        <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="list-checks" class="w-4 h-4 text-[#1E2761]"></i> コンテンツ品質診断</h2>
+        <div id="content-summary" class="text-[12px] text-[#6B7280]"></div>
+      </div>
+      <div class="overflow-x-auto thin-scroll">
+        <table class="w-full text-sm min-w-[860px]">
+          <thead>
+            <tr class="bg-[#F9FAFB] text-left text-[12px] text-[#6B7280] border-b border-[#E5E7EB]">
+              <th class="px-6 py-3 font-medium">コンテンツ</th>
+              <th class="px-6 py-3 font-medium w-24">種別</th>
+              <th class="px-6 py-3 font-medium w-32">タイトル</th>
+              <th class="px-6 py-3 font-medium w-32">本文</th>
+              <th class="px-6 py-3 font-medium w-24">画像</th>
+              <th class="px-6 py-3 font-medium w-24">スコア</th>
+              <th class="px-6 py-3 font-medium w-40 text-right">操作</th>
+            </tr>
+          </thead>
+          <tbody id="audit-rows">
+            <tr><td colspan="7" class="px-6 py-10 text-center text-[#9CA3AF]">読み込み中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ===== JSON-LD プレビューモーダル ===== -->
+<div id="ld-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[88vh] flex flex-col">
+    <div class="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
+      <h3 id="ld-title" class="text-base font-semibold flex items-center gap-2">
+        <i data-lucide="braces" class="w-5 h-5 text-[#1E2761]"></i> JSON-LD プレビュー
+      </h3>
+      <button id="ld-close" class="w-9 h-9 rounded-lg hover:bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <pre id="ld-body" class="flex-1 overflow-auto thin-scroll px-6 py-5 bg-[#0F172A] text-[#A7F3D0] text-[12px] leading-relaxed font-mono whitespace-pre-wrap"></pre>
+    <div class="px-6 py-3 border-t border-[#E5E7EB] flex items-center justify-end gap-2">
+      <button id="ld-copy" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#E5E7EB] text-[13px] font-semibold text-[#374151] hover:bg-[#F9FAFB]">
+        <i data-lucide="copy" class="w-4 h-4"></i> コピー
+      </button>
+      <button id="ld-download" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1E2761] text-white text-[13px] font-semibold hover:opacity-90">
+        <i data-lucide="download" class="w-4 h-4"></i> ダウンロード
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AI改善提案モーダル ===== -->
+<div id="ai-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[88vh] flex flex-col">
+    <div class="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
+      <h3 id="ai-title" class="text-base font-semibold flex items-center gap-2">
+        <i data-lucide="sparkles" class="w-5 h-5 text-[#1E2761]"></i> AIによる改善提案
+      </h3>
+      <button id="ai-close" class="w-9 h-9 rounded-lg hover:bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div id="ai-body" class="flex-1 overflow-y-auto thin-scroll px-6 py-5 text-sm leading-relaxed"></div>
+  </div>
+</div>
+
+<script src="/assets/store.js"></script>
+<script src="/assets/admin.js"></script>
+<script>
+  const user = initAdmin("seo");
+
+  /* ---- サイト全体のチェック ---- */
+  async function runSiteChecks() {
+    const checks = [];
+    const fetchSafe = async (url, contentTypePart) => {
+      try {
+        const r = await fetch(url, { method: "GET" });
+        const ok = r.ok && (contentTypePart ? (r.headers.get("content-type") || "").includes(contentTypePart) : true);
+        return ok;
+      } catch { return false; }
+    };
+    const sitemapOk = await fetchSafe("/sitemap.xml", "xml") || await fetchSafe("/api/sitemap", "xml");
+    const robotsOk = await fetchSafe("/robots.txt", "text");
+
+    checks.push({ ok: sitemapOk, label: "sitemap.xml が公開されている", desc: sitemapOk ? "検索エンジンが全ページを発見できます" : "未公開：検索インデックスに影響します" });
+    checks.push({ ok: robotsOk, label: "robots.txt が公開されている", desc: robotsOk ? "クロール許可・サイトマップ参照あり" : "未公開：クローラ向けの指示が伝わりません" });
+    checks.push({ ok: true, label: "全ページにメタタグ自動付与", desc: "title / description / OGP / Twitter Card / canonical" });
+    checks.push({ ok: true, label: "全ページに構造化データ自動付与", desc: "Organization・JobPosting・Article・BreadcrumbList 等" });
+    checks.push({ ok: true, label: "HTTPS で配信されている", desc: "Netlify が自動でHTTPS化（Let's Encrypt）" });
+    checks.push({ ok: true, label: "モバイルフレンドリー（レスポンシブ）", desc: "Tailwind による全画面対応" });
+
+    document.getElementById("site-checks").innerHTML = checks.map((c) => `
+      <li class="flex items-start gap-2 border border-[#E5E7EB] rounded-lg p-3">
+        <i data-lucide="${c.ok ? "check-circle-2" : "alert-circle"}" class="w-4 h-4 mt-0.5 ${c.ok ? "text-[#10B981]" : "text-[#EF4444]"} shrink-0"></i>
+        <div>
+          <p class="font-medium ${c.ok ? "text-[#111827]" : "text-[#EF4444]"}">${escapeHtml(c.label)}</p>
+          <p class="text-[12px] text-[#6B7280] mt-0.5">${escapeHtml(c.desc)}</p>
+        </div>
+      </li>`).join("");
+    if (window.lucide) lucide.createIcons();
+  }
+
+  /* ---- コンテンツ品質診断 ---- */
+  function auditItem(n, type) {
+    const titleLen = (n.title || "").length;
+    const bodyLen = (n.body || "").length;
+    const hasImage = !!(n.image && n.image !== "general");
+    const titleCheck = titleLen >= 10 && titleLen <= 60 ? "ok" : (titleLen === 0 ? "ng" : "warn");
+    const bodyCheck = bodyLen >= 100 ? "ok" : (bodyLen >= 30 ? "warn" : "ng");
+    const imageCheck = hasImage ? "ok" : "warn";
+    const score = (titleCheck === "ok" ? 40 : titleCheck === "warn" ? 25 : 0)
+                + (bodyCheck === "ok" ? 40 : bodyCheck === "warn" ? 20 : 0)
+                + (imageCheck === "ok" ? 20 : 10);
+    return { titleLen, bodyLen, hasImage, titleCheck, bodyCheck, imageCheck, score };
+  }
+  const STATUS_BADGE = {
+    ok:   '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#065F46] bg-[#D1FAE5] rounded px-2 py-0.5"><i data-lucide="check" class="w-3 h-3"></i>OK</span>',
+    warn: '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#92400E] bg-[#FEF3C7] rounded px-2 py-0.5"><i data-lucide="alert-triangle" class="w-3 h-3"></i>要改善</span>',
+    ng:   '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#991B1B] bg-[#FEE2E2] rounded px-2 py-0.5"><i data-lucide="x" class="w-3 h-3"></i>不足</span>',
+  };
+  function scoreBadge(score) {
+    const color = score >= 80 ? "#10B981" : score >= 60 ? "#F59E0B" : "#EF4444";
+    return `<span class="inline-flex items-center gap-1.5 font-bold" style="color:${color}">${score}<span class="text-[#9CA3AF] font-normal text-[12px]">/100</span></span>`;
+  }
+
+  async function loadAudit() {
+    const [news, jobs, blog] = await Promise.all([
+      window.Store.listNews("published").catch(() => []),
+      window.Store.listJobs("published").catch(() => []),
+      window.Store.listBlog("published").catch(() => []),
+    ]);
+    const items = [
+      ...news.map((n) => ({ ...n, _type: "news" })),
+      ...jobs.map((n) => ({ ...n, _type: "job" })),
+      ...blog.map((n) => ({ ...n, _type: "blog" })),
+    ];
+    const typeLabel = { news: "お知らせ", job: "求人", blog: "ブログ" };
+    let scoreSum = 0;
+    items.forEach((it) => { it._audit = auditItem(it, it._type); scoreSum += it._audit.score; });
+    const avg = items.length ? Math.round(scoreSum / items.length) : 0;
+    document.getElementById("content-summary").innerHTML =
+      `${items.length}件のコンテンツ ／ 平均SEOスコア <strong class="text-[#1E2761]">${avg}</strong> / 100`;
+    const host = document.getElementById("audit-rows");
+    if (items.length === 0) {
+      host.innerHTML = `<tr><td colspan="7" class="px-6 py-10 text-center text-[#9CA3AF]">公開済みコンテンツがありません。</td></tr>`;
+      return;
+    }
+    host.innerHTML = items.map((it) => {
+      const a = it._audit;
+      return `
+      <tr class="border-b border-[#E5E7EB] last:border-0 hover:bg-[#F9FAFB]" data-type="${it._type}" data-id="${it.id}">
+        <td class="px-6 py-3.5">
+          <p class="font-medium text-[#111827]">${escapeHtml(it.title)}</p>
+          <p class="text-[11px] text-[#9CA3AF] mt-0.5">${escapeHtml(it.id)}</p>
+        </td>
+        <td class="px-6 py-3.5"><span class="text-[11px] font-semibold text-[#1E2761] bg-[#EEF2FF] rounded px-2 py-0.5">${typeLabel[it._type] || it._type}</span></td>
+        <td class="px-6 py-3.5">${STATUS_BADGE[a.titleCheck]}<p class="text-[10px] text-[#9CA3AF] mt-1">${a.titleLen}文字</p></td>
+        <td class="px-6 py-3.5">${STATUS_BADGE[a.bodyCheck]}<p class="text-[10px] text-[#9CA3AF] mt-1">${a.bodyLen}文字</p></td>
+        <td class="px-6 py-3.5">${STATUS_BADGE[a.imageCheck]}</td>
+        <td class="px-6 py-3.5">${scoreBadge(a.score)}</td>
+        <td class="px-6 py-3.5">
+          <div class="flex justify-end gap-1.5">
+            <button data-act="ld" class="px-2.5 py-1.5 rounded-md border border-[#E5E7EB] text-[12px] font-medium text-[#374151] hover:bg-white" title="JSON-LDを確認">
+              <i data-lucide="braces" class="w-3.5 h-3.5"></i>
+            </button>
+            <button data-act="ai" class="px-2.5 py-1.5 rounded-md bg-[#1E2761] text-white text-[12px] font-semibold hover:opacity-90">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 inline"></i> AI提案
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    }).join("");
+    lucide.createIcons();
+
+    // 行内のボタン処理
+    host.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-act]");
+      if (!btn) return;
+      const tr = btn.closest("tr");
+      const id = tr.dataset.id;
+      const type = tr.dataset.type;
+      const item = items.find((x) => x.id === id && x._type === type);
+      if (!item) return;
+      if (btn.dataset.act === "ld") showLdPreview(item);
+      if (btn.dataset.act === "ai") showAiSuggest(item);
+    }, { once: false });
+  }
+
+  /* ---- JSON-LD プレビュー（模擬生成）---- */
+  function buildLdForItem(item) {
+    const base = "https://infonet-ai-demo.netlify.app";
+    const org = {
+      "@context": "https://schema.org", "@type": "Organization",
+      name: "株式会社インフォネット", url: base,
+      logo: base + "/assets/infonet-logo.png",
+      address: { "@type": "PostalAddress", addressCountry: "JP", postalCode: "105-0004", addressRegion: "東京都", addressLocality: "港区", streetAddress: "新橋4-21-3 新橋東急ビル7F" },
+    };
+    const url = item._type === "news" ? `${base}/news.html?id=${item.id}`
+              : item._type === "blog" ? `${base}/blog.html?id=${item.id}`
+              : `${base}/job.html?id=${item.id}`;
+    const breadcrumb = {
+      "@context": "https://schema.org", "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "ホーム", item: base + "/" },
+        item._type === "blog" ? { "@type": "ListItem", position: 2, name: "ブログ", item: base + "/recruit.html#blog" }
+          : item._type === "job" ? { "@type": "ListItem", position: 2, name: "採用情報", item: base + "/recruit.html" }
+          : { "@type": "ListItem", position: 2, name: "お知らせ", item: base + "/#news" },
+        { "@type": "ListItem", position: 3, name: item.title, item: url },
+      ],
+    };
+    let main;
+    if (item._type === "job") {
+      const dp = item.publishedAt || item.createdAt || new Date().toISOString();
+      const vt = new Date(new Date(dp).getTime() + 90*86400000).toISOString();
+      main = {
+        "@context": "https://schema.org", "@type": "JobPosting",
+        title: item.title, description: (item.body || "").replace(/\n/g, "<br>"),
+        datePosted: dp, validThrough: vt, employmentType: "FULL_TIME",
+        hiringOrganization: { "@type": "Organization", name: org.name, sameAs: org.url, logo: org.logo },
+        jobLocation: { "@type": "Place", address: org.address },
+        applicantLocationRequirements: { "@type": "Country", name: "JP" },
+      };
+    } else {
+      main = {
+        "@context": "https://schema.org",
+        "@type": item._type === "blog" ? "BlogPosting" : "NewsArticle",
+        headline: item.title,
+        description: (item.body || "").slice(0, 160),
+        datePublished: item.publishedAt || item.createdAt,
+        dateModified: item.updatedAt || item.publishedAt || item.createdAt,
+        author: { "@type": "Organization", name: org.name },
+        publisher: { "@type": "Organization", name: org.name, logo: { "@type": "ImageObject", url: org.logo } },
+        mainEntityOfPage: url,
+      };
+    }
+    return { "@context": "https://schema.org", "@graph": [org, breadcrumb, main] };
+  }
+  function showLdPreview(item) {
+    const data = buildLdForItem(item);
+    document.getElementById("ld-title").innerHTML = `<i data-lucide="braces" class="w-5 h-5 text-[#1E2761]"></i> JSON-LD：${escapeHtml(item.title)}`;
+    document.getElementById("ld-body").textContent = JSON.stringify(data, null, 2);
+    document.getElementById("ld-modal").classList.remove("hidden");
+    document.getElementById("ld-modal").classList.add("flex");
+    document.getElementById("ld-download").onclick = () => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/ld+json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `${item._type}-${item.id}-jsonld.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 100);
+    };
+    document.getElementById("ld-copy").onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+        toast("クリップボードにコピーしました", "success");
+      } catch {
+        toast("コピーに失敗しました", "error");
+      }
+    };
+    lucide.createIcons();
+  }
+  document.getElementById("ld-close").addEventListener("click", () => {
+    document.getElementById("ld-modal").classList.add("hidden");
+    document.getElementById("ld-modal").classList.remove("flex");
+  });
+  document.getElementById("ld-modal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+      e.currentTarget.classList.add("hidden");
+      e.currentTarget.classList.remove("flex");
+    }
+  });
+
+  /* ---- AI改善提案 ---- */
+  async function showAiSuggest(item) {
+    document.getElementById("ai-title").innerHTML = `<i data-lucide="sparkles" class="w-5 h-5 text-[#1E2761]"></i> AI改善提案：${escapeHtml(item.title)}`;
+    document.getElementById("ai-body").innerHTML = `<div class="text-center py-8 text-[#6B7280]">
+      <i data-lucide="loader-2" class="w-6 h-6 mx-auto animate-spin text-[#1E2761] mb-2"></i>
+      <p>AIが分析中です…（15〜25秒）</p>
+    </div>`;
+    document.getElementById("ai-modal").classList.remove("hidden");
+    document.getElementById("ai-modal").classList.add("flex");
+    lucide.createIcons();
+    try {
+      const summary = {
+        type: item._type, title: item.title,
+        titleLength: (item.title || "").length,
+        bodyLength: (item.body || "").length,
+        hasImage: !!item.image,
+        publishedAt: item.publishedAt,
+        excerpt: (item.body || "").slice(0, 300),
+      };
+      const r = await fetch("/api/seo-report", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          summary: { rangeDays: 30, ...summary, _purpose: "個別コンテンツのSEO改善提案" },
+          topPages: [],
+          topQueries: [],
+        }),
+      });
+      const data = await r.json();
+      const md = data.reportMarkdown || "応答が空でした。";
+      const html = md
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/^## (.+)$/gm, '<h3 class="mt-5 mb-2 text-base font-bold text-[#1E2761] border-b border-[#E5E7EB] pb-1">$1</h3>')
+        .replace(/^\- \[ \] (.+)$/gm, '<div class="flex items-start gap-2 my-1.5"><span class="w-4 h-4 mt-0.5 border border-[#D1D5DB] rounded-sm shrink-0"></span><span>$1</span></div>')
+        .replace(/^\- (.+)$/gm, '<div class="flex items-start gap-2 my-1"><span class="text-[#1E2761] font-bold">・</span><span>$1</span></div>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong class="text-[#1E2761]">$1</strong>')
+        .replace(/\n\n/g, '<div class="h-2"></div>')
+        .replace(/\n/g, "<br>");
+      document.getElementById("ai-body").innerHTML = html
+        + `<p class="mt-4 text-[11px] text-[#9CA3AF]">${data.model || ""} ／ ${data.tokensUsed || 0}トークン</p>`;
+    } catch (err) {
+      document.getElementById("ai-body").innerHTML = `<p class="text-[#EF4444]">取得に失敗しました：${escapeHtml(String(err && err.message || err))}</p>`;
+    }
+  }
+  document.getElementById("ai-close").addEventListener("click", () => {
+    document.getElementById("ai-modal").classList.add("hidden");
+    document.getElementById("ai-modal").classList.remove("flex");
+  });
+  document.getElementById("ai-modal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+      e.currentTarget.classList.add("hidden");
+      e.currentTarget.classList.remove("flex");
+    }
+  });
+
+  document.getElementById("ldld-preview-btn").addEventListener("click", () => {
+    // 採用ページ用のサンプル
+    const sample = {
+      "@context": "https://schema.org", "@type": "Organization",
+      name: "株式会社インフォネット",
+      url: "https://infonet-ai-demo.netlify.app",
+      logo: "https://infonet-ai-demo.netlify.app/assets/infonet-logo.png",
+      description: "Webサイト制作・システム開発・DXコンサルティング。東京都港区新橋。",
+      address: { "@type": "PostalAddress", postalCode: "105-0004", addressRegion: "東京都", addressLocality: "港区", streetAddress: "新橋4-21-3 新橋東急ビル7F", addressCountry: "JP" },
+    };
+    document.getElementById("ld-title").innerHTML = `<i data-lucide="braces" class="w-5 h-5 text-[#1E2761]"></i> JSON-LD サンプル（Organization）`;
+    document.getElementById("ld-body").textContent = JSON.stringify(sample, null, 2);
+    document.getElementById("ld-modal").classList.remove("hidden");
+    document.getElementById("ld-modal").classList.add("flex");
+    document.getElementById("ld-download").onclick = () => {
+      const blob = new Blob([JSON.stringify(sample, null, 2)], { type: "application/ld+json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "organization-jsonld.json";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 100);
+    };
+    document.getElementById("ld-copy").onclick = async () => {
+      try { await navigator.clipboard.writeText(JSON.stringify(sample, null, 2)); toast("クリップボードにコピーしました", "success"); }
+      catch { toast("コピーに失敗しました", "error"); }
+    };
+    lucide.createIcons();
+  });
+
+  /* ---- 初期化 ---- */
+  (async function init() {
+    await runSiteChecks();
+    await loadAudit();
+    lucide.createIcons();
+  })();
+</script>
+</body>
+</html>
