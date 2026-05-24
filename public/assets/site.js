@@ -17,6 +17,138 @@ function excerptSite(text, len) {
   return t.length > len ? t.slice(0, len) + "…" : t;
 }
 
+/* =============================================================
+ *  SEO ─ メタタグ／JSON-LD 自動付与
+ * ============================================================= */
+const ORG = {
+  name: "株式会社インフォネット",
+  url: (typeof location !== "undefined") ? (location.origin || "https://infonet-ai-demo.netlify.app") : "https://infonet-ai-demo.netlify.app",
+  logo: "/assets/infonet-logo.png",
+  description: "Webサイト制作・システム開発・DXコンサルティング。東京都港区新橋。",
+  street: "新橋4-21-3 新橋東急ビル7F",
+  locality: "港区",
+  region: "東京都",
+  postalCode: "105-0004",
+};
+function absUrl(p) {
+  if (!p) return ORG.url;
+  if (/^https?:\/\//.test(p)) return p;
+  return ORG.url + (p.startsWith("/") ? p : "/" + p);
+}
+function ensureMeta(selector, makeEl) {
+  let el = document.head.querySelector(selector);
+  if (!el) { el = makeEl(); document.head.appendChild(el); }
+  return el;
+}
+function setNamedMeta(name, content) {
+  if (!content) return;
+  const el = ensureMeta(`meta[name="${name}"]`, () => {
+    const m = document.createElement("meta"); m.setAttribute("name", name); return m;
+  });
+  el.setAttribute("content", content);
+}
+function setPropMeta(prop, content) {
+  if (!content) return;
+  const el = ensureMeta(`meta[property="${prop}"]`, () => {
+    const m = document.createElement("meta"); m.setAttribute("property", prop); return m;
+  });
+  el.setAttribute("content", content);
+}
+function setCanonical(url) {
+  if (!url) return;
+  let el = document.head.querySelector('link[rel="canonical"]');
+  if (!el) { el = document.createElement("link"); el.setAttribute("rel", "canonical"); document.head.appendChild(el); }
+  el.setAttribute("href", url);
+}
+function setSeoMeta(opts) {
+  // opts: { title, description, image, url, type }
+  const url = opts.url || (typeof location !== "undefined" ? location.href : ORG.url);
+  if (opts.title) document.title = opts.title;
+  setNamedMeta("description", opts.description);
+  setPropMeta("og:title", opts.title || document.title);
+  setPropMeta("og:description", opts.description);
+  setPropMeta("og:url", url);
+  setPropMeta("og:type", opts.type || "website");
+  setPropMeta("og:site_name", ORG.name);
+  if (opts.image) setPropMeta("og:image", absUrl(opts.image));
+  setNamedMeta("twitter:card", "summary_large_image");
+  setNamedMeta("twitter:title", opts.title || document.title);
+  setNamedMeta("twitter:description", opts.description);
+  if (opts.image) setNamedMeta("twitter:image", absUrl(opts.image));
+  setCanonical(url);
+}
+function injectJsonLd(items) {
+  // 既存の自動生成 JSON-LD を一度消してから追加
+  document.querySelectorAll('script[type="application/ld+json"][data-managed="1"]').forEach((s) => s.remove());
+  const arr = Array.isArray(items) ? items : [items];
+  const payload = (arr.length === 1) ? arr[0] : { "@context": "https://schema.org", "@graph": arr };
+  const s = document.createElement("script");
+  s.type = "application/ld+json";
+  s.setAttribute("data-managed", "1");
+  s.textContent = JSON.stringify(payload);
+  document.head.appendChild(s);
+}
+function ldOrganization() {
+  return {
+    "@context": "https://schema.org", "@type": "Organization",
+    name: ORG.name, url: ORG.url, logo: absUrl(ORG.logo),
+    description: ORG.description,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: ORG.street, addressLocality: ORG.locality,
+      addressRegion: ORG.region, postalCode: ORG.postalCode, addressCountry: "JP",
+    },
+  };
+}
+function ldBreadcrumb(items) {
+  return {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
+    itemListElement: items.map((it, i) => ({
+      "@type": "ListItem", position: i + 1, name: it.name, item: absUrl(it.url),
+    })),
+  };
+}
+function ldArticle(n, type) {
+  return {
+    "@context": "https://schema.org", "@type": type || "Article",
+    headline: n.title,
+    description: excerptSite(n.body, 160),
+    image: absUrl(window.newsImageUrl(n.image)),
+    datePublished: n.publishedAt || n.createdAt,
+    dateModified: n.updatedAt || n.publishedAt || n.createdAt,
+    author: { "@type": "Organization", name: ORG.name },
+    publisher: {
+      "@type": "Organization", name: ORG.name,
+      logo: { "@type": "ImageObject", url: absUrl(ORG.logo) },
+    },
+    mainEntityOfPage: absUrl(location.pathname + location.search),
+  };
+}
+function ldJobPosting(j) {
+  const datePosted = j.publishedAt || j.createdAt || new Date().toISOString();
+  const validThrough = new Date(new Date(datePosted).getTime() + 90 * 86400000).toISOString();
+  return {
+    "@context": "https://schema.org", "@type": "JobPosting",
+    title: j.title,
+    description: (j.body || "").replace(/\n/g, "<br>"),
+    datePosted, validThrough,
+    employmentType: "FULL_TIME",
+    hiringOrganization: {
+      "@type": "Organization", name: ORG.name, sameAs: ORG.url, logo: absUrl(ORG.logo),
+    },
+    jobLocation: {
+      "@type": "Place",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: ORG.street, addressLocality: ORG.locality,
+        addressRegion: ORG.region, postalCode: ORG.postalCode, addressCountry: "JP",
+      },
+    },
+    applicantLocationRequirements: { "@type": "Country", name: "JP" },
+    image: absUrl(window.newsImageUrl(j.image)),
+  };
+}
+
 /* ---------- LP：お知らせセクションの描画 ---------- */
 async function renderNewsSection() {
   const host = document.getElementById("news-list");
@@ -59,6 +191,26 @@ async function renderNewsSection() {
 async function renderHeroLatest() {
   const host = document.getElementById("hero-latest");
   if (!host) return;
+
+  // トップページのSEO（hero-latest が存在するページ＝index.html）
+  setSeoMeta({
+    title: `${ORG.name}｜企業のWeb戦略を、技術と発想で支える。`,
+    description: ORG.description + " 中小企業から上場企業まで、Webサイト制作・システム開発・DXのご相談はインフォネットへ。",
+    image: "/assets/recruit-hero.webp",
+    type: "website",
+  });
+  injectJsonLd([
+    ldOrganization(),
+    {
+      "@context": "https://schema.org", "@type": "WebSite",
+      name: ORG.name, url: ORG.url,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: ORG.url + "/?q={search_term_string}",
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ]);
   try {
     const list = await window.Store.listNews("published");
     const n = (Array.isArray(list) ? list : [])[0]; // 最新（公開日の新しい順）
@@ -102,7 +254,21 @@ async function renderNewsDetail() {
       host.innerHTML = `<p class="text-[#666] py-12 text-center">この記事は公開されていないか、削除されました。</p>`;
       return;
     }
-    document.title = `${n.title}｜株式会社インフォネット`;
+    setSeoMeta({
+      title: `${n.title}｜お知らせ｜${ORG.name}`,
+      description: excerptSite(n.body, 150),
+      image: window.newsImageUrl(n.image),
+      type: "article",
+    });
+    injectJsonLd([
+      ldOrganization(),
+      ldBreadcrumb([
+        { name: "ホーム", url: "/" },
+        { name: "お知らせ", url: "/#news" },
+        { name: n.title, url: location.pathname + location.search },
+      ]),
+      ldArticle(n, "NewsArticle"),
+    ]);
     host.innerHTML = `
       <span class="inline-block text-sm font-semibold text-white bg-[#0F3D7E] rounded px-3 py-1">
         ${formatDateSite(n.publishedAt || n.createdAt)}
@@ -242,7 +408,21 @@ async function renderJobDetail() {
       host.innerHTML = `<p class="text-[#666] py-12 text-center">この求人は公開されていないか、募集を終了しました。</p>`;
       return;
     }
-    document.title = `${n.title}｜採用情報｜株式会社インフォネット`;
+    setSeoMeta({
+      title: `${n.title}｜採用情報｜${ORG.name}`,
+      description: excerptSite(n.body, 150),
+      image: window.newsImageUrl(n.image),
+      type: "article",
+    });
+    injectJsonLd([
+      ldOrganization(),
+      ldBreadcrumb([
+        { name: "ホーム", url: "/" },
+        { name: "採用情報", url: "/recruit.html" },
+        { name: n.title, url: location.pathname + location.search },
+      ]),
+      ldJobPosting(n),
+    ]);
     host.innerHTML = `
       <span class="inline-block text-sm font-semibold text-white bg-[#0F3D7E] rounded px-3 py-1">募集中</span>
       <h1 class="mt-5 text-3xl font-bold text-[#1A1A1A] leading-tight">${escapeHtmlSite(n.title)}</h1>
@@ -288,6 +468,30 @@ async function renderRecruitPage() {
   } catch {
     return;
   }
+
+  // SEO（採用ページ）
+  setSeoMeta({
+    title: `採用情報｜${ORG.name}`,
+    description: (r.mvSubtitle && r.mvSubtitle.replace(/\n/g, "")) || `${ORG.name}の採用情報。私たちと一緒に、企業のWeb戦略を支える仲間を募集しています。`,
+    image: r.mvImage,
+    type: "website",
+  });
+  let jobsList = [];
+  try { jobsList = await window.Store.listJobs("published"); } catch {}
+  const itemList = {
+    "@context": "https://schema.org", "@type": "ItemList",
+    itemListElement: (jobsList || []).slice(0, 10).map((j, i) => ({
+      "@type": "ListItem", position: i + 1, name: j.title, url: absUrl("/job.html?id=" + encodeURIComponent(j.id)),
+    })),
+  };
+  injectJsonLd([
+    ldOrganization(),
+    ldBreadcrumb([
+      { name: "ホーム", url: "/" },
+      { name: "採用情報", url: "/recruit.html" },
+    ]),
+    itemList,
+  ]);
   // セクション配色テーマを適用（AIおまかせ更新で指定される）
   applySectionThemes(r.sectionThemes);
 
@@ -548,7 +752,22 @@ async function renderBlogDetail() {
       host.innerHTML = `<p class="text-[#666] py-12 text-center">この記事は公開されていないか、削除されました。</p>`;
       return;
     }
-    document.title = `${n.title}｜ブログ｜株式会社インフォネット`;
+    setSeoMeta({
+      title: `${n.title}｜ブログ｜${ORG.name}`,
+      description: excerptSite(n.body, 150),
+      image: window.newsImageUrl(n.image),
+      type: "article",
+    });
+    injectJsonLd([
+      ldOrganization(),
+      ldBreadcrumb([
+        { name: "ホーム", url: "/" },
+        { name: "採用情報", url: "/recruit.html" },
+        { name: "ブログ", url: "/recruit.html#blog" },
+        { name: n.title, url: location.pathname + location.search },
+      ]),
+      ldArticle(n, "BlogPosting"),
+    ]);
     host.innerHTML = `
       <div class="flex items-center gap-3">
         <span class="inline-block text-sm font-semibold text-white bg-[#00B8D9] rounded px-3 py-1">

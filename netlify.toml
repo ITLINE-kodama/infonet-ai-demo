@@ -11,6 +11,12 @@
   to = "/.netlify/functions/:splat"
   status = 200
 
+# サイトマップを動的生成（ニュース・求人・ブログを含む）
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
+  status = 200
+
 # きれいな記事URL（/news/seed-001 など）でも詳細ページを表示
 [[redirects]]
   from = "/news/*"
