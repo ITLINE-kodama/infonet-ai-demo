@@ -84,7 +84,7 @@
         </div>
       </div>
       <div class="overflow-x-auto thin-scroll">
-        <table class="w-full text-sm min-w-[1000px]">
+        <table class="w-full text-sm min-w-[1100px]">
           <thead>
             <tr class="bg-[#F9FAFB] text-left text-[12px] text-[#6B7280] border-b border-[#E5E7EB]">
               <th class="px-6 py-3 font-medium">コンテンツ</th>
@@ -228,13 +228,13 @@
     return { titleLen, bodyLen, isCustomImage, isGeneric, titleCheck, bodyCheck, imageCheck, ldCheck, score };
   }
   const STATUS_BADGE = {
-    ok:   '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#065F46] bg-[#D1FAE5] rounded px-2 py-0.5"><i data-lucide="check" class="w-3 h-3"></i>OK</span>',
-    warn: '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#92400E] bg-[#FEF3C7] rounded px-2 py-0.5"><i data-lucide="alert-triangle" class="w-3 h-3"></i>要改善</span>',
-    ng:   '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#991B1B] bg-[#FEE2E2] rounded px-2 py-0.5"><i data-lucide="x" class="w-3 h-3"></i>不足</span>',
+    ok:   '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#065F46] bg-[#D1FAE5] rounded px-2 py-0.5 whitespace-nowrap"><i data-lucide="check" class="w-3 h-3"></i>OK</span>',
+    warn: '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#92400E] bg-[#FEF3C7] rounded px-2 py-0.5 whitespace-nowrap"><i data-lucide="alert-triangle" class="w-3 h-3"></i>要改善</span>',
+    ng:   '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#991B1B] bg-[#FEE2E2] rounded px-2 py-0.5 whitespace-nowrap"><i data-lucide="x" class="w-3 h-3"></i>不足</span>',
   };
   const LD_BADGE = {
-    ok:   '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#065F46] bg-[#D1FAE5] rounded px-2 py-0.5"><i data-lucide="check" class="w-3 h-3"></i>対応済み</span>',
-    warn: '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#92400E] bg-[#FEF3C7] rounded px-2 py-0.5"><i data-lucide="alert-triangle" class="w-3 h-3"></i>要改善</span>',
+    ok:   '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#065F46] bg-[#D1FAE5] rounded px-2 py-0.5 whitespace-nowrap"><i data-lucide="check" class="w-3 h-3"></i>対応済み</span>',
+    warn: '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#92400E] bg-[#FEF3C7] rounded px-2 py-0.5 whitespace-nowrap"><i data-lucide="alert-triangle" class="w-3 h-3"></i>要改善</span>',
   };
   function scoreBadge(score) {
     const color = score >= 80 ? "#10B981" : score >= 60 ? "#F59E0B" : "#EF4444";
@@ -253,6 +253,10 @@
       ...blog.map((n) => ({ ...n, _type: "blog" })),
     ];
     const typeLabel = { news: "お知らせ", job: "求人", blog: "ブログ" };
+    const editUrl = (it) =>
+      it._type === "news" ? `/admin/news.html?id=${encodeURIComponent(it.id)}`
+      : it._type === "blog" ? `/admin/blog.html?id=${encodeURIComponent(it.id)}`
+      : `/admin/jobs.html?id=${encodeURIComponent(it.id)}`;
     let scoreSum = 0;
     items.forEach((it) => { it._audit = auditItem(it, it._type); scoreSum += it._audit.score; });
     const avg = items.length ? Math.round(scoreSum / items.length) : 0;
@@ -268,10 +272,13 @@
       return `
       <tr class="border-b border-[#E5E7EB] last:border-0 hover:bg-[#F9FAFB]" data-type="${it._type}" data-id="${it.id}">
         <td class="px-6 py-3.5">
-          <p class="font-medium text-[#111827]">${escapeHtml(it.title)}</p>
+          <a href="${editUrl(it)}" class="font-medium text-[#111827] hover:text-[#1E2761] hover:underline inline-flex items-center gap-1.5" title="編集画面を開く">
+            <span>${escapeHtml(it.title)}</span>
+            <i data-lucide="external-link" class="w-3 h-3 opacity-50 shrink-0"></i>
+          </a>
           <p class="text-[11px] text-[#9CA3AF] mt-0.5">${escapeHtml(it.id)}</p>
         </td>
-        <td class="px-6 py-3.5"><span class="text-[11px] font-semibold text-[#1E2761] bg-[#EEF2FF] rounded px-2 py-0.5">${typeLabel[it._type] || it._type}</span></td>
+        <td class="px-6 py-3.5"><span class="inline-block text-[11px] font-semibold text-[#1E2761] bg-[#EEF2FF] rounded px-2 py-0.5 whitespace-nowrap">${typeLabel[it._type] || it._type}</span></td>
         <td class="px-6 py-3.5">${STATUS_BADGE[a.titleCheck]}<p class="text-[10px] text-[#9CA3AF] mt-1">${a.titleLen}文字</p></td>
         <td class="px-6 py-3.5">${STATUS_BADGE[a.bodyCheck]}<p class="text-[10px] text-[#9CA3AF] mt-1">${a.bodyLen}文字</p></td>
         <td class="px-6 py-3.5">${STATUS_BADGE[a.imageCheck]}</td>
