@@ -11,6 +11,18 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<style>
+  @keyframes ga4-fadein {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadein { animation: ga4-fadein 0.4s ease-out both; }
+  @keyframes ga4-pulse-soft {
+    0%, 100% { box-shadow: 0 10px 30px rgba(30,39,97,0.35), 0 0 0 0 rgba(59,130,246,0.5); }
+    50%      { box-shadow: 0 10px 30px rgba(30,39,97,0.35), 0 0 0 10px rgba(59,130,246,0); }
+  }
+  .animate-pulse-soft { animation: ga4-pulse-soft 2.4s ease-in-out infinite; }
+</style>
 </head>
 <body class="bg-[#F9FAFB] text-[#111827]">
 
@@ -192,8 +204,32 @@
 </div>
 
 <!-- ===== GA4 AI チャット（フローティング） ===== -->
+<!-- FABの上に常時表示するヒント吹き出し -->
+<div id="ga4-chat-hint"
+  class="fixed bottom-[5.5rem] right-6 z-40 w-[280px] bg-white rounded-2xl shadow-[0_12px_30px_rgba(30,39,97,0.18)] border border-[#E5E7EB] p-4 animate-fadein">
+  <button id="ga4-chat-hint-close" class="absolute top-2 right-2 w-6 h-6 rounded-full text-[#9CA3AF] hover:text-[#111827] hover:bg-[#F3F4F6] flex items-center justify-center" title="閉じる">
+    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+  </button>
+  <div class="flex items-center gap-2 mb-2">
+    <span class="w-7 h-7 rounded-full bg-gradient-to-br from-[#1E2761] to-[#3B82F6] text-white flex items-center justify-center shrink-0">
+      <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+    </span>
+    <p class="text-[13px] font-semibold text-[#111827]">AIにおまかせ分析</p>
+  </div>
+  <p class="text-[12px] text-[#374151] leading-relaxed">
+    データの<strong class="text-[#1E2761]">閲覧・追加・分析・削除</strong>、なんでもチャットで承ります。
+  </p>
+  <div class="mt-2 flex flex-wrap gap-1.5">
+    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#1E2761]">📊 グラフ追加</span>
+    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#047857]">📈 傾向分析</span>
+    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#92400E]">🤔 用語解説</span>
+    <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#FEE2E2] text-[#B91C1C]">🗑 削除</span>
+  </div>
+  <!-- 吹き出しの三角 -->
+  <div class="absolute -bottom-2 right-8 w-4 h-4 bg-white border-r border-b border-[#E5E7EB] transform rotate-45"></div>
+</div>
 <button id="ga4-chat-fab"
-  class="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 pl-4 pr-5 py-3 rounded-full bg-gradient-to-r from-[#1E2761] to-[#3B82F6] text-white text-sm font-semibold shadow-[0_10px_30px_rgba(30,39,97,0.35)] hover:scale-105 transition">
+  class="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 pl-4 pr-5 py-3 rounded-full bg-gradient-to-r from-[#1E2761] to-[#3B82F6] text-white text-sm font-semibold shadow-[0_10px_30px_rgba(30,39,97,0.35)] hover:scale-105 transition animate-pulse-soft">
   <i data-lucide="message-circle" class="w-5 h-5"></i>
   <span>AIに聞く</span>
 </button>
@@ -682,12 +718,27 @@
   const ga4Input = document.getElementById("ga4-chat-input");
   const ga4Fab = document.getElementById("ga4-chat-fab");
   const ga4Panel = document.getElementById("ga4-chat-panel");
+  const ga4Hint = document.getElementById("ga4-chat-hint");
   let ga4Busy = false;
   let ga4Inited = false;
   let ga4History = [];
   let customWidgets = []; // {id, type, title}
 
+  function ga4HideHint() {
+    if (ga4Hint && !ga4Hint.classList.contains("hidden")) {
+      ga4Hint.classList.add("hidden");
+    }
+  }
+  const ga4HintClose = document.getElementById("ga4-chat-hint-close");
+  if (ga4HintClose) {
+    ga4HintClose.addEventListener("click", (e) => {
+      e.stopPropagation();
+      ga4HideHint();
+    });
+  }
+
   function ga4Open() {
+    ga4HideHint();
     ga4Fab.classList.add("hidden");
     ga4Panel.classList.remove("hidden");
     ga4Panel.classList.add("flex");
