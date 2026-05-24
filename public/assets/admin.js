@@ -179,7 +179,7 @@ function initAdmin(activeKey) {
         <a href="/" class="flex items-center gap-2">${logoMarkup()}</a>
         <p class="mt-1 text-[11px] text-white/55">${escapeHtml(BRAND.productName)}</p>
       </div>
-      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
         ${NAV_ITEMS.map((it) => {
           if (it.group) {
             return `<p class="px-3 pt-4 pb-1 text-[10px] font-semibold tracking-wider text-white/35 uppercase">${escapeHtml(it.group)}</p>`;

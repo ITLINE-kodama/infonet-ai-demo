@@ -12,6 +12,10 @@ body {
 .thin-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 .thin-scroll::-webkit-scrollbar-track { background: transparent; }
 
+/* スクロールバーを非表示（スクロール機能は残す） */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
 /* AI生成中のタイピングインジケータ */
 .typing-dot {
   display: inline-block; width: 6px; height: 6px; border-radius: 50%;
