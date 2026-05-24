@@ -16,6 +16,7 @@
   from = "/sitemap.xml"
   to = "/.netlify/functions/sitemap"
   status = 200
+  force = true
 
 # きれいな記事URL（/news/seed-001 など）でも詳細ページを表示
 [[redirects]]
