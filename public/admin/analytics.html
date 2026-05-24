@@ -138,6 +138,20 @@
       </div>
     </div>
 
+    <!-- ===== カスタム分析（AIに聞いて追加するウィジェット） ===== -->
+    <section id="custom-widgets-section" class="hidden mt-6">
+      <div class="bg-gradient-to-br from-[#EEF2FF] via-white to-[#F0FDFA] border border-[#C7D2FE]/60 rounded-xl p-6">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
+          <h2 class="text-base font-semibold flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-[#1E2761]"></i> カスタム分析
+            <span class="text-[11px] font-semibold bg-white text-[#1E2761] border border-[#C7D2FE] rounded-full px-2 py-0.5">AI追加</span>
+          </h2>
+          <button id="clear-widgets-btn" class="text-[12px] font-medium text-[#EF4444] hover:underline">すべて削除</button>
+        </div>
+        <div id="custom-widgets" class="grid sm:grid-cols-2 gap-4"></div>
+      </div>
+    </section>
+
     <!-- SEO -->
     <div class="mt-6 bg-white border border-[#E5E7EB] rounded-xl p-6">
       <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="search" class="w-4 h-4 text-[#1E2761]"></i> SEO評価</h2>
@@ -175,6 +189,40 @@
       <p class="text-[11px] text-[#9CA3AF]">※ 本ページは GA4 のデモデータです。本番では実際の計測結果が表示されます。</p>
     </div>
   </main>
+</div>
+
+<!-- ===== GA4 AI チャット（フローティング） ===== -->
+<button id="ga4-chat-fab"
+  class="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 pl-4 pr-5 py-3 rounded-full bg-gradient-to-r from-[#1E2761] to-[#3B82F6] text-white text-sm font-semibold shadow-[0_10px_30px_rgba(30,39,97,0.35)] hover:scale-105 transition">
+  <i data-lucide="message-circle" class="w-5 h-5"></i>
+  <span>AIに聞く</span>
+</button>
+
+<div id="ga4-chat-panel" class="hidden fixed bottom-6 right-6 z-50 w-[400px] max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-2rem)] bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.25)] flex flex-col border border-[#E5E7EB]">
+  <div class="px-5 py-3.5 border-b border-[#E5E7EB] flex items-center justify-between bg-gradient-to-r from-[#1E2761] to-[#3B82F6] text-white rounded-t-2xl">
+    <div class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center"><i data-lucide="sparkles" class="w-4 h-4"></i></span>
+      <div>
+        <p class="text-sm font-semibold">らくらくAI（GA4分析）</p>
+        <p class="text-[10px] text-white/70">分析・ウィジェット追加・質問に対応</p>
+      </div>
+    </div>
+    <button id="ga4-chat-close" class="w-8 h-8 rounded-lg hover:bg-white/15 flex items-center justify-center">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  </div>
+  <div id="ga4-chat" class="flex-1 overflow-y-auto thin-scroll px-4 py-4 space-y-3 bg-[#F9FAFB]"></div>
+  <div class="px-3 py-3 border-t border-[#E5E7EB] bg-white rounded-b-2xl">
+    <div class="flex items-end gap-2">
+      <textarea id="ga4-chat-input" rows="1" placeholder="例：国別の流入を表示して／直近の傾向を分析して"
+        class="flex-1 resize-none border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] leading-relaxed focus:border-[#1E2761] outline-none thin-scroll"
+        style="max-height: 100px;"></textarea>
+      <button id="ga4-chat-send" class="w-9 h-9 shrink-0 rounded-lg bg-[#1E2761] text-white flex items-center justify-center hover:opacity-90 disabled:opacity-40">
+        <i data-lucide="send" class="w-4 h-4"></i>
+      </button>
+    </div>
+    <p class="mt-1 text-[10px] text-[#9CA3AF]">Enterで送信／Shift+Enterで改行</p>
+  </div>
 </div>
 
 <!-- ===== AIレポート モーダル ===== -->
@@ -626,6 +674,239 @@
     refresh();
     lucide.createIcons();
   })();
+
+  /* ==========================================================
+   *  GA4 AIチャット（カスタムウィジェット追加・分析）
+   * ========================================================== */
+  const ga4Chat = document.getElementById("ga4-chat");
+  const ga4Input = document.getElementById("ga4-chat-input");
+  const ga4Fab = document.getElementById("ga4-chat-fab");
+  const ga4Panel = document.getElementById("ga4-chat-panel");
+  let ga4Busy = false;
+  let ga4Inited = false;
+  let ga4History = [];
+  let customWidgets = []; // {id, type, title}
+
+  function ga4Open() {
+    ga4Fab.classList.add("hidden");
+    ga4Panel.classList.remove("hidden");
+    ga4Panel.classList.add("flex");
+    if (!ga4Inited) {
+      ga4Inited = true;
+      ga4AddBot(`こんにちは！GA4分析のAIアシスタントです👋<br>
+        「<strong>○○を表示して</strong>」とお話しいただけば、ダッシュボードにウィジェットを追加します。
+        「<strong>○○を分析して</strong>」で分析レポートも出せます。
+        <span class="block mt-2 text-[11px] text-[#6B7280]">例：「国別の流入を表示して」「直近の傾向を分析して」「曜日別のPVをグラフで」「CVRが低い原因を教えて」</span>`);
+    }
+    setTimeout(() => ga4Input.focus(), 100);
+  }
+  function ga4Close() {
+    ga4Panel.classList.add("hidden");
+    ga4Panel.classList.remove("flex");
+    ga4Fab.classList.remove("hidden");
+  }
+  ga4Fab.addEventListener("click", ga4Open);
+  document.getElementById("ga4-chat-close").addEventListener("click", ga4Close);
+
+  function ga4AddUser(text) {
+    const el = document.createElement("div");
+    el.className = "flex justify-end";
+    el.innerHTML = `<div class="max-w-[85%] bg-[#1E2761] text-white text-[13px] rounded-2xl rounded-br-sm px-3.5 py-2 leading-relaxed whitespace-pre-wrap">${escapeHtml(text)}</div>`;
+    ga4Chat.appendChild(el);
+    ga4Chat.scrollTop = ga4Chat.scrollHeight;
+  }
+  function ga4AddBot(html) {
+    const el = document.createElement("div");
+    el.className = "flex gap-2";
+    el.innerHTML = `
+      <span class="w-7 h-7 shrink-0 rounded-full bg-gradient-to-br from-[#1E2761] to-[#3B82F6] text-white flex items-center justify-center">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+      </span>
+      <div class="max-w-[85%] bg-white border border-[#E5E7EB] text-[#111827] text-[13px] rounded-2xl rounded-bl-sm px-3.5 py-2 leading-relaxed">${html}</div>`;
+    ga4Chat.appendChild(el);
+    if (window.lucide) lucide.createIcons();
+    ga4Chat.scrollTop = ga4Chat.scrollHeight;
+    return el;
+  }
+  function ga4AddTyping() {
+    const el = ga4AddBot(`<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>`);
+    el.dataset.typing = "1";
+    return el;
+  }
+
+  /* ---- ウィジェット描画 ---- */
+  const WIDGET_COLORS = ["#1E2761", "#00B8D9", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#EC4899"];
+  function renderCustomWidget(widget) {
+    const id = "cw-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    const host = document.getElementById("custom-widgets");
+    const section = document.getElementById("custom-widgets-section");
+    section.classList.remove("hidden");
+    customWidgets.push({ id, type: widget.type, title: widget.title });
+
+    const wrap = document.createElement("div");
+    wrap.id = id;
+    wrap.className = "bg-white border border-[#E5E7EB] rounded-xl p-5 relative";
+    if (widget.size === "large" || widget.type === "table" || widget.type === "text") {
+      wrap.classList.add("sm:col-span-2");
+    }
+
+    const closeBtn = `<button data-widget-remove="${id}" class="absolute top-3 right-3 w-7 h-7 rounded hover:bg-[#F3F4F6] text-[#9CA3AF] hover:text-[#EF4444] flex items-center justify-center" title="削除">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>`;
+    const titleBlock = `<div class="pr-8">
+      <p class="text-[12px] font-semibold text-[#6B7280] tracking-wide uppercase">${escapeHtml(widget.title || "")}</p>
+      ${widget.description ? `<p class="text-[11px] text-[#9CA3AF] mt-0.5">${escapeHtml(widget.description)}</p>` : ""}
+    </div>`;
+
+    let body = "";
+    const d = widget.data || {};
+    if (widget.type === "kpi") {
+      const deltaColor = d.deltaPositive ? "#10B981" : "#EF4444";
+      body = `<p class="mt-3 text-3xl font-bold text-[#111827]">${escapeHtml(d.value || "—")}</p>
+        <p class="text-[12px] text-[#6B7280] mt-0.5">${escapeHtml(d.label || "")}</p>
+        ${d.delta ? `<p class="text-[12px] font-semibold mt-1" style="color:${deltaColor}">${escapeHtml(d.delta)} <span class="text-[#9CA3AF] font-normal">前期間比</span></p>` : ""}`;
+    } else if (widget.type === "table") {
+      const cols = Array.isArray(d.columns) ? d.columns : [];
+      const rows = Array.isArray(d.rows) ? d.rows : [];
+      body = `<div class="mt-3 overflow-x-auto thin-scroll">
+        <table class="w-full text-[13px]">
+          <thead><tr class="text-left text-[11px] text-[#6B7280] border-b border-[#E5E7EB]">
+            ${cols.map(c => `<th class="py-2 px-2 font-medium">${escapeHtml(String(c))}</th>`).join("")}
+          </tr></thead>
+          <tbody>
+            ${rows.map(r => `<tr class="border-b border-[#F3F4F6] last:border-0">
+              ${r.map(v => `<td class="py-2 px-2">${escapeHtml(String(v))}</td>`).join("")}
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>`;
+    } else if (widget.type === "text") {
+      const md = (d.markdown || "");
+      body = `<div class="mt-3 text-[13px] leading-relaxed text-[#374151]">${mdToInlineHtml(md)}</div>`;
+    } else if (widget.type === "bar" || widget.type === "doughnut" || widget.type === "line") {
+      body = `<div class="mt-3" style="height: 220px; position: relative;"><canvas id="${id}-canvas"></canvas></div>`;
+    } else {
+      body = `<p class="mt-3 text-[12px] text-[#9CA3AF]">不明なウィジェットタイプ：${escapeHtml(widget.type)}</p>`;
+    }
+    wrap.innerHTML = closeBtn + titleBlock + body;
+    host.appendChild(wrap);
+
+    if (widget.type === "bar" || widget.type === "doughnut" || widget.type === "line") {
+      const canvas = document.getElementById(id + "-canvas");
+      if (canvas) {
+        const labels = Array.isArray(d.labels) ? d.labels : [];
+        const values = Array.isArray(d.values) ? d.values : [];
+        const colors = Array.isArray(d.colors) && d.colors.length ? d.colors : WIDGET_COLORS;
+        new Chart(canvas.getContext("2d"), {
+          type: widget.type === "doughnut" ? "doughnut" : widget.type,
+          data: {
+            labels,
+            datasets: [{
+              label: widget.title || "",
+              data: values,
+              backgroundColor: widget.type === "doughnut"
+                ? colors.slice(0, values.length)
+                : (d.color || "#1E2761"),
+              borderColor: widget.type === "line" ? (d.color || "#1E2761") : undefined,
+              borderWidth: widget.type === "line" ? 2 : 0,
+              fill: widget.type === "line" ? false : undefined,
+              tension: 0.35,
+              pointRadius: widget.type === "line" ? 3 : 0,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: widget.type === "doughnut", position: "bottom", labels: { font: { size: 11 } } },
+            },
+            scales: widget.type === "doughnut" ? {} : {
+              x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+              y: { grid: { color: "#F3F4F6" }, ticks: { font: { size: 10 } }, beginAtZero: true },
+            },
+            cutout: widget.type === "doughnut" ? "60%" : undefined,
+          },
+        });
+      }
+    }
+    lucide.createIcons();
+  }
+  function mdToInlineHtml(md) {
+    return String(md || "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/^### (.+)$/gm, '<h4 class="mt-3 mb-1 text-[13px] font-bold text-[#1E2761]">$1</h4>')
+      .replace(/^## (.+)$/gm, '<h3 class="mt-4 mb-2 text-[14px] font-bold text-[#111827] border-b border-[#E5E7EB] pb-1">$1</h3>')
+      .replace(/^- (.+)$/gm, '<div class="flex items-start gap-2 my-1"><span class="text-[#1E2761] font-bold">・</span><span>$1</span></div>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong class="text-[#1E2761]">$1</strong>')
+      .replace(/\n\n/g, '<div class="h-2"></div>')
+      .replace(/\n/g, "<br>");
+  }
+  function removeWidget(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+    customWidgets = customWidgets.filter((w) => w.id !== id);
+    if (!customWidgets.length) {
+      document.getElementById("custom-widgets-section").classList.add("hidden");
+    }
+  }
+  document.getElementById("custom-widgets").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-widget-remove]");
+    if (btn) removeWidget(btn.dataset.widgetRemove);
+  });
+  document.getElementById("clear-widgets-btn").addEventListener("click", () => {
+    document.getElementById("custom-widgets").innerHTML = "";
+    customWidgets = [];
+    document.getElementById("custom-widgets-section").classList.add("hidden");
+    toast("カスタム分析をクリアしました", "info");
+  });
+
+  /* ---- 送信処理 ---- */
+  async function ga4Send() {
+    if (ga4Busy) return;
+    const text = ga4Input.value.trim();
+    if (!text) return;
+    ga4Busy = true;
+    document.getElementById("ga4-chat-send").disabled = true;
+    ga4Input.value = "";
+    ga4AddUser(text);
+    const typing = ga4AddTyping();
+    try {
+      const r = await fetch("/api/analytics-chat", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          instruction: text,
+          conversationHistory: ga4History.slice(-8),
+          currentWidgets: customWidgets.map(w => ({ type: w.type, title: w.title })),
+        }),
+      });
+      const data = await r.json();
+      typing.remove();
+      const action = data.action || "qa";
+      if ((action === "add_widget" || action === "analyze") && data.widget) {
+        renderCustomWidget(data.widget);
+      }
+      const msg = data.chatMessage || "応答を受け取りました。";
+      ga4AddBot(`${escapeHtml(msg).replace(/\n/g, "<br>")}
+        <span class="block mt-1 text-[10px] text-[#9CA3AF]">${escapeHtml(data.model || "")}${data.tokensUsed ? " ／ " + data.tokensUsed + "トークン" : ""}</span>`);
+      ga4History.push({ role: "user", content: text });
+      ga4History.push({ role: "assistant", content: JSON.stringify({ action, chatMessage: msg, widget: data.widget }) });
+    } catch (err) {
+      typing.remove();
+      ga4AddBot(`<span class="text-[#EF4444]">通信に失敗しました：${escapeHtml(String(err && err.message || err))}</span>`);
+    } finally {
+      ga4Busy = false;
+      document.getElementById("ga4-chat-send").disabled = false;
+      ga4Input.focus();
+    }
+  }
+  document.getElementById("ga4-chat-send").addEventListener("click", ga4Send);
+  ga4Input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ga4Send(); }
+  });
+  ga4Input.addEventListener("input", () => {
+    ga4Input.style.height = "auto";
+    ga4Input.style.height = Math.min(ga4Input.scrollHeight, 100) + "px";
+  });
 </script>
 </body>
 </html>
