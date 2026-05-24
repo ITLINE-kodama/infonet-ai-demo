@@ -9,12 +9,14 @@ const SYSTEM_PROMPT = `あなたは「らくらくAI」、GA4アクセス解析�
 
 【出力はJSONのみ】
 {
-  "action": "add_widget" | "analyze" | "qa",
+  "action": "add_widget" | "analyze" | "remove_widget" | "qa",
   "chatMessage": "担当者への一言（敬体・親しみやすく・2〜4文）",
-  "widget": { ... }
+  "widget": { ... },
+  "remove": { "titles": ["削除対象タイトル1", ...], "all": false }
 }
 - add_widget: ダッシュボードに新しいウィジェットを追加。widget 必須。
 - analyze: 分析結果を text タイプのウィジェットとして追加。widget 必須（type:"text"）。
+- remove_widget: 既存ウィジェットを削除。remove 必須。「現在追加済みウィジェット」一覧から該当タイトルを部分一致で1〜複数件選び remove.titles に列挙。全部消す場合は remove.all:true。
 - qa: 質問への回答のみ。widget 無し。
 
 【widget の型と data 形式】
@@ -33,6 +35,7 @@ const SYSTEM_PROMPT = `あなたは「らくらくAI」、GA4アクセス解析�
 【判断ヒント】
 - 「○○を表示／追加／グラフ／カードに」 → action: "add_widget"
 - 「分析して／傾向は？／教えて」「○○についてレポート」 → action: "analyze"（type: "text"）
+- 「○○のカードを消して／削除して／クリア」「全部消して」「リセット」 → action: "remove_widget"
 - 雑談・操作質問 → action: "qa"
 
 【データはデモ・架空】
@@ -75,6 +78,20 @@ function isExpired() {
 function mockResponse(instruction) {
   const msg = String(instruction || "");
   // ざっくりキーワードで分岐したモック
+  if (/全部|すべて|全て|リセット|クリア/.test(msg) && /消|削除|外/.test(msg)) {
+    return {
+      action: "remove_widget",
+      chatMessage: "（デモモック）追加済みのカードをすべて削除しました。",
+      remove: { all: true, titles: [] },
+    };
+  }
+  if (/消|削除|外して|要らない|不要/.test(msg)) {
+    return {
+      action: "remove_widget",
+      chatMessage: "（デモモック）該当するカードを削除しました。本番では指定タイトルを正確に特定して削除します。",
+      remove: { all: false, titles: [] },
+    };
+  }
   if (/分析|傾向|レポート|教えて/.test(msg)) {
     return {
       action: "analyze",
@@ -157,11 +174,12 @@ export default async (req) => {
     }
     if (!parsed || typeof parsed !== "object") throw new Error("AI応答のフォーマットが不正です");
 
-    const action = ["add_widget", "analyze", "qa"].includes(parsed.action) ? parsed.action : "qa";
+    const action = ["add_widget", "analyze", "remove_widget", "qa"].includes(parsed.action) ? parsed.action : "qa";
     return json({
       action,
       chatMessage: typeof parsed.chatMessage === "string" ? parsed.chatMessage : "応答を受け取りました。",
       widget: parsed.widget && typeof parsed.widget === "object" ? parsed.widget : null,
+      remove: parsed.remove && typeof parsed.remove === "object" ? parsed.remove : null,
       tokensUsed: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0),
       model: "claude-sonnet-4-6",
       mode: "live",

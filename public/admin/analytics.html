@@ -214,7 +214,7 @@
   <div id="ga4-chat" class="flex-1 overflow-y-auto thin-scroll px-4 py-4 space-y-3 bg-[#F9FAFB]"></div>
   <div class="px-3 py-3 border-t border-[#E5E7EB] bg-white rounded-b-2xl">
     <div class="flex items-end gap-2">
-      <textarea id="ga4-chat-input" rows="1" placeholder="例：国別の流入を表示して／直近の傾向を分析して"
+      <textarea id="ga4-chat-input" rows="1" placeholder="例：『国別の流入を表示』『傾向を分析して』『直帰率って？』『〇〇のカードを消して』など、なんでもどうぞ"
         class="flex-1 resize-none border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] leading-relaxed focus:border-[#1E2761] outline-none thin-scroll"
         style="max-height: 100px;"></textarea>
       <button id="ga4-chat-send" class="w-9 h-9 shrink-0 rounded-lg bg-[#1E2761] text-white flex items-center justify-center hover:opacity-90 disabled:opacity-40">
@@ -693,10 +693,18 @@
     ga4Panel.classList.add("flex");
     if (!ga4Inited) {
       ga4Inited = true;
-      ga4AddBot(`こんにちは！GA4分析のAIアシスタントです👋<br>
-        「<strong>○○を表示して</strong>」とお話しいただけば、ダッシュボードにウィジェットを追加します。
-        「<strong>○○を分析して</strong>」で分析レポートも出せます。
-        <span class="block mt-2 text-[11px] text-[#6B7280]">例：「国別の流入を表示して」「直近の傾向を分析して」「曜日別のPVをグラフで」「CVRが低い原因を教えて」</span>`);
+      ga4AddBot(`こんにちは。GA4分析のAIアシスタントです✨<br>
+        データの<strong>閲覧・追加・分析・削除</strong>、なんでもお気軽にお話しかけください。<br>
+        ふだんの言葉のままで大丈夫です。「こんな数字が見たい」「○○について深掘りして」といったご要望から、用語の疑問まで承ります。
+        <span class="block mt-3 text-[11px] text-[#6B7280] leading-[1.9]">
+          🌏 「国別の流入を表示して」<span class="text-[#9CA3AF]">→ 棒グラフを追加</span><br>
+          📈 「直近30日の傾向を分析して」<span class="text-[#9CA3AF]">→ レポートを追加</span><br>
+          📊 「曜日別のセッションを表で」<span class="text-[#9CA3AF]">→ 表を追加</span><br>
+          🎯 「CVRが低い原因は？」<span class="text-[#9CA3AF]">→ 改善案を提案</span><br>
+          🤔 「直帰率って何の指標？」<span class="text-[#9CA3AF]">→ 用語解説</span><br>
+          🗑 「国別のカードを消して」<span class="text-[#9CA3AF]">→ 該当ウィジェットを削除</span>
+        </span>
+        <span class="block mt-2 text-[11px] text-[#9CA3AF]">追加したカードは右上の×ボタンでも削除できます。何でもお話しください。</span>`);
     }
     setTimeout(() => ga4Input.focus(), 100);
   }
@@ -882,8 +890,24 @@
       const data = await r.json();
       typing.remove();
       const action = data.action || "qa";
+      let removedCount = 0;
       if ((action === "add_widget" || action === "analyze") && data.widget) {
         renderCustomWidget(data.widget);
+      } else if (action === "remove_widget" && data.remove) {
+        const rem = data.remove;
+        if (rem.all) {
+          removedCount = customWidgets.length;
+          customWidgets.slice().forEach((w) => removeWidget(w.id));
+        } else if (Array.isArray(rem.titles) && rem.titles.length) {
+          rem.titles.forEach((t) => {
+            const target = String(t || "").trim();
+            if (!target) return;
+            const matches = customWidgets.filter((w) =>
+              (w.title || "").includes(target) || target.includes(w.title || "")
+            );
+            matches.forEach((m) => { removeWidget(m.id); removedCount++; });
+          });
+        }
       }
       const msg = data.chatMessage || "応答を受け取りました。";
       ga4AddBot(`${escapeHtml(msg).replace(/\n/g, "<br>")}
