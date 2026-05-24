@@ -84,14 +84,15 @@
         </div>
       </div>
       <div class="overflow-x-auto thin-scroll">
-        <table class="w-full text-sm min-w-[860px]">
+        <table class="w-full text-sm min-w-[1000px]">
           <thead>
             <tr class="bg-[#F9FAFB] text-left text-[12px] text-[#6B7280] border-b border-[#E5E7EB]">
               <th class="px-6 py-3 font-medium">コンテンツ</th>
               <th class="px-6 py-3 font-medium w-24">種別</th>
-              <th class="px-6 py-3 font-medium w-32">タイトル</th>
-              <th class="px-6 py-3 font-medium w-32">本文</th>
+              <th class="px-6 py-3 font-medium w-24">タイトル</th>
+              <th class="px-6 py-3 font-medium w-24">本文</th>
               <th class="px-6 py-3 font-medium w-24">画像</th>
+              <th class="px-6 py-3 font-medium w-28">JSON-LD</th>
               <th class="px-6 py-3 font-medium w-24">スコア</th>
               <th class="px-6 py-3 font-medium w-36 text-right">操作</th>
             </tr>
@@ -212,19 +213,28 @@
   function auditItem(n, type) {
     const titleLen = (n.title || "").length;
     const bodyLen = (n.body || "").length;
-    const hasImage = !!(n.image && n.image !== "general");
+    const imgVal = (n.image || "").toString();
+    const isCustomImage = imgVal.startsWith("data:") || imgVal.startsWith("/") || imgVal.startsWith("http");
+    const isGeneric = imgVal === "general";
     const titleCheck = titleLen >= 10 && titleLen <= 60 ? "ok" : (titleLen === 0 ? "ng" : "warn");
     const bodyCheck = bodyLen >= 100 ? "ok" : (bodyLen >= 30 ? "warn" : "ng");
-    const imageCheck = hasImage ? "ok" : "warn";
-    const score = (titleCheck === "ok" ? 40 : titleCheck === "warn" ? 25 : 0)
-                + (bodyCheck === "ok" ? 40 : bodyCheck === "warn" ? 20 : 0)
-                + (imageCheck === "ok" ? 20 : 10);
-    return { titleLen, bodyLen, hasImage, titleCheck, bodyCheck, imageCheck, score };
+    const imageCheck = isCustomImage ? "ok" : (isGeneric ? "warn" : (imgVal ? "ok" : "ng"));
+    // JSON-LD品質：タイトル・本文が両方OKなら自動で良いJSON-LDが生成される
+    const ldCheck = (titleCheck === "ok" && bodyCheck === "ok") ? "ok" : "warn";
+    const score = (titleCheck === "ok" ? 35 : titleCheck === "warn" ? 22 : 0)
+                + (bodyCheck === "ok" ? 35 : bodyCheck === "warn" ? 18 : 0)
+                + (imageCheck === "ok" ? 20 : imageCheck === "warn" ? 12 : 0)
+                + (ldCheck === "ok" ? 10 : 5);
+    return { titleLen, bodyLen, isCustomImage, isGeneric, titleCheck, bodyCheck, imageCheck, ldCheck, score };
   }
   const STATUS_BADGE = {
     ok:   '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#065F46] bg-[#D1FAE5] rounded px-2 py-0.5"><i data-lucide="check" class="w-3 h-3"></i>OK</span>',
     warn: '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#92400E] bg-[#FEF3C7] rounded px-2 py-0.5"><i data-lucide="alert-triangle" class="w-3 h-3"></i>要改善</span>',
     ng:   '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#991B1B] bg-[#FEE2E2] rounded px-2 py-0.5"><i data-lucide="x" class="w-3 h-3"></i>不足</span>',
+  };
+  const LD_BADGE = {
+    ok:   '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#065F46] bg-[#D1FAE5] rounded px-2 py-0.5"><i data-lucide="check" class="w-3 h-3"></i>対応済み</span>',
+    warn: '<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#92400E] bg-[#FEF3C7] rounded px-2 py-0.5"><i data-lucide="alert-triangle" class="w-3 h-3"></i>要改善</span>',
   };
   function scoreBadge(score) {
     const color = score >= 80 ? "#10B981" : score >= 60 ? "#F59E0B" : "#EF4444";
@@ -250,7 +260,7 @@
       `${items.length}件のコンテンツ ／ 平均SEOスコア <strong class="text-[#1E2761]">${avg}</strong> / 100`;
     const host = document.getElementById("audit-rows");
     if (items.length === 0) {
-      host.innerHTML = `<tr><td colspan="7" class="px-6 py-10 text-center text-[#9CA3AF]">公開済みコンテンツがありません。</td></tr>`;
+      host.innerHTML = `<tr><td colspan="8" class="px-6 py-10 text-center text-[#9CA3AF]">公開済みコンテンツがありません。</td></tr>`;
       return;
     }
     host.innerHTML = items.map((it) => {
@@ -265,6 +275,7 @@
         <td class="px-6 py-3.5">${STATUS_BADGE[a.titleCheck]}<p class="text-[10px] text-[#9CA3AF] mt-1">${a.titleLen}文字</p></td>
         <td class="px-6 py-3.5">${STATUS_BADGE[a.bodyCheck]}<p class="text-[10px] text-[#9CA3AF] mt-1">${a.bodyLen}文字</p></td>
         <td class="px-6 py-3.5">${STATUS_BADGE[a.imageCheck]}</td>
+        <td class="px-6 py-3.5">${LD_BADGE[a.ldCheck]}<p class="text-[10px] text-[#9CA3AF] mt-1">自動付与</p></td>
         <td class="px-6 py-3.5">${scoreBadge(a.score)}</td>
         <td class="px-6 py-3.5">
           <div class="flex flex-col items-end gap-1.5 ml-auto w-[120px]">
@@ -304,21 +315,34 @@
     const m = document.getElementById("fix-modal");
     document.getElementById("fix-title").innerHTML =
       `<i data-lucide="wand-sparkles" class="w-5 h-5 text-[#10B981]"></i> AI自動対策：${escapeHtml(item.title)}`;
+    const needsImageGen = item._audit && item._audit.imageCheck !== "ok";
     document.getElementById("fix-body").innerHTML = `<div class="text-center py-12 text-[#6B7280]">
       <i data-lucide="loader-2" class="w-6 h-6 mx-auto animate-spin text-[#10B981] mb-2"></i>
-      <p class="font-medium">AIが改善案を生成しています…（15〜25秒）</p>
+      <p class="font-medium">${needsImageGen
+        ? "AIが文章を整え、新しい画像を生成中…（25〜35秒）"
+        : "AIが改善案を生成しています…（15〜25秒）"}</p>
+      ${needsImageGen ? '<p class="text-[11px] mt-2 text-[#9CA3AF]">画像はGemini、文章はClaudeで並列処理しています</p>' : ""}
     </div>`;
     document.getElementById("fix-apply").disabled = true;
     document.getElementById("fix-meta").textContent = "";
     m.classList.remove("hidden"); m.classList.add("flex");
     lucide.createIcons();
     try {
-      const r = await fetch("/api/seo-fix", {
+      // 文章改善（Claude）と画像生成（Gemini）を並列実行
+      const fixPromise = fetch("/api/seo-fix", {
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ type: item._type, current: { title: item.title, body: item.body, image: item.image } }),
-      });
-      const data = await r.json();
+      }).then((r) => r.json());
+      const imgPromise = needsImageGen
+        ? window.Store.generateImage(item.title, "コーポレートサイト掲載に適した、テクノロジー感のあるかっこいい挿絵")
+            .catch(() => null)
+        : Promise.resolve(null);
+      const [data, genImage] = await Promise.all([fixPromise, imgPromise]);
       if (data.error) throw new Error(data.error);
+      if (genImage) {
+        data.image = genImage;
+        data.imageGenerated = true;
+      }
       currentFix = { item, suggestion: data };
       renderFixPreview(item, data);
     } catch (err) {
@@ -371,7 +395,19 @@
         </div>
         <div>
           <p class="text-[12px] font-semibold text-[#6B7280] mb-2">🖼 推奨画像</p>
-          ${beforeImage === afterImage ? `
+          ${sug.imageGenerated ? `
+            <div class="grid grid-cols-2 gap-3">
+              <div class="border border-[#E5E7EB] rounded-lg overflow-hidden bg-[#F9FAFB]">
+                <img src="${beforeImageUrl}" alt="" class="w-full h-28 object-cover" />
+                <p class="text-[10px] text-[#9CA3AF] font-semibold px-2 py-1">BEFORE: ${escapeHtml(beforeImage || "(なし)")}</p>
+              </div>
+              <div class="border-2 border-[#10B981] rounded-lg overflow-hidden bg-[#ECFDF5] relative">
+                <span class="absolute top-1.5 right-1.5 z-10 text-[10px] font-bold text-white bg-gradient-to-r from-[#10B981] to-[#0EA5E9] px-2 py-0.5 rounded-full shadow">🎨 AI生成</span>
+                <img src="${afterImageUrl}" alt="" class="w-full h-28 object-cover" />
+                <p class="text-[10px] text-[#10B981] font-semibold px-2 py-1">AFTER: Geminiで新規生成</p>
+              </div>
+            </div>
+          ` : beforeImage === afterImage ? `
             <div class="border border-[#10B981]/40 rounded-lg p-3 bg-[#ECFDF5] flex items-center gap-3">
               <img src="${afterImageUrl}" alt="" class="w-28 h-20 object-cover rounded-md shrink-0 border border-[#10B981]/30" />
               <div class="flex-1 min-w-0">
@@ -379,7 +415,6 @@
                   <i data-lucide="check-circle-2" class="w-4 h-4"></i> 現状の画像が最適と判断されました
                 </p>
                 <p class="text-[12px] text-[#374151] mt-1 leading-relaxed">画像キー：<strong>${escapeHtml(afterImage)}</strong>（コンテンツ内容と適合）</p>
-                <p class="text-[11px] text-[#6B7280] mt-1">※ 別の画像にしたい場合は、コンテンツ編集画面から手動でアップロード／AI生成できます。</p>
               </div>
             </div>
           ` : `
@@ -474,13 +509,19 @@
     let fail = 0;
     for (const item of items) {
       try {
-        toast(`${done + 1}/${items.length}件目を処理中…（${item.title.slice(0, 20)}）`, "info");
-        const r = await fetch("/api/seo-fix", {
+        const audit = auditItem(item, item._type);
+        const needsImg = audit.imageCheck !== "ok";
+        toast(`${done + 1}/${items.length}件目を処理中…（${item.title.slice(0, 20)}）${needsImg ? " ／ 画像生成も実行" : ""}`, "info");
+        const fixPromise = fetch("/api/seo-fix", {
           method: "POST", headers: { "content-type": "application/json" },
           body: JSON.stringify({ type: item._type, current: { title: item.title, body: item.body, image: item.image } }),
-        });
-        const data = await r.json();
+        }).then((r) => r.json());
+        const imgPromise = needsImg
+          ? window.Store.generateImage(item.title, "コーポレートサイト掲載に適した、テクノロジー感のあるかっこいい挿絵").catch(() => null)
+          : Promise.resolve(null);
+        const [data, genImage] = await Promise.all([fixPromise, imgPromise]);
         if (!data.error) {
+          if (genImage) data.image = genImage;
           await applyFix(item, data);
           done++;
         } else {
