@@ -93,7 +93,7 @@
               <th class="px-6 py-3 font-medium w-32">本文</th>
               <th class="px-6 py-3 font-medium w-24">画像</th>
               <th class="px-6 py-3 font-medium w-24">スコア</th>
-              <th class="px-6 py-3 font-medium w-40 text-right">操作</th>
+              <th class="px-6 py-3 font-medium w-36 text-right">操作</th>
             </tr>
           </thead>
           <tbody id="audit-rows">
@@ -267,15 +267,15 @@
         <td class="px-6 py-3.5">${STATUS_BADGE[a.imageCheck]}</td>
         <td class="px-6 py-3.5">${scoreBadge(a.score)}</td>
         <td class="px-6 py-3.5">
-          <div class="flex justify-end gap-1.5">
-            <button data-act="ld" class="px-2.5 py-1.5 rounded-md border border-[#E5E7EB] text-[12px] font-medium text-[#374151] hover:bg-white" title="JSON-LDを確認">
-              <i data-lucide="braces" class="w-3.5 h-3.5"></i>
+          <div class="flex flex-col items-end gap-1.5 ml-auto w-[120px]">
+            <button data-act="fix" class="w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md bg-gradient-to-r from-[#10B981] to-[#0EA5E9] text-white text-[12px] font-semibold hover:opacity-90 whitespace-nowrap" title="AIで改善案を生成して適用">
+              <i data-lucide="wand-sparkles" class="w-3.5 h-3.5"></i> 自動対策
             </button>
-            <button data-act="fix" class="px-2.5 py-1.5 rounded-md bg-gradient-to-r from-[#10B981] to-[#0EA5E9] text-white text-[12px] font-semibold hover:opacity-90" title="AIで改善案を生成して適用">
-              <i data-lucide="wand-sparkles" class="w-3.5 h-3.5 inline"></i> 自動対策
+            <button data-act="ai" class="w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[#1E2761] text-white text-[12px] font-semibold hover:opacity-90 whitespace-nowrap" title="AIで改善提案を表示（適用なし）">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI提案
             </button>
-            <button data-act="ai" class="px-2.5 py-1.5 rounded-md bg-[#1E2761] text-white text-[12px] font-semibold hover:opacity-90" title="AIで改善提案を表示（適用なし）">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5 inline"></i>
+            <button data-act="ld" class="w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md border border-[#E5E7EB] text-[12px] font-medium text-[#374151] hover:bg-[#F9FAFB] whitespace-nowrap" title="JSON-LDを確認">
+              <i data-lucide="braces" class="w-3.5 h-3.5"></i> JSON-LD
             </button>
           </div>
         </td>
@@ -371,16 +371,29 @@
         </div>
         <div>
           <p class="text-[12px] font-semibold text-[#6B7280] mb-2">🖼 推奨画像</p>
-          <div class="grid grid-cols-2 gap-3">
-            <div class="border border-[#E5E7EB] rounded-lg overflow-hidden bg-[#F9FAFB]">
-              <img src="${beforeImageUrl}" alt="" class="w-full h-28 object-cover" />
-              <p class="text-[10px] text-[#9CA3AF] font-semibold px-2 py-1">BEFORE: ${escapeHtml(beforeImage)}</p>
+          ${beforeImage === afterImage ? `
+            <div class="border border-[#10B981]/40 rounded-lg p-3 bg-[#ECFDF5] flex items-center gap-3">
+              <img src="${afterImageUrl}" alt="" class="w-28 h-20 object-cover rounded-md shrink-0 border border-[#10B981]/30" />
+              <div class="flex-1 min-w-0">
+                <p class="text-[12px] font-semibold text-[#10B981] flex items-center gap-1.5">
+                  <i data-lucide="check-circle-2" class="w-4 h-4"></i> 現状の画像が最適と判断されました
+                </p>
+                <p class="text-[12px] text-[#374151] mt-1 leading-relaxed">画像キー：<strong>${escapeHtml(afterImage)}</strong>（コンテンツ内容と適合）</p>
+                <p class="text-[11px] text-[#6B7280] mt-1">※ 別の画像にしたい場合は、コンテンツ編集画面から手動でアップロード／AI生成できます。</p>
+              </div>
             </div>
-            <div class="border border-[#10B981]/40 rounded-lg overflow-hidden bg-[#ECFDF5]">
-              <img src="${afterImageUrl}" alt="" class="w-full h-28 object-cover" />
-              <p class="text-[10px] text-[#10B981] font-semibold px-2 py-1">AFTER: ${escapeHtml(afterImage)}</p>
+          ` : `
+            <div class="grid grid-cols-2 gap-3">
+              <div class="border border-[#E5E7EB] rounded-lg overflow-hidden bg-[#F9FAFB]">
+                <img src="${beforeImageUrl}" alt="" class="w-full h-28 object-cover" />
+                <p class="text-[10px] text-[#9CA3AF] font-semibold px-2 py-1">BEFORE: ${escapeHtml(beforeImage)}</p>
+              </div>
+              <div class="border border-[#10B981]/40 rounded-lg overflow-hidden bg-[#ECFDF5]">
+                <img src="${afterImageUrl}" alt="" class="w-full h-28 object-cover" />
+                <p class="text-[10px] text-[#10B981] font-semibold px-2 py-1">AFTER: ${escapeHtml(afterImage)}（変更推奨）</p>
+              </div>
             </div>
-          </div>
+          `}
         </div>
       </div>`;
     document.getElementById("fix-body").innerHTML = html;
