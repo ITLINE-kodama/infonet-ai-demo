@@ -76,7 +76,12 @@
     <section class="mt-6 bg-white border border-[#E5E7EB] rounded-xl">
       <div class="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between flex-wrap gap-2">
         <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="list-checks" class="w-4 h-4 text-[#1E2761]"></i> コンテンツ品質診断</h2>
-        <div id="content-summary" class="text-[12px] text-[#6B7280]"></div>
+        <div class="flex items-center gap-3">
+          <div id="content-summary" class="text-[12px] text-[#6B7280]"></div>
+          <button id="bulk-fix-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#1E2761] to-[#3B82F6] text-white text-[12px] font-semibold hover:opacity-90 shadow-sm">
+            <i data-lucide="wand-sparkles" class="w-3.5 h-3.5"></i> スコア80未満をまとめてAI対策
+          </button>
+        </div>
       </div>
       <div class="overflow-x-auto thin-scroll">
         <table class="w-full text-sm min-w-[860px]">
@@ -119,6 +124,35 @@
       <button id="ld-download" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1E2761] text-white text-[13px] font-semibold hover:opacity-90">
         <i data-lucide="download" class="w-4 h-4"></i> ダウンロード
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AI自動対策（Before/After 適用）モーダル ===== -->
+<div id="fix-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col">
+    <div class="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
+      <h3 id="fix-title" class="text-base font-semibold flex items-center gap-2">
+        <i data-lucide="wand-sparkles" class="w-5 h-5 text-[#10B981]"></i> AI自動対策
+      </h3>
+      <button id="fix-close" class="w-9 h-9 rounded-lg hover:bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div id="fix-body" class="flex-1 overflow-y-auto thin-scroll px-6 py-5">
+      <div class="text-center py-12 text-[#6B7280]">
+        <i data-lucide="loader-2" class="w-6 h-6 mx-auto animate-spin text-[#10B981] mb-2"></i>
+        <p class="font-medium">AIが改善案を生成しています…（15〜25秒）</p>
+      </div>
+    </div>
+    <div class="px-6 py-3 border-t border-[#E5E7EB] flex items-center justify-between gap-3">
+      <p id="fix-meta" class="text-[11px] text-[#9CA3AF]"></p>
+      <div class="flex items-center gap-2">
+        <button id="fix-cancel" class="px-4 py-2 rounded-lg border border-[#E5E7EB] text-[13px] font-semibold text-[#374151] hover:bg-[#F9FAFB]">キャンセル</button>
+        <button id="fix-apply" disabled class="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-gradient-to-r from-[#10B981] to-[#0EA5E9] text-white text-[13px] font-semibold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed">
+          <i data-lucide="check" class="w-4 h-4"></i> 適用する
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -237,8 +271,11 @@
             <button data-act="ld" class="px-2.5 py-1.5 rounded-md border border-[#E5E7EB] text-[12px] font-medium text-[#374151] hover:bg-white" title="JSON-LDを確認">
               <i data-lucide="braces" class="w-3.5 h-3.5"></i>
             </button>
-            <button data-act="ai" class="px-2.5 py-1.5 rounded-md bg-[#1E2761] text-white text-[12px] font-semibold hover:opacity-90">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5 inline"></i> AI提案
+            <button data-act="fix" class="px-2.5 py-1.5 rounded-md bg-gradient-to-r from-[#10B981] to-[#0EA5E9] text-white text-[12px] font-semibold hover:opacity-90" title="AIで改善案を生成して適用">
+              <i data-lucide="wand-sparkles" class="w-3.5 h-3.5 inline"></i> 自動対策
+            </button>
+            <button data-act="ai" class="px-2.5 py-1.5 rounded-md bg-[#1E2761] text-white text-[12px] font-semibold hover:opacity-90" title="AIで改善提案を表示（適用なし）">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 inline"></i>
             </button>
           </div>
         </td>
@@ -257,8 +294,192 @@
       if (!item) return;
       if (btn.dataset.act === "ld") showLdPreview(item);
       if (btn.dataset.act === "ai") showAiSuggest(item);
+      if (btn.dataset.act === "fix") showAutoFix(item);
     }, { once: false });
   }
+
+  /* ---- AI自動対策（Before/After + 適用）---- */
+  let currentFix = null; // { item, suggestion }
+  async function showAutoFix(item) {
+    const m = document.getElementById("fix-modal");
+    document.getElementById("fix-title").innerHTML =
+      `<i data-lucide="wand-sparkles" class="w-5 h-5 text-[#10B981]"></i> AI自動対策：${escapeHtml(item.title)}`;
+    document.getElementById("fix-body").innerHTML = `<div class="text-center py-12 text-[#6B7280]">
+      <i data-lucide="loader-2" class="w-6 h-6 mx-auto animate-spin text-[#10B981] mb-2"></i>
+      <p class="font-medium">AIが改善案を生成しています…（15〜25秒）</p>
+    </div>`;
+    document.getElementById("fix-apply").disabled = true;
+    document.getElementById("fix-meta").textContent = "";
+    m.classList.remove("hidden"); m.classList.add("flex");
+    lucide.createIcons();
+    try {
+      const r = await fetch("/api/seo-fix", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ type: item._type, current: { title: item.title, body: item.body, image: item.image } }),
+      });
+      const data = await r.json();
+      if (data.error) throw new Error(data.error);
+      currentFix = { item, suggestion: data };
+      renderFixPreview(item, data);
+    } catch (err) {
+      document.getElementById("fix-body").innerHTML =
+        `<p class="text-[#EF4444] p-4">生成に失敗しました：${escapeHtml(String(err && err.message || err))}</p>`;
+    }
+  }
+  function renderFixPreview(item, sug) {
+    const beforeTitle = item.title || "";
+    const afterTitle = sug.title || "";
+    const beforeBody = item.body || "";
+    const afterBody = sug.body || "";
+    const beforeImage = item.image || "(なし)";
+    const afterImage = sug.image || "(なし)";
+    const beforeImageUrl = window.newsImageUrl(beforeImage);
+    const afterImageUrl = window.newsImageUrl(afterImage);
+    const html = `
+      ${sug.rationale ? `<div class="bg-[#EEF2FF] border border-[#C7D2FE] rounded-lg px-4 py-3 mb-5">
+        <p class="text-[12px] font-semibold text-[#1E2761] flex items-center gap-1.5"><i data-lucide="lightbulb" class="w-4 h-4"></i> AIからの一言</p>
+        <p class="mt-1 text-[13px] text-[#374151] leading-relaxed">${escapeHtml(sug.rationale)}</p>
+      </div>` : ""}
+      <div class="space-y-5">
+        <div>
+          <p class="text-[12px] font-semibold text-[#6B7280] mb-2">📝 タイトル</p>
+          <div class="grid md:grid-cols-2 gap-3">
+            <div class="border border-[#E5E7EB] rounded-lg p-3 bg-[#F9FAFB]">
+              <p class="text-[10px] text-[#9CA3AF] font-semibold mb-1">BEFORE</p>
+              <p class="text-sm text-[#6B7280] leading-relaxed">${escapeHtml(beforeTitle)}</p>
+              <p class="text-[10px] text-[#9CA3AF] mt-2">${beforeTitle.length}文字</p>
+            </div>
+            <div class="border border-[#10B981]/40 rounded-lg p-3 bg-[#ECFDF5]">
+              <p class="text-[10px] text-[#10B981] font-semibold mb-1">AFTER</p>
+              <p class="text-sm font-medium text-[#111827] leading-relaxed">${escapeHtml(afterTitle)}</p>
+              <p class="text-[10px] text-[#10B981] mt-2">${afterTitle.length}文字</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="text-[12px] font-semibold text-[#6B7280] mb-2">📄 本文</p>
+          <div class="grid md:grid-cols-2 gap-3">
+            <div class="border border-[#E5E7EB] rounded-lg p-3 bg-[#F9FAFB] max-h-72 overflow-y-auto thin-scroll">
+              <p class="text-[10px] text-[#9CA3AF] font-semibold mb-1">BEFORE（${beforeBody.length}文字）</p>
+              <p class="text-[13px] text-[#6B7280] leading-[1.8] whitespace-pre-wrap">${escapeHtml(beforeBody)}</p>
+            </div>
+            <div class="border border-[#10B981]/40 rounded-lg p-3 bg-[#ECFDF5] max-h-72 overflow-y-auto thin-scroll">
+              <p class="text-[10px] text-[#10B981] font-semibold mb-1">AFTER（${afterBody.length}文字）</p>
+              <p class="text-[13px] text-[#111827] leading-[1.8] whitespace-pre-wrap">${escapeHtml(afterBody)}</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="text-[12px] font-semibold text-[#6B7280] mb-2">🖼 推奨画像</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="border border-[#E5E7EB] rounded-lg overflow-hidden bg-[#F9FAFB]">
+              <img src="${beforeImageUrl}" alt="" class="w-full h-28 object-cover" />
+              <p class="text-[10px] text-[#9CA3AF] font-semibold px-2 py-1">BEFORE: ${escapeHtml(beforeImage)}</p>
+            </div>
+            <div class="border border-[#10B981]/40 rounded-lg overflow-hidden bg-[#ECFDF5]">
+              <img src="${afterImageUrl}" alt="" class="w-full h-28 object-cover" />
+              <p class="text-[10px] text-[#10B981] font-semibold px-2 py-1">AFTER: ${escapeHtml(afterImage)}</p>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById("fix-body").innerHTML = html;
+    document.getElementById("fix-meta").textContent = sug.model
+      ? `${sug.model} ／ ${sug.tokensUsed || 0}トークン`
+      : "";
+    document.getElementById("fix-apply").disabled = false;
+    lucide.createIcons();
+  }
+  async function applyFix(item, suggestion) {
+    const patch = { title: suggestion.title, body: suggestion.body, image: suggestion.image };
+    if (item._type === "news") await apiUpdateNews(item.id, patch);
+    else if (item._type === "blog") await apiUpdateBlog(item.id, patch);
+    else if (item._type === "job") await apiUpdateJob(item.id, patch);
+    await apiLog({ userName: user.name, action: "edit", targetId: item.id, targetTitle: suggestion.title || item.title, userPrompt: "SEO自動対策" });
+  }
+  document.getElementById("fix-close").addEventListener("click", () => {
+    const m = document.getElementById("fix-modal");
+    m.classList.add("hidden"); m.classList.remove("flex");
+    currentFix = null;
+  });
+  document.getElementById("fix-cancel").addEventListener("click", () => {
+    document.getElementById("fix-close").click();
+  });
+  document.getElementById("fix-modal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+      e.currentTarget.classList.add("hidden");
+      e.currentTarget.classList.remove("flex");
+      currentFix = null;
+    }
+  });
+  document.getElementById("fix-apply").addEventListener("click", async () => {
+    if (!currentFix) return;
+    const btn = document.getElementById("fix-apply");
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 適用中…';
+    lucide.createIcons();
+    try {
+      await applyFix(currentFix.item, currentFix.suggestion);
+      toast("コンテンツを更新しました。SEOスコアを再計算します。", "success");
+      document.getElementById("fix-close").click();
+      await loadAudit();
+    } catch (err) {
+      toast("適用に失敗しました：" + (err && err.message ? err.message : err), "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> 適用する';
+      lucide.createIcons();
+    }
+  });
+
+  /* ---- 一括対策 ---- */
+  document.getElementById("bulk-fix-btn").addEventListener("click", async () => {
+    // 一覧から再取得
+    const [news, jobs, blog] = await Promise.all([
+      window.Store.listNews("published").catch(() => []),
+      window.Store.listJobs("published").catch(() => []),
+      window.Store.listBlog("published").catch(() => []),
+    ]);
+    const items = [
+      ...news.map((n) => ({ ...n, _type: "news" })),
+      ...jobs.map((n) => ({ ...n, _type: "job" })),
+      ...blog.map((n) => ({ ...n, _type: "blog" })),
+    ].filter((it) => auditItem(it, it._type).score < 80);
+    if (!items.length) {
+      toast("対策が必要なコンテンツはありません", "info");
+      return;
+    }
+    const ok = await confirmModal({
+      title: `${items.length}件をAIで一括対策しますか？`,
+      message: `スコア80未満のコンテンツ ${items.length}件について、AIが改善版を生成して順番に適用します。\n\n所要時間：1件あたり約20秒（合計 約${Math.ceil(items.length * 20 / 60)}分）\nAPI課金：合計 約¥${items.length * 1}〜${items.length * 2}\n\n適用後の内容は「お知らせ更新」「ブログ作成」「求人作成」画面で確認・編集できます。`,
+      okText: `一括対策を実行（${items.length}件）`,
+    });
+    if (!ok) return;
+
+    // プログレストースト
+    let done = 0;
+    let fail = 0;
+    for (const item of items) {
+      try {
+        toast(`${done + 1}/${items.length}件目を処理中…（${item.title.slice(0, 20)}）`, "info");
+        const r = await fetch("/api/seo-fix", {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ type: item._type, current: { title: item.title, body: item.body, image: item.image } }),
+        });
+        const data = await r.json();
+        if (!data.error) {
+          await applyFix(item, data);
+          done++;
+        } else {
+          fail++;
+        }
+      } catch {
+        fail++;
+      }
+    }
+    toast(`一括対策完了：成功 ${done}件 / 失敗 ${fail}件`, done > 0 ? "success" : "error");
+    await loadAudit();
+  });
 
   /* ---- JSON-LD プレビュー（模擬生成）---- */
   function buildLdForItem(item) {
