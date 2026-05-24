@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GA4分析｜AIでらくらく更新</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/styles.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+</head>
+<body class="bg-[#F9FAFB] text-[#111827]">
+
+<div class="flex">
+  <aside id="sidebar"></aside>
+
+  <main class="flex-1 min-w-0 p-6 lg:p-8 max-w-[1400px]">
+    <!-- ヘッダー -->
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h1 class="text-2xl font-bold">GA4分析</h1>
+          <span class="text-[11px] font-semibold bg-[#FEF3C7] text-[#92400E] rounded-full px-2.5 py-0.5">DEMOデータ</span>
+        </div>
+        <p class="text-sm text-[#6B7280] mt-1">採用ページ・お知らせ・ブログのアクセス解析。<span id="date-range-label" class="font-medium text-[#1E2761]"></span></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <div id="range-tabs" class="inline-flex bg-white border border-[#E5E7EB] rounded-lg p-1 text-[12px] font-medium">
+          <button data-range="7" class="range-btn px-3 py-1.5 rounded-md hover:bg-[#F3F4F6]">7日</button>
+          <button data-range="30" class="range-btn px-3 py-1.5 rounded-md bg-[#1E2761] text-white">30日</button>
+          <button data-range="90" class="range-btn px-3 py-1.5 rounded-md hover:bg-[#F3F4F6]">90日</button>
+          <button data-range="all" class="range-btn px-3 py-1.5 rounded-md hover:bg-[#F3F4F6]">全期間</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- サマリーカード -->
+    <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+      <div class="bg-white border border-[#E5E7EB] rounded-xl p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-[12px] text-[#6B7280]">ページビュー</span>
+          <i data-lucide="eye" class="w-4 h-4 text-[#1E2761]"></i>
+        </div>
+        <p class="mt-2 text-2xl font-bold" id="kpi-pv">–</p>
+        <p class="text-[11px] mt-0.5"><span id="kpi-pv-delta" class="font-semibold"></span></p>
+      </div>
+      <div class="bg-white border border-[#E5E7EB] rounded-xl p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-[12px] text-[#6B7280]">ユーザー</span>
+          <i data-lucide="users" class="w-4 h-4 text-[#10B981]"></i>
+        </div>
+        <p class="mt-2 text-2xl font-bold" id="kpi-uu">–</p>
+        <p class="text-[11px] mt-0.5"><span id="kpi-uu-delta" class="font-semibold"></span></p>
+      </div>
+      <div class="bg-white border border-[#E5E7EB] rounded-xl p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-[12px] text-[#6B7280]">セッション</span>
+          <i data-lucide="activity" class="w-4 h-4 text-[#00B8D9]"></i>
+        </div>
+        <p class="mt-2 text-2xl font-bold" id="kpi-sessions">–</p>
+        <p class="text-[11px] mt-0.5"><span id="kpi-sessions-delta" class="font-semibold"></span></p>
+      </div>
+      <div class="bg-white border border-[#E5E7EB] rounded-xl p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-[12px] text-[#6B7280]">直帰率</span>
+          <i data-lucide="trending-down" class="w-4 h-4 text-[#F59E0B]"></i>
+        </div>
+        <p class="mt-2 text-2xl font-bold" id="kpi-bounce">–</p>
+        <p class="text-[11px] text-[#9CA3AF] mt-0.5">業界平均 60-70%</p>
+      </div>
+      <div class="bg-white border border-[#E5E7EB] rounded-xl p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-[12px] text-[#6B7280]">平均セッション時間</span>
+          <i data-lucide="clock" class="w-4 h-4 text-[#8B5CF6]"></i>
+        </div>
+        <p class="mt-2 text-2xl font-bold" id="kpi-avg-time">–</p>
+        <p class="text-[11px] text-[#9CA3AF] mt-0.5">分:秒</p>
+      </div>
+      <div class="bg-white border border-[#E5E7EB] rounded-xl p-4">
+        <div class="flex items-center justify-between">
+          <span class="text-[12px] text-[#6B7280]">CV（応募）</span>
+          <i data-lucide="target" class="w-4 h-4 text-[#EF4444]"></i>
+        </div>
+        <p class="mt-2 text-2xl font-bold" id="kpi-cv">–</p>
+        <p class="text-[11px] mt-0.5"><span id="kpi-cv-rate" class="text-[#9CA3AF]"></span></p>
+      </div>
+    </div>
+
+    <!-- 日別チャート -->
+    <div class="mt-6 bg-white border border-[#E5E7EB] rounded-xl p-6">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="line-chart" class="w-4 h-4 text-[#1E2761]"></i> 日別ページビュー</h2>
+        <p class="text-[11px] text-[#9CA3AF]">公開開始 <span id="chart-start-date" class="font-medium text-[#374151]"></span> から</p>
+      </div>
+      <div class="mt-4" style="height: 280px;">
+        <canvas id="pvChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 流入経路 + デバイス -->
+    <div class="mt-6 grid lg:grid-cols-2 gap-3">
+      <div class="bg-white border border-[#E5E7EB] rounded-xl p-6">
+        <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4 text-[#1E2761]"></i> 流入経路</h2>
+        <div class="mt-4 grid grid-cols-2 gap-4 items-center">
+          <div style="height: 200px; position: relative;"><canvas id="sourceChart"></canvas></div>
+          <div id="source-legend" class="text-[12px] space-y-2"></div>
+        </div>
+      </div>
+      <div class="bg-white border border-[#E5E7EB] rounded-xl p-6">
+        <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="smartphone" class="w-4 h-4 text-[#1E2761]"></i> デバイス</h2>
+        <div class="mt-4 grid grid-cols-2 gap-4 items-center">
+          <div style="height: 200px; position: relative;"><canvas id="deviceChart"></canvas></div>
+          <div id="device-legend" class="text-[12px] space-y-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 人気ページ -->
+    <div class="mt-6 bg-white border border-[#E5E7EB] rounded-xl">
+      <div class="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
+        <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="file-bar-chart" class="w-4 h-4 text-[#1E2761]"></i> 人気ページ TOP 8</h2>
+      </div>
+      <div class="overflow-x-auto thin-scroll">
+        <table class="w-full text-sm min-w-[720px]">
+          <thead>
+            <tr class="bg-[#F9FAFB] text-left text-[12px] text-[#6B7280] border-b border-[#E5E7EB]">
+              <th class="px-6 py-3 font-medium">ページ</th>
+              <th class="px-6 py-3 font-medium w-28">PV</th>
+              <th class="px-6 py-3 font-medium w-32">平均滞在</th>
+              <th class="px-6 py-3 font-medium w-28">直帰率</th>
+            </tr>
+          </thead>
+          <tbody id="top-pages-rows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SEO -->
+    <div class="mt-6 bg-white border border-[#E5E7EB] rounded-xl p-6">
+      <h2 class="text-base font-semibold flex items-center gap-2"><i data-lucide="search" class="w-4 h-4 text-[#1E2761]"></i> SEO評価</h2>
+      <div class="mt-5 grid lg:grid-cols-3 gap-5">
+        <!-- スコア -->
+        <div class="bg-gradient-to-br from-[#EEF2FF] to-white border border-[#C7D2FE] rounded-xl p-5">
+          <p class="text-[12px] text-[#6B7280] font-medium">SEOスコア</p>
+          <div class="mt-1 flex items-end gap-2">
+            <p class="text-4xl font-bold text-[#1E2761]" id="seo-score">–</p>
+            <p class="text-base text-[#6B7280] font-medium mb-1">/ 100</p>
+          </div>
+          <p class="text-[12px] text-[#6B7280] mt-2" id="seo-score-label"></p>
+          <div class="mt-3 h-2 bg-white rounded-full overflow-hidden">
+            <div id="seo-score-bar" class="h-full bg-gradient-to-r from-[#1E2761] to-[#00B8D9] rounded-full" style="width: 0%"></div>
+          </div>
+        </div>
+        <!-- 検索クエリ -->
+        <div class="lg:col-span-2 border border-[#E5E7EB] rounded-xl p-5">
+          <p class="text-[12px] text-[#6B7280] font-medium">検索キーワード（流入上位）</p>
+          <ul id="top-queries" class="mt-3 space-y-1.5 text-sm"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- アクションボタン -->
+    <div class="mt-6 flex items-center gap-3 flex-wrap">
+      <button id="ai-report-btn"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#1E2761] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-40 shadow-sm">
+        <i data-lucide="sparkles" class="w-4 h-4"></i> AIで詳細レポート生成
+      </button>
+      <button id="download-btn"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white text-sm font-semibold text-[#374151] hover:bg-[#F9FAFB]">
+        <i data-lucide="download" class="w-4 h-4"></i> ダウンロード（HTML）
+      </button>
+      <p class="text-[11px] text-[#9CA3AF]">※ 本ページは GA4 のデモデータです。本番では実際の計測結果が表示されます。</p>
+    </div>
+  </main>
+</div>
+
+<!-- ===== AIレポート モーダル ===== -->
+<div id="report-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[88vh] flex flex-col">
+    <div class="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
+      <h3 class="text-base font-semibold flex items-center gap-2">
+        <i data-lucide="sparkles" class="w-5 h-5 text-[#1E2761]"></i> AIによるSEOコンサルレポート
+      </h3>
+      <button id="report-close" type="button" class="w-9 h-9 rounded-lg hover:bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div id="report-body" class="flex-1 overflow-y-auto thin-scroll px-6 py-6 prose prose-sm max-w-none article-body"></div>
+    <div class="px-6 py-3 border-t border-[#E5E7EB] flex items-center justify-between gap-3">
+      <p id="report-meta" class="text-[11px] text-[#9CA3AF]"></p>
+      <button id="report-download" type="button"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1E2761] text-white text-sm font-semibold hover:opacity-90">
+        <i data-lucide="download" class="w-4 h-4"></i> このレポートをダウンロード
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/store.js"></script>
+<script src="/assets/admin.js"></script>
+<script>
+  const user = initAdmin("analytics");
+
+  /* ---- データ生成（モック）---- */
+  // 計測開始日 = ニュース/ブログ/求人の最も古い publishedAt
+  async function determineStartDate() {
+    try {
+      const lists = await Promise.all([
+        window.Store.listNews().catch(() => []),
+        window.Store.listBlog().catch(() => []),
+        window.Store.listJobs().catch(() => []),
+      ]);
+      const dates = lists.flat()
+        .map((n) => n && (n.publishedAt || n.createdAt))
+        .filter(Boolean)
+        .map((s) => new Date(s).getTime())
+        .filter((t) => !Number.isNaN(t));
+      if (dates.length) return new Date(Math.min(...dates));
+    } catch {}
+    // フォールバック：30日前
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d;
+  }
+
+  // 決定論的な乱数（同じシードで同じ結果）
+  function seededRandom(seed) {
+    let s = seed % 2147483647;
+    if (s <= 0) s += 2147483646;
+    return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+  }
+
+  // 日次データ生成
+  function generateDailySeries(startDate) {
+    const rnd = seededRandom(42);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    const days = Math.max(1, Math.floor((today - start) / 86400000) + 1);
+    const series = [];
+    for (let i = 0; i < days; i++) {
+      const date = new Date(start.getTime() + i * 86400000);
+      // 成長カーブ + 週末ディップ + ノイズ
+      const dayOfWeek = date.getDay(); // 0=Sun, 6=Sat
+      const weekend = (dayOfWeek === 0 || dayOfWeek === 6) ? 0.55 : 1;
+      const growth = 12 + Math.pow(i, 0.85) * 1.2; // ゆるやかな成長
+      const noise = 0.75 + rnd() * 0.5;
+      const pv = Math.round(growth * weekend * noise);
+      const sessions = Math.round(pv * (0.62 + rnd() * 0.08));
+      const users = Math.round(sessions * (0.78 + rnd() * 0.06));
+      series.push({ date, pv, sessions, users });
+    }
+    return series;
+  }
+
+  function fmtDate(d) {
+    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+  }
+  function fmtDuration(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${String(s).padStart(2, "0")}`;
+  }
+
+  /* ---- 状態 ---- */
+  let allSeries = [];
+  let currentRange = 30;
+  let charts = { pv: null, source: null, device: null };
+
+  function getRangeSeries() {
+    if (currentRange === "all") return allSeries;
+    return allSeries.slice(-Math.min(currentRange, allSeries.length));
+  }
+
+  function computeSummary(series) {
+    const pv = series.reduce((s, d) => s + d.pv, 0);
+    const sessions = series.reduce((s, d) => s + d.sessions, 0);
+    const users = series.reduce((s, d) => s + d.users, 0);
+    // 直前期間と比較
+    const prevSlice = allSeries.slice(Math.max(0, allSeries.length - series.length * 2), allSeries.length - series.length);
+    const prevPv = prevSlice.reduce((s, d) => s + d.pv, 0) || 1;
+    const prevSessions = prevSlice.reduce((s, d) => s + d.sessions, 0) || 1;
+    const prevUsers = prevSlice.reduce((s, d) => s + d.users, 0) || 1;
+    return {
+      pageViews: pv, sessions, users,
+      bounceRate: 58 + (Math.sin(series.length) * 4).toFixed(0) * 1,
+      avgSessionSec: 145 + Math.floor((series.length % 8) * 7),
+      cv: Math.max(0, Math.round(users * 0.022)),
+      pvDelta: ((pv - prevPv) / prevPv * 100),
+      sessionsDelta: ((sessions - prevSessions) / prevSessions * 100),
+      usersDelta: ((users - prevUsers) / prevUsers * 100),
+      rangeDays: series.length,
+    };
+  }
+
+  function renderKPIs(summary) {
+    document.getElementById("kpi-pv").textContent = summary.pageViews.toLocaleString();
+    document.getElementById("kpi-uu").textContent = summary.users.toLocaleString();
+    document.getElementById("kpi-sessions").textContent = summary.sessions.toLocaleString();
+    document.getElementById("kpi-bounce").textContent = `${summary.bounceRate}%`;
+    document.getElementById("kpi-avg-time").textContent = fmtDuration(summary.avgSessionSec);
+    document.getElementById("kpi-cv").textContent = summary.cv;
+    const cvRate = summary.users ? (summary.cv / summary.users * 100).toFixed(2) : "0.00";
+    document.getElementById("kpi-cv-rate").textContent = `CVR ${cvRate}%`;
+    const deltaText = (v) => {
+      const sign = v >= 0 ? "+" : "";
+      const cls = v >= 0 ? "text-[#10B981]" : "text-[#EF4444]";
+      return `<span class="${cls}">${sign}${v.toFixed(1)}%</span> <span class="text-[#9CA3AF]">前期間比</span>`;
+    };
+    document.getElementById("kpi-pv-delta").innerHTML = deltaText(summary.pvDelta);
+    document.getElementById("kpi-sessions-delta").innerHTML = deltaText(summary.sessionsDelta);
+    document.getElementById("kpi-uu-delta").innerHTML = deltaText(summary.usersDelta);
+  }
+
+  function renderPvChart(series) {
+    const ctx = document.getElementById("pvChart").getContext("2d");
+    if (charts.pv) charts.pv.destroy();
+    const labels = series.map((d) => fmtDate(d.date).slice(5));
+    const data = series.map((d) => d.pv);
+    const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+    gradient.addColorStop(0, "rgba(30,39,97,0.25)");
+    gradient.addColorStop(1, "rgba(30,39,97,0)");
+    charts.pv = new Chart(ctx, {
+      type: "line",
+      data: { labels, datasets: [{
+        label: "PV",
+        data,
+        borderColor: "#1E2761",
+        backgroundColor: gradient,
+        borderWidth: 2,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHoverBackgroundColor: "#1E2761",
+      }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: "#9CA3AF", maxTicksLimit: 10 } },
+          y: { grid: { color: "#F3F4F6" }, ticks: { color: "#9CA3AF" }, beginAtZero: true },
+        },
+      },
+    });
+  }
+
+  const SOURCES = [
+    { name: "Organic Search（Google）", value: 42, color: "#1E2761" },
+    { name: "Direct（直接）", value: 24, color: "#00B8D9" },
+    { name: "Social（X / Facebook）", value: 14, color: "#10B981" },
+    { name: "Referral（外部リンク）", value: 11, color: "#F59E0B" },
+    { name: "Email（メール）", value: 9, color: "#8B5CF6" },
+  ];
+  const DEVICES = [
+    { name: "モバイル", value: 56, color: "#1E2761" },
+    { name: "デスクトップ", value: 36, color: "#00B8D9" },
+    { name: "タブレット", value: 8, color: "#10B981" },
+  ];
+
+  function renderDonut(canvasId, items, legendId) {
+    const ctx = document.getElementById(canvasId).getContext("2d");
+    if (charts[canvasId]) charts[canvasId].destroy();
+    charts[canvasId] = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: items.map((i) => i.name),
+        datasets: [{ data: items.map((i) => i.value), backgroundColor: items.map((i) => i.color), borderWidth: 0 }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "62%",
+        plugins: { legend: { display: false } },
+      },
+    });
+    document.getElementById(legendId).innerHTML = items.map((i) => `
+      <li class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-sm" style="background:${i.color}"></span>
+        <span class="text-[#374151] flex-1">${i.name}</span>
+        <span class="font-semibold text-[#111827]">${i.value}%</span>
+      </li>`).join("");
+  }
+
+  function renderTopPages() {
+    const pages = [
+      { url: "/recruit.html", title: "採用情報", pv: 1240, time: 215, bounce: 41 },
+      { url: "/", title: "トップページ", pv: 982, time: 95, bounce: 62 },
+      { url: "/news.html", title: "お知らせ詳細", pv: 540, time: 134, bounce: 48 },
+      { url: "/blog.html", title: "ブログ記事", pv: 412, time: 178, bounce: 35 },
+      { url: "/job.html", title: "求人詳細（Webディレクター）", pv: 298, time: 245, bounce: 30 },
+      { url: "/#about", title: "会社概要セクション", pv: 220, time: 88, bounce: 71 },
+      { url: "/#services", title: "サービス紹介セクション", pv: 178, time: 76, bounce: 68 },
+      { url: "/#contact", title: "お問い合わせセクション", pv: 134, time: 110, bounce: 52 },
+    ];
+    document.getElementById("top-pages-rows").innerHTML = pages.map((p) => `
+      <tr class="border-b border-[#E5E7EB] last:border-0 hover:bg-[#F9FAFB]">
+        <td class="px-6 py-3">
+          <p class="font-medium text-[#111827]">${escapeHtml(p.title)}</p>
+          <p class="text-[12px] text-[#6B7280] mt-0.5">${escapeHtml(p.url)}</p>
+        </td>
+        <td class="px-6 py-3 font-semibold">${p.pv.toLocaleString()}</td>
+        <td class="px-6 py-3 text-[#374151]">${fmtDuration(p.time)}</td>
+        <td class="px-6 py-3 text-[#374151]">${p.bounce}%</td>
+      </tr>`).join("");
+    return pages;
+  }
+
+  const TOP_QUERIES = [
+    { q: "インフォネット 採用", impressions: 312, clicks: 84, ctr: 26.9 },
+    { q: "Web制作 求人 新橋", impressions: 256, clicks: 41, ctr: 16.0 },
+    { q: "DX エンジニア 中途", impressions: 189, clicks: 22, ctr: 11.6 },
+    { q: "インフォネット 評判", impressions: 168, clicks: 32, ctr: 19.0 },
+    { q: "Webディレクター 採用 東京", impressions: 144, clicks: 17, ctr: 11.8 },
+    { q: "新卒採用 Web系", impressions: 121, clicks: 13, ctr: 10.7 },
+  ];
+
+  function renderSeo() {
+    const score = 76;
+    document.getElementById("seo-score").textContent = score;
+    document.getElementById("seo-score-bar").style.width = score + "%";
+    document.getElementById("seo-score-label").textContent =
+      score >= 80 ? "良好（さらに伸ばす余地あり）"
+      : score >= 60 ? "標準（改善で大きく伸ばせる）"
+      : "改善が必要";
+    document.getElementById("top-queries").innerHTML = TOP_QUERIES.map((q, i) => `
+      <li class="flex items-center gap-3 py-1.5 border-b border-[#F3F4F6] last:border-0">
+        <span class="w-5 text-center text-[11px] font-bold text-[#9CA3AF]">${i + 1}</span>
+        <span class="flex-1 truncate">${escapeHtml(q.q)}</span>
+        <span class="text-[11px] text-[#6B7280]">表示 ${q.impressions} ／ クリック ${q.clicks}</span>
+        <span class="text-[11px] font-semibold ${q.ctr >= 20 ? "text-[#10B981]" : "text-[#374151]"}">CTR ${q.ctr}%</span>
+      </li>`).join("");
+  }
+
+  /* ---- レンジ切り替え ---- */
+  document.querySelectorAll(".range-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".range-btn").forEach((b) => {
+        b.classList.remove("bg-[#1E2761]", "text-white");
+        b.classList.add("hover:bg-[#F3F4F6]");
+      });
+      btn.classList.add("bg-[#1E2761]", "text-white");
+      btn.classList.remove("hover:bg-[#F3F4F6]");
+      const r = btn.dataset.range;
+      currentRange = (r === "all") ? "all" : parseInt(r, 10);
+      refresh();
+    });
+  });
+
+  let topPagesData = [];
+  function refresh() {
+    const series = getRangeSeries();
+    const summary = computeSummary(series);
+    document.getElementById("date-range-label").textContent =
+      currentRange === "all" ? "全期間" : `直近 ${currentRange} 日間`;
+    renderKPIs(summary);
+    renderPvChart(series);
+  }
+
+  /* ---- AIレポート生成 ---- */
+  async function generateAiReport() {
+    const btn = document.getElementById("ai-report-btn");
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 生成中…';
+    if (window.lucide) lucide.createIcons();
+    const series = getRangeSeries();
+    const summary = computeSummary(series);
+    const summaryForAI = {
+      rangeDays: summary.rangeDays,
+      pageViews: summary.pageViews,
+      sessions: summary.sessions,
+      users: summary.users,
+      bounceRate: summary.bounceRate,
+      avgSessionDuration: fmtDuration(summary.avgSessionSec),
+      conversions: summary.cv,
+      conversionRate: ((summary.cv / Math.max(1, summary.users)) * 100).toFixed(2) + "%",
+      pvDeltaVsPrev: summary.pvDelta.toFixed(1) + "%",
+      trafficSources: SOURCES.map(s => ({ name: s.name, share: s.value + "%" })),
+      devices: DEVICES.map(d => ({ name: d.name, share: d.value + "%" })),
+    };
+    try {
+      const r = await fetch("/api/seo-report", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ summary: summaryForAI, topPages: topPagesData, topQueries: TOP_QUERIES }),
+      });
+      const data = await r.json();
+      const md = data.reportMarkdown || data.error || "レポートを取得できませんでした。";
+      showReport(md, data);
+    } catch (err) {
+      showReport("レポート生成に失敗しました：" + (err && err.message ? err.message : err), {});
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4"></i> AIで詳細レポート生成';
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+  function mdToHtml(md) {
+    const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return esc(md)
+      .replace(/^### (.+)$/gm, '<h3 class="mt-5 mb-2 text-base font-bold text-[#1E2761]">$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2 class="mt-6 mb-2 text-lg font-bold text-[#111827] border-b border-[#E5E7EB] pb-1">$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1 class="text-xl font-bold text-[#111827] mb-3">$1</h1>')
+      .replace(/^\- \[ \] (.+)$/gm, '<div class="flex items-start gap-2 my-1.5"><span class="w-4 h-4 mt-0.5 border border-[#D1D5DB] rounded-sm shrink-0"></span><span>$1</span></div>')
+      .replace(/^\- (.+)$/gm, '<div class="flex items-start gap-2 my-1"><span class="text-[#1E2761] font-bold">・</span><span>$1</span></div>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong class="text-[#1E2761]">$1</strong>')
+      .replace(/^---$/gm, '<hr class="my-4 border-[#E5E7EB]" />')
+      .replace(/\n\n/g, '<div class="h-2"></div>')
+      .replace(/\n/g, "<br>");
+  }
+  let lastReportMd = "";
+  function showReport(md, meta) {
+    lastReportMd = md;
+    document.getElementById("report-body").innerHTML = mdToHtml(md);
+    document.getElementById("report-meta").textContent =
+      meta.model ? `生成モデル：${meta.model}　／　トークン：${meta.tokensUsed || 0}` : "";
+    const m = document.getElementById("report-modal");
+    m.classList.remove("hidden");
+    m.classList.add("flex");
+    if (window.lucide) lucide.createIcons();
+  }
+  document.getElementById("ai-report-btn").addEventListener("click", generateAiReport);
+  document.getElementById("report-close").addEventListener("click", () => {
+    const m = document.getElementById("report-modal");
+    m.classList.add("hidden");
+    m.classList.remove("flex");
+  });
+  document.getElementById("report-modal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+      e.currentTarget.classList.add("hidden");
+      e.currentTarget.classList.remove("flex");
+    }
+  });
+
+  /* ---- ダウンロード ---- */
+  function downloadHtml(filename, htmlContent) {
+    const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 100);
+  }
+  function buildHtmlReport() {
+    const series = getRangeSeries();
+    const summary = computeSummary(series);
+    const today = new Date();
+    const reportSection = lastReportMd ? `
+      <h2>AIによるSEOコンサルレポート</h2>
+      <div class="ai-report">${mdToHtml(lastReportMd)}</div>` : "";
+    return `<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><title>GA4 解析レポート（インフォネット採用サイト）</title>
+<style>
+  body { font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif; max-width: 860px; margin: 40px auto; padding: 0 24px; color: #111827; line-height: 1.7; }
+  h1 { font-size: 28px; color: #1E2761; border-bottom: 3px solid #1E2761; padding-bottom: 10px; }
+  h2 { font-size: 20px; color: #1E2761; margin-top: 36px; border-left: 4px solid #1E2761; padding-left: 10px; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+  th, td { border-bottom: 1px solid #E5E7EB; padding: 10px 12px; text-align: left; }
+  th { background: #F9FAFB; color: #6B7280; font-size: 12px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+  .kpi { border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px; }
+  .kpi-label { font-size: 11px; color: #6B7280; }
+  .kpi-value { font-size: 24px; font-weight: bold; color: #111827; margin-top: 4px; }
+  .footer { margin-top: 50px; padding-top: 16px; border-top: 1px solid #E5E7EB; color: #9CA3AF; font-size: 11px; }
+  .ai-report { background: #F9FAFB; border-radius: 8px; padding: 18px; }
+</style></head><body>
+  <h1>GA4 解析レポート（採用サイト）</h1>
+  <p style="color:#6B7280;">対象期間：${currentRange === "all" ? "全期間" : "直近 " + currentRange + " 日間"} ／ 出力日：${fmtDate(today)}</p>
+  <h2>サマリー</h2>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">ページビュー</div><div class="kpi-value">${summary.pageViews.toLocaleString()}</div></div>
+    <div class="kpi"><div class="kpi-label">ユーザー</div><div class="kpi-value">${summary.users.toLocaleString()}</div></div>
+    <div class="kpi"><div class="kpi-label">セッション</div><div class="kpi-value">${summary.sessions.toLocaleString()}</div></div>
+    <div class="kpi"><div class="kpi-label">直帰率</div><div class="kpi-value">${summary.bounceRate}%</div></div>
+    <div class="kpi"><div class="kpi-label">平均セッション時間</div><div class="kpi-value">${fmtDuration(summary.avgSessionSec)}</div></div>
+    <div class="kpi"><div class="kpi-label">コンバージョン（応募）</div><div class="kpi-value">${summary.cv}</div></div>
+  </div>
+  <h2>流入経路</h2>
+  <table><thead><tr><th>経路</th><th>シェア</th></tr></thead><tbody>
+    ${SOURCES.map(s => `<tr><td>${s.name}</td><td>${s.value}%</td></tr>`).join("")}
+  </tbody></table>
+  <h2>デバイス</h2>
+  <table><thead><tr><th>デバイス</th><th>シェア</th></tr></thead><tbody>
+    ${DEVICES.map(d => `<tr><td>${d.name}</td><td>${d.value}%</td></tr>`).join("")}
+  </tbody></table>
+  <h2>人気ページ</h2>
+  <table><thead><tr><th>ページ</th><th>PV</th><th>平均滞在</th><th>直帰率</th></tr></thead><tbody>
+    ${topPagesData.map(p => `<tr><td>${p.title}<br><span style="font-size:11px;color:#6B7280;">${p.url}</span></td><td>${p.pv.toLocaleString()}</td><td>${fmtDuration(p.time)}</td><td>${p.bounce}%</td></tr>`).join("")}
+  </tbody></table>
+  <h2>検索キーワード（流入上位）</h2>
+  <table><thead><tr><th>クエリ</th><th>表示回数</th><th>クリック</th><th>CTR</th></tr></thead><tbody>
+    ${TOP_QUERIES.map(q => `<tr><td>${q.q}</td><td>${q.impressions}</td><td>${q.clicks}</td><td>${q.ctr}%</td></tr>`).join("")}
+  </tbody></table>
+  ${reportSection}
+  <div class="footer">
+    本レポートは AIでらくらく更新（ITLINE提供）が出力した GA4 解析レポートのサンプルです。<br>
+    本番運用時は実際のGA4プロパティとSearch Consoleのデータを元に同様のレポートが生成されます。
+  </div>
+</body></html>`;
+  }
+  document.getElementById("download-btn").addEventListener("click", () => {
+    const html = buildHtmlReport();
+    const fname = `infonet-ga4-report-${fmtDate(new Date()).replace(/\./g, "")}.html`;
+    downloadHtml(fname, html);
+    toast("レポートをダウンロードしました", "success");
+  });
+  document.getElementById("report-download").addEventListener("click", () => {
+    const html = buildHtmlReport();
+    const fname = `infonet-ga4-ai-report-${fmtDate(new Date()).replace(/\./g, "")}.html`;
+    downloadHtml(fname, html);
+    toast("AIレポート付きでダウンロードしました", "success");
+  });
+
+  /* ---- 初期化 ---- */
+  (async function init() {
+    const start = await determineStartDate();
+    allSeries = generateDailySeries(start);
+    document.getElementById("chart-start-date").textContent = fmtDate(start);
+    topPagesData = renderTopPages();
+    renderDonut("sourceChart", SOURCES, "source-legend");
+    renderDonut("deviceChart", DEVICES, "device-legend");
+    renderSeo();
+    refresh();
+    lucide.createIcons();
+  })();
+</script>
+</body>
+</html>
