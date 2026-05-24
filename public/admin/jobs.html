@@ -334,31 +334,34 @@
       const result = await apiGenerate(text, conversationHistory, "job");
       typing.remove();
 
-      titleEl.value = result.title || "";
-      bodyEl.value = result.body || "";
-      selectedImage = window.NEWS_IMAGE_KEYS.includes(result.imageKey) ? result.imageKey : "recruit";
-      renderImagePicker();
-      syncPreview();
+      const isQa = !result.title && !result.body;
+      if (!isQa) {
+        titleEl.value = result.title;
+        bodyEl.value = result.body;
+        if (window.NEWS_IMAGE_KEYS.includes(result.imageKey)) selectedImage = result.imageKey;
+        renderImagePicker();
+        syncPreview();
+      }
 
       conversationHistory.push({ role: "user", content: text });
       conversationHistory.push({
         role: "assistant",
-        content: JSON.stringify({ title: result.title, body: result.body }),
+        content: JSON.stringify({ title: result.title || "", body: result.body || "", chatMessage: result.chatMessage || "" }),
       });
 
       const meta = result.mode === "live"
         ? `claude-sonnet-4-6 ／ ${result.tokensUsed} トークン`
         : `${result.model}`;
       addAiMsg(`${escapeHtml(result.chatMessage)}
-        <span class="block mt-1.5 text-[11px] text-[#9CA3AF]">右側のプレビューに反映しました（${escapeHtml(meta)}）</span>`);
+        <span class="block mt-1.5 text-[11px] text-[#9CA3AF]">${isQa ? "ご質問にお答えしました" : "右側のプレビューに反映しました"}（${escapeHtml(meta)}）</span>`);
 
       apiLog({
-        userName: user.name, action: "generate",
+        userName: user.name, action: isQa ? "qa" : "generate",
         targetTitle: result.title, aiModel: result.model,
-        userPrompt: text, aiOutput: result.body, tokensUsed: result.tokensUsed,
+        userPrompt: text, aiOutput: result.body || result.chatMessage, tokensUsed: result.tokensUsed,
       });
 
-      if (document.getElementById("img-toggle").checked) {
+      if (!isQa && document.getElementById("img-toggle").checked) {
         const instr = document.getElementById("img-instruction").value.trim();
         generateThumbnail(result.title || text, instr);
       }
