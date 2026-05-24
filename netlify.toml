@@ -14,7 +14,7 @@
 # サイトマップを動的生成（ニュース・求人・ブログを含む）
 [[redirects]]
   from = "/sitemap.xml"
-  to = "/.netlify/functions/sitemap"
+  to = "/api/sitemap"
   status = 200
   force = true
 
