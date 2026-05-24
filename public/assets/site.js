@@ -369,8 +369,9 @@ async function renderRecruitPage() {
     }
   });
 
-  // フォントサイズ等のスタイル上書き
-  const STYLE_TARGET_MAP = {
+  // フォントサイズ・画像サイズなどスタイルの上書き
+  // テキスト要素はID、画像要素はCSSセレクタで指定
+  const STYLE_TEXT_TARGETS = {
     mvTitle: "rc-mv-title",
     mvSubtitle: "rc-mv-subtitle",
     message: "rc-message",
@@ -385,14 +386,31 @@ async function renderRecruitPage() {
     ctaHeading: "rc-cta-heading",
     ctaSubtext: "rc-cta-subtext",
   };
-  const ALLOWED_STYLE_PROPS = ["fontSize", "fontWeight", "textAlign", "color", "letterSpacing", "lineHeight"];
+  const STYLE_IMAGE_TARGETS = {
+    mvImage: "#rc-mv-img",
+    visionImage: '[data-section-img="vision"]',
+    positionsImage: '[data-section-img="positions"]',
+    interviewImage: '[data-section-img="interview"]',
+    benefitsImage: '[data-section-img="benefits"]',
+    flowImage: '[data-section-img="flow"]',
+    blogImage: '[data-section-img="blog"]',
+  };
+  const ALLOWED_TEXT_PROPS = ["fontSize", "fontWeight", "textAlign", "color", "letterSpacing", "lineHeight"];
+  const ALLOWED_IMAGE_PROPS = ["opacity", "width", "height", "mixBlendMode", "objectFit", "objectPosition", "filter", "top", "right", "bottom", "left"];
   const overrides = (r.styleOverrides && typeof r.styleOverrides === "object") ? r.styleOverrides : {};
   Object.entries(overrides).forEach(([key, style]) => {
-    const id = STYLE_TARGET_MAP[key];
-    if (!id || !style || typeof style !== "object") return;
-    const el = document.getElementById(id);
-    if (!el) return;
-    ALLOWED_STYLE_PROPS.forEach((prop) => {
+    if (!style || typeof style !== "object") return;
+    let el = null;
+    let allowed = null;
+    if (STYLE_TEXT_TARGETS[key]) {
+      el = document.getElementById(STYLE_TEXT_TARGETS[key]);
+      allowed = ALLOWED_TEXT_PROPS;
+    } else if (STYLE_IMAGE_TARGETS[key]) {
+      el = document.querySelector(STYLE_IMAGE_TARGETS[key]);
+      allowed = ALLOWED_IMAGE_PROPS;
+    }
+    if (!el || !allowed) return;
+    allowed.forEach((prop) => {
       if (typeof style[prop] === "string" && style[prop].trim()) {
         el.style[prop] = style[prop];
       }

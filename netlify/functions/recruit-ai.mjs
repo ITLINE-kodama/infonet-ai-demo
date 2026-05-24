@@ -160,12 +160,29 @@ sectionThemes のキーと対応セクション：
 - ヘッダーのナビゲーション、フッター、ロゴ、DEMO バッジ
 これらの変更要望が来たら chatMessage で「ITLINE 小玉までご相談ください」と案内。それ以外の和文テキストは上記キーで編集可能。
 
-【styleOverrides ─ フォントサイズや色の調整】
-各テキストのフォントサイズや行間を変更できます。
+【styleOverrides ─ サイズ・色・透明度などのデザイン調整】
+テキストと画像の両方のスタイルを変更できます。
+
+★テキストのスタイル
+キー：mvTitle / mvSubtitle / message / visionHeading / positionsHeading / positionsLead / interviewHeading / statsHeading / benefitsHeading / flowHeading / blogHeading / ctaHeading / ctaSubtext
+許可される CSS プロパティ：fontSize / fontWeight / textAlign / color / letterSpacing / lineHeight
 例：「メインビジュアルの文字を小さく」→ {"styleOverrides": {"mvTitle": {"fontSize": "3rem"}}}
 例：「ビジョンの見出しの行間を広く」→ {"styleOverrides": {"visionHeading": {"lineHeight": "1.6"}}}
-キーは編集データ名と同じ（mvTitle / mvSubtitle / message / visionHeading / positionsHeading / positionsLead / interviewHeading / statsHeading / benefitsHeading / flowHeading / blogHeading / ctaHeading / ctaSubtext）。
-許可される CSS プロパティ：fontSize / fontWeight / textAlign / color / letterSpacing / lineHeight のみ。値は CSS 文字列（"3rem", "16px", "#0052FF", "1.5" など）。
+
+★画像のスタイル（サイズ・透明度・ぼかし等）
+キー：mvImage（メインビジュアル背景）／ visionImage / positionsImage / interviewImage / benefitsImage / flowImage / blogImage（各セクションの装飾画像）
+許可される CSS プロパティ：opacity / width / height / mixBlendMode / objectFit / objectPosition / filter / top / right / bottom / left
+- 標準状態：mvImage は画面右半分に薄く重なっている（width:50%, opacity:0.35, mix-blend-mode:luminosity）
+- 「画像を大きく」「画像をテキストにかぶせて」→ {"styleOverrides": {"mvImage": {"width": "100%"}}}
+- 「画像をはっきり見せて」「画像が目立つように」→ {"styleOverrides": {"mvImage": {"opacity": "0.7", "mixBlendMode": "normal"}}}
+- 「画像を左に寄せて」→ {"styleOverrides": {"mvImage": {"left": "0", "right": "auto"}}}
+- 「ビジョン背景の画像を濃く」→ {"styleOverrides": {"visionImage": {"opacity": "0.6"}}}
+- 「画像をぼかして」→ {"styleOverrides": {"mvImage": {"filter": "blur(6px)"}}}
+- 「画像を彩度高く・明るく」→ {"styleOverrides": {"mvImage": {"filter": "saturate(1.5) brightness(1.1)"}}}
+- 「画像をモノクロに」→ {"styleOverrides": {"mvImage": {"filter": "grayscale(1)"}}}
+
+値は CSS 文字列。"100%", "70%", "3rem", "0.6", "blur(4px)" 等のCSS規格に従う表記。
+画像サイズやデザインの変更も AI で対応可能です（「ITLINE に相談を」とは案内しない）。
 
 【画像で指示されたとき】
 画像内のテキストが現在の各キーの値のどれと対応するかを慎重に判別してください。current.sectionText 等の現在値を見て、画像内のテキストと一致するキーを選び、そのキーだけを更新します。mvTitle と sectionText.visionHeading のように似た文字構造のものがあるので、現在の値を見比べて間違えないこと。
