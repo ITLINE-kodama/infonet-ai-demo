@@ -665,19 +665,23 @@
         return;
       }
       const updated = res.recruit;
+      // フロント側で実データを変更したかどうか（false のままなら最後の保存もスキップして無駄通信を回避）
+      let hasFrontendChange = false;
       // 添付画像を採用ページの画像として適用する指示があった場合
       if (sentImage && typeof res.applyAttachedImage === "string") {
         const tgt = res.applyAttachedImage;
         if (tgt === "mvImage") {
           updated.mvImage = sentImage;
+          hasFrontendChange = true;
         } else if (tgt.startsWith("interview:") && Array.isArray(updated.interviews)) {
           const id = tgt.slice("interview:".length);
           const iv = updated.interviews.find((x) => x && x.id === id);
-          if (iv) iv.image = sentImage;
+          if (iv) { iv.image = sentImage; hasFrontendChange = true; }
         } else if (tgt.startsWith("section:")) {
           const key = tgt.slice("section:".length);
           if (!updated.sectionImages || typeof updated.sectionImages !== "object") updated.sectionImages = {};
           updated.sectionImages[key] = sentImage;
+          hasFrontendChange = true;
         }
       }
       // メインビジュアル画像も生成
@@ -685,27 +689,35 @@
         const imgUrl = await window.Store.generateImage("採用ページのメインビジュアル背景", $("ai-mv-instruction").value.trim());
         if (imgUrl) {
           updated.mvImage = imgUrl;
+          hasFrontendChange = true;
           if (typeof saveToLibrary === "function") saveToLibrary(imgUrl, "AI生成 (MV背景)");
         }
       }
-      await apiSaveRecruit(updated);
-      await apiLog({ userName: user.name, action: "edit", targetTitle: "採用ページ：AIで更新", userPrompt: instruction });
-      data = updated;
-      if (!Array.isArray(data.interviews)) data.interviews = [];
-      if (!Array.isArray(data.stats)) data.stats = [];
-      if (!Array.isArray(data.benefits)) data.benefits = [];
-      fillEditor();
+      // 実データの変更があるときだけ保存（巨大な mvImage を含む 1.7MB+ payload を不要に PUT するのを回避）
+      const shouldSave = (res.hasDataChange === true) || hasFrontendChange;
+      if (shouldSave) {
+        await apiSaveRecruit(updated);
+        await apiLog({ userName: user.name, action: "edit", targetTitle: "採用ページ：AIで更新", userPrompt: instruction });
+        data = updated;
+        if (!Array.isArray(data.interviews)) data.interviews = [];
+        if (!Array.isArray(data.stats)) data.stats = [];
+        if (!Array.isArray(data.benefits)) data.benefits = [];
+        fillEditor();
+      }
       typing.remove();
       const msg = (res.chatMessage || "採用ページを更新しました。").trim();
-      aiAddBot(`${escapeHtml(msg)}
+      aiAddBot(`${escapeHtml(msg)}${shouldSave ? `
         <span class="block mt-2 text-[12px]">
           <a href="#" data-act="preview" class="text-[#1E2761] font-medium hover:underline">→ 採用ページを別画面で確認する</a>
-        </span>`);
+        </span>` : ""}`);
     } catch (err) {
       typing.remove();
       const reason = (err && err.message) ? err.message : "通信エラーが発生しました";
       aiAddBot(`<span class="text-[#EF4444]">更新に失敗しました。</span>
-        <span class="block mt-1 text-[11px] text-[#9CA3AF]">理由：${escapeHtml(reason)}</span>`);
+        <span class="block mt-1 text-[11px] text-[#9CA3AF]">理由：${escapeHtml(reason)}</span>
+        <span class="block mt-2 text-[12px] text-[#374151] leading-relaxed">
+          画像を変更したい場合は、📎ボタンから画像を添付するか、入力欄上の<strong>「背景画像も生成」</strong>にチェックを入れてからもう一度お試しください。
+        </span>`);
     } finally {
       aiBusy = false;
       $("ai-run").disabled = false;

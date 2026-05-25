@@ -370,6 +370,10 @@ export default async (req) => {
         : null;
     delete parsed.applyAttachedImage;
 
+    // 質問・相談・添付要求などで「データ変更が一切無い」場合は、保存スキップ用フラグを返す
+    // （巨大な mvImage を含む payload を毎回 PUT するのを避け、ネットワーク不安定時のエラー減らす）
+    const hasDataChange = Object.keys(parsed).length > 0;
+
     // AIは「変更したキーだけ」を返すため、現在の内容にマージして全体を組み立てる
     const recruit = { ...current, ...parsed };
     // 以下のオブジェクト系は一部のキーだけ返ることがあるため、現在値と深くマージする
@@ -392,6 +396,7 @@ export default async (req) => {
       recruit,
       chatMessage,
       applyAttachedImage,
+      hasDataChange,
       tokensUsed: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0),
       model: "claude-sonnet-4-6",
     });
