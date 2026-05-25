@@ -195,6 +195,53 @@
   </main>
 </div>
 
+<!-- ===== AI生成画像 確認モーダル ===== -->
+<div id="gen-confirm-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+    <div class="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
+      <div>
+        <h3 class="text-base font-semibold flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-[#1E2761]"></i>
+          AIが画像を生成しました — ご確認ください
+        </h3>
+        <p class="text-[12px] text-[#6B7280] mt-0.5">「この画像を採用する」を押すまでは反映されません。</p>
+      </div>
+      <button id="gen-confirm-close" type="button" class="w-9 h-9 rounded-lg hover:bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto thin-scroll p-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <p class="text-[11px] font-semibold text-[#6B7280] tracking-wide uppercase mb-1.5">現在の画像</p>
+          <div class="aspect-video bg-[#F3F4F6] rounded-lg overflow-hidden border border-[#E5E7EB]">
+            <img id="gen-confirm-current" alt="現在の画像" class="w-full h-full object-cover" />
+          </div>
+        </div>
+        <div>
+          <p class="text-[11px] font-semibold text-[#1E2761] tracking-wide uppercase mb-1.5">✨ AI生成（新規）</p>
+          <div class="aspect-video bg-[#F3F4F6] rounded-lg overflow-hidden border-2 border-[#1E2761]/40">
+            <img id="gen-confirm-new" alt="生成された画像" class="w-full h-full object-cover" />
+          </div>
+        </div>
+      </div>
+      <div id="gen-confirm-instruction-wrap" class="mt-4 hidden">
+        <p class="text-[11px] font-semibold text-[#6B7280] tracking-wide uppercase mb-1">画像のご指示</p>
+        <p id="gen-confirm-instruction" class="text-[13px] text-[#374151] bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-2"></p>
+      </div>
+    </div>
+    <div class="px-6 py-4 border-t border-[#E5E7EB] flex items-center justify-end gap-2 flex-wrap">
+      <button id="gen-confirm-cancel" type="button" class="px-4 py-2 rounded-lg text-sm text-[#374151] hover:bg-[#F3F4F6]">キャンセル</button>
+      <button id="gen-confirm-retry" type="button" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-[#1E2761] border border-[#1E2761] hover:bg-[#EEF2FF]">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i> 別案を生成
+      </button>
+      <button id="gen-confirm-apply" type="button" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-semibold bg-[#1E2761] text-white hover:bg-[#172052]">
+        <i data-lucide="check" class="w-4 h-4"></i> この画像を採用する
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 画像ライブラリ モーダル ===== -->
 <div id="lib-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col">
@@ -406,18 +453,18 @@
       toast("背景画像をアップロードしました（保存を押すと反映）", "success");
     });
   });
-  $("mv-gen-img").addEventListener("click", async () => {
-    const instr = $("mv-image-instruction").value.trim();
+  /* ---- AI画像生成 → 確認モーダルで採用判定 ---- */
+  // 「AIで画像生成」ボタンは、生成後すぐに反映せず、モーダルでプレビュー → 担当者が採否を判断
+  let pendingGenImage = null; // 確認待ちの生成画像URL（採用するまで data.mvImage には入れない）
+  async function runMvImageGeneration(instr) {
     const btn = $("mv-gen-img");
     btn.disabled = true;
     toast("AIが背景画像を生成しています…（10〜20秒）", "info");
     try {
       const url = await window.Store.generateImage("採用ページのメインビジュアル背景", instr);
       if (url) {
-        data.mvImage = url;
-        syncMvPreview();
-        if (typeof saveToLibrary === "function") saveToLibrary(url, "AI生成 (MV背景)");
-        toast("背景画像を生成しました（保存を押すと反映）", "success");
+        pendingGenImage = url;
+        openGenConfirmModal(url, instr);
       } else {
         toast("画像生成は現在利用できません", "error");
       }
@@ -426,6 +473,49 @@
     } finally {
       btn.disabled = false;
     }
+  }
+  function openGenConfirmModal(newUrl, instr) {
+    const currentUrl = window.newsImageUrl(data.mvImage || "recruit");
+    $("gen-confirm-current").src = currentUrl;
+    $("gen-confirm-new").src = newUrl;
+    if (instr) {
+      $("gen-confirm-instruction").textContent = instr;
+      $("gen-confirm-instruction-wrap").classList.remove("hidden");
+    } else {
+      $("gen-confirm-instruction-wrap").classList.add("hidden");
+    }
+    const m = $("gen-confirm-modal");
+    m.classList.remove("hidden");
+    m.classList.add("flex");
+    if (window.lucide) lucide.createIcons();
+  }
+  function closeGenConfirmModal() {
+    const m = $("gen-confirm-modal");
+    m.classList.add("hidden");
+    m.classList.remove("flex");
+    pendingGenImage = null;
+  }
+  $("mv-gen-img").addEventListener("click", () => {
+    const instr = $("mv-image-instruction").value.trim();
+    runMvImageGeneration(instr);
+  });
+  $("gen-confirm-close").addEventListener("click", closeGenConfirmModal);
+  $("gen-confirm-cancel").addEventListener("click", closeGenConfirmModal);
+  $("gen-confirm-modal").addEventListener("click", (e) => {
+    if (e.target === $("gen-confirm-modal")) closeGenConfirmModal();
+  });
+  $("gen-confirm-apply").addEventListener("click", () => {
+    if (!pendingGenImage) return closeGenConfirmModal();
+    data.mvImage = pendingGenImage;
+    syncMvPreview();
+    if (typeof saveToLibrary === "function") saveToLibrary(pendingGenImage, "AI生成 (MV背景)");
+    toast("背景画像を採用しました（保存を押すと反映）", "success");
+    closeGenConfirmModal();
+  });
+  $("gen-confirm-retry").addEventListener("click", () => {
+    closeGenConfirmModal();
+    const instr = $("mv-image-instruction").value.trim();
+    runMvImageGeneration(instr);
   });
 
   /* ---- 保存ボタン（セクション別）---- */
