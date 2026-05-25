@@ -59,7 +59,7 @@
           <div class="flex-1 min-w-0 space-y-2">
             <input id="mv-image-instruction" type="text" placeholder="画像の指示（例：夜景の見える開放的なオフィス）"
               class="w-full border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 text-[12px] focus:border-[#1E2761] outline-none" />
-            <div class="flex gap-2">
+            <div class="flex gap-2 flex-wrap">
               <button id="mv-gen-img" type="button"
                 class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1E2761] hover:bg-[#F9FAFB] disabled:opacity-40">
                 <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AIで画像生成
@@ -67,6 +67,10 @@
               <button id="mv-upload-img" type="button"
                 class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1E2761] hover:bg-[#F9FAFB]">
                 <i data-lucide="upload" class="w-3.5 h-3.5"></i> アップロード
+              </button>
+              <button id="mv-pick-lib" type="button" title="過去にAI生成・アップロードした画像から選ぶ"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1E2761] hover:bg-[#F9FAFB]">
+                <i data-lucide="images" class="w-3.5 h-3.5"></i> ライブラリから選ぶ
               </button>
             </div>
           </div>
@@ -264,6 +268,7 @@
 
 <script src="/assets/store.js"></script>
 <script src="/assets/admin.js"></script>
+<script src="/assets/image-lib.js"></script>
 <script>
   const user = initAdmin("recruit-edit");
   let data = null;
@@ -498,6 +503,15 @@
   $("mv-gen-img").addEventListener("click", () => {
     const instr = $("mv-image-instruction").value.trim();
     runMvImageGeneration(instr);
+  });
+  // 「ライブラリから選ぶ」→ 過去画像のグリッドから選択して MV 背景に適用
+  $("mv-pick-lib").addEventListener("click", () => {
+    if (!window.ImageLib) { toast("画像ライブラリを開けませんでした", "error"); return; }
+    window.ImageLib.openPicker((dataUrl) => {
+      data.mvImage = dataUrl;
+      syncMvPreview();
+      toast("ライブラリから背景画像を選びました（保存を押すと反映）", "success");
+    }, { subtitle: "選んだ画像をメインビジュアル背景として適用します。" });
   });
   $("gen-confirm-close").addEventListener("click", closeGenConfirmModal);
   $("gen-confirm-cancel").addEventListener("click", closeGenConfirmModal);

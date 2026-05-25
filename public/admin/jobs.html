@@ -100,10 +100,16 @@
             <label class="block text-[13px] font-medium text-[#374151]">サムネイル画像
               <span class="text-[11px] font-normal text-[#9CA3AF]">（AIが自動選択／クリックで変更）</span>
             </label>
-            <button id="upload-img-btn" type="button"
-              class="shrink-0 inline-flex items-center gap-1 text-[12px] font-medium text-[#1E2761] hover:underline">
-              <i data-lucide="upload" class="w-3.5 h-3.5"></i> 画像をアップロード
-            </button>
+            <div class="shrink-0 flex items-center gap-3">
+              <button id="pick-lib-btn" type="button" title="過去にAI生成・アップロードした画像から選ぶ"
+                class="inline-flex items-center gap-1 text-[12px] font-medium text-[#1E2761] hover:underline">
+                <i data-lucide="images" class="w-3.5 h-3.5"></i> ライブラリから選ぶ
+              </button>
+              <button id="upload-img-btn" type="button"
+                class="inline-flex items-center gap-1 text-[12px] font-medium text-[#1E2761] hover:underline">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i> 画像をアップロード
+              </button>
+            </div>
           </div>
           <input type="file" id="img-file" accept="image/*" class="hidden" />
           <div id="image-picker" class="grid grid-cols-3 gap-2"></div>
@@ -144,6 +150,7 @@
 
 <script src="/assets/store.js"></script>
 <script src="/assets/admin.js"></script>
+<script src="/assets/image-lib.js"></script>
 <script>
   const user = initAdmin("jobs");
 
@@ -240,6 +247,17 @@
   document.getElementById("upload-img-btn").addEventListener("click", () => {
     document.getElementById("img-file").click();
   });
+  // 「ライブラリから選ぶ」→ 過去にAI生成・アップロードした画像から選択
+  document.getElementById("pick-lib-btn").addEventListener("click", () => {
+    if (!window.ImageLib) { toast("画像ライブラリを開けませんでした", "error"); return; }
+    window.ImageLib.openPicker((dataUrl) => {
+      uploadedImage = dataUrl;
+      selectedImage = dataUrl;
+      renderImagePicker();
+      syncPreview();
+      toast("ライブラリから画像を選びました", "success");
+    }, { subtitle: "選んだ画像をこの求人のサムネイルとして使用します。" });
+  });
   document.getElementById("img-file").addEventListener("change", (e) => {
     const file = e.target.files && e.target.files[0];
     e.target.value = "";
@@ -264,6 +282,7 @@
       selectedImage = uploadedImage;
       renderImagePicker();
       syncPreview();
+      if (window.ImageLib) window.ImageLib.save(uploadedImage, "アップロード (求人)");
       toast("画像をアップロードしました", "success");
     };
     img.onerror = () => {
@@ -289,6 +308,7 @@
         selectedImage = url;
         renderImagePicker();
         syncPreview();
+        if (window.ImageLib) window.ImageLib.save(url, "AI生成 (求人サムネ)");
         addAiMsg("サムネイル画像を生成し、プレビューに反映しました。下の一覧からライブラリ画像に差し替えることもできます。");
       } else {
         addAiMsg(`<span class="text-[#6B7280]">サムネイル画像はライブラリ画像を使用します（画像生成が無効、またはデモ期間外のため）。</span>`);
