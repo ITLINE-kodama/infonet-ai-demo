@@ -165,9 +165,31 @@ sectionThemes のキーと対応セクション：
 
 ★テキストのスタイル
 キー：mvTitle / mvSubtitle / message / visionHeading / positionsHeading / positionsLead / interviewHeading / statsHeading / benefitsHeading / flowHeading / blogHeading / ctaHeading / ctaSubtext
-許可される CSS プロパティ：fontSize / fontWeight / textAlign / color / letterSpacing / lineHeight
+許可される CSS プロパティ：fontSize / fontWeight / textAlign / color / letterSpacing / lineHeight / whiteSpace
 例：「メインビジュアルの文字を小さく」→ {"styleOverrides": {"mvTitle": {"fontSize": "3rem"}}}
 例：「ビジョンの見出しの行間を広く」→ {"styleOverrides": {"visionHeading": {"lineHeight": "1.6"}}}
+
+★★★【最重要】「1行で表示／改行しないで／1ラインで」と言われたら必ず以下を両方適用する★★★
+単に whiteSpace:"nowrap" だけだと文字がはみ出して見切れます。**必ず fontSize も同時に縮小**してテキストがコンテナに収まるようにしてください。
+- 推定容器幅と日本語文字幅（1文字≒fontSizeとほぼ同じ幅）から、自動でフォントサイズを計算する
+- 各見出しのコンテナ幅と元のfontSize（md以上画面の基準）：
+  - mvTitle：~900px幅／元 ~6rem(96px)。16文字以上なら fontSize "3rem" 程度
+  - visionHeading：~828px幅／元 ~3rem(48px) text-5xl。16文字以上なら "2.25rem"、20文字以上なら "1.875rem"
+  - positionsHeading：~580px幅／元 ~3rem(48px)。10文字以上なら "2.25rem"、14文字以上なら "1.875rem"
+  - interviewHeading / statsHeading / benefitsHeading / flowHeading / blogHeading：~1140px幅／元 ~3rem。20文字以上なら "2.5rem"
+  - ctaHeading：~900px幅／元 ~4rem(64px)。16文字以上なら "2.5rem"
+- 上記はあくまで目安。文字数×fontSize(px) がコンテナ幅 × 0.95 以内になるよう fontSize を選ぶ
+- 必ず whiteSpace:"nowrap" も同時セット（万一はみ出しても改行はさせない）
+- letterSpacing も "-0.02em" 程度に詰めると更に1行に収まりやすい
+
+例：「ビジョンの見出しを1行で表示して」（現テキスト16文字「テクノロジーで、まだ見ぬ最適解を導く。」）
+→ {"styleOverrides": {"visionHeading": {"fontSize": "2.25rem", "whiteSpace": "nowrap", "letterSpacing": "-0.02em"}}}
+
+例：「メインビジュアルのキャッチを改行させないで」（mvTitle が17文字）
+→ {"styleOverrides": {"mvTitle": {"fontSize": "2.75rem", "whiteSpace": "nowrap", "letterSpacing": "-0.02em"}}}
+
+逆に「改行を戻して／元に戻して」と言われたら whiteSpace を "normal" にし、fontSize/letterSpacing を空文字 "" で解除：
+→ {"styleOverrides": {"visionHeading": {"fontSize": "", "whiteSpace": "normal", "letterSpacing": ""}}}
 
 ★画像のスタイル（サイズ・透明度・ぼかし等）
 キー：mvImage（メインビジュアル背景）／ visionImage / positionsImage / interviewImage / benefitsImage / flowImage / blogImage（各セクションの装飾画像）

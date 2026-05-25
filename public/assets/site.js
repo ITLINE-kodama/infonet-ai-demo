@@ -599,7 +599,7 @@ async function renderRecruitPage() {
     flowImage: '[data-section-img="flow"]',
     blogImage: '[data-section-img="blog"]',
   };
-  const ALLOWED_TEXT_PROPS = ["fontSize", "fontWeight", "textAlign", "color", "letterSpacing", "lineHeight"];
+  const ALLOWED_TEXT_PROPS = ["fontSize", "fontWeight", "textAlign", "color", "letterSpacing", "lineHeight", "whiteSpace"];
   const ALLOWED_IMAGE_PROPS = ["opacity", "width", "height", "mixBlendMode", "objectFit", "objectPosition", "filter", "top", "right", "bottom", "left"];
   const overrides = (r.styleOverrides && typeof r.styleOverrides === "object") ? r.styleOverrides : {};
   Object.entries(overrides).forEach(([key, style]) => {
@@ -615,8 +615,9 @@ async function renderRecruitPage() {
     }
     if (!el || !allowed) return;
     allowed.forEach((prop) => {
-      if (typeof style[prop] === "string" && style[prop].trim()) {
-        el.style[prop] = style[prop];
+      if (typeof style[prop] === "string") {
+        // 空文字 "" の場合はそのプロパティを解除（元のクラス指定に戻す）
+        el.style[prop] = style[prop].trim() ? style[prop] : "";
       }
     });
   });
